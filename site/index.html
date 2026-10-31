@@ -42,27 +42,23 @@
             overflow-x: hidden;
             line-height: 1.5;
             -webkit-font-smoothing: antialiased;
-            background-color: var(--bg-base);
+            background-color: transparent;
         }
 
-        /* Fixed Single Ambient Background: forzahorizon1222 */
+        /* Fixed Single Ambient Background: forzahorizon1222.png */
         .ambient-fixed-bg {
             position: fixed;
             top: -20px;
             left: -20px;
             width: calc(100vw + 40px);
             height: calc(100vh + 40px);
-            background-image: url('assets/forzahorizon1222.jpg');
-            background-image: -webkit-image-set(url('assets/forzahorizon1222.webp') 1x);
-            background-image: image-set(
-                url('assets/forzahorizon1222.webp') type('image/webp'),
-                url('assets/forzahorizon1222.jpg') type('image/jpeg')
-            );
+            background-image: url('assets/forzahorizon1222.png');
             background-size: cover;
-            background-position: center 38%;
-            z-index: -2;
+            background-position: center 32%;
+            background-repeat: no-repeat;
+            z-index: 0;
             transform: scale(1.02);
-            filter: brightness(0.50) contrast(1.08) saturate(1.18);
+            filter: brightness(0.78) contrast(1.06) saturate(1.20);
             pointer-events: none;
             will-change: transform, filter;
             transition: filter 0.05s ease-out, transform 0.05s ease-out;
@@ -75,14 +71,16 @@
             width: 100vw;
             height: 100vh;
             background: 
-                radial-gradient(ellipse at 50% 35%, rgba(8, 12, 18, 0.25) 0%, rgba(8, 12, 18, 0.72) 65%, var(--bg-base) 100%),
-                linear-gradient(180deg, rgba(8, 12, 18, 0.35) 0%, rgba(8, 12, 18, 0.85) 75%, var(--bg-base) 100%);
-            z-index: -1;
+                radial-gradient(ellipse at 50% 35%, rgba(8, 12, 18, 0.12) 0%, rgba(8, 12, 18, 0.50) 65%, rgba(8, 12, 18, 0.88) 100%),
+                linear-gradient(180deg, rgba(8, 12, 18, 0.15) 0%, rgba(8, 12, 18, 0.35) 45%, rgba(8, 12, 18, 0.85) 85%, var(--bg-base) 100%);
+            z-index: 1;
             pointer-events: none;
         }
 
         /* Velocity-Decayed Scroll Motion Blur Container */
         #motion-blur-stage {
+            position: relative;
+            z-index: 2;
             will-change: filter;
             transition: filter 0.08s ease-out;
         }
@@ -558,12 +556,16 @@
             color: var(--volt);
         }
 
+        /* Adaptive Layout for Tablet & Medium Screens */
         @media (max-width: 900px) {
             header {
                 padding: 14px 20px;
             }
             nav {
                 display: none;
+            }
+            .ambient-fixed-bg {
+                background-position: 46% 26%;
             }
             .showcase-card, .showcase-card.reverse {
                 grid-template-columns: 1fr;
@@ -582,6 +584,105 @@
             }
             .showcase-info {
                 padding: 28px 24px;
+            }
+            .tech-grid {
+                grid-template-columns: 1fr;
+            }
+            .setup-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Adaptive Layout for Mobile Devices */
+        @media (max-width: 640px) {
+            header {
+                padding: 12px 16px;
+            }
+            .brand-text {
+                font-size: 12px;
+            }
+            .btn-nav-repo {
+                padding: 7px 12px;
+                font-size: 10px;
+                letter-spacing: 0.5px;
+            }
+            .ambient-fixed-bg {
+                background-position: 48% 22%;
+                transform: scale(1.05);
+            }
+            .hero {
+                min-height: auto;
+                padding: 100px 16px 40px;
+            }
+            .hero-title {
+                font-size: clamp(26px, 7.5vw, 36px);
+                margin-bottom: 16px;
+            }
+            .hero-description {
+                font-size: 14px;
+                padding: 14px 16px;
+                margin-bottom: 28px;
+            }
+            .hero-cta-group {
+                flex-direction: column;
+                width: 100%;
+                gap: 12px;
+                margin-bottom: 28px;
+            }
+            .btn-volt, .btn-slate {
+                width: 100%;
+                justify-content: center;
+                box-sizing: border-box;
+                padding: 14px 18px;
+                font-size: 12px;
+            }
+            .hero-specs-strip {
+                gap: 12px;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+            }
+            .showcase-section,
+            .tech-section,
+            .setup-section {
+                padding: 48px 16px;
+            }
+            .section-heading {
+                font-size: clamp(22px, 6vw, 28px);
+            }
+            .showcase-info {
+                padding: 22px 18px;
+            }
+            .showcase-bullets {
+                font-size: 13px;
+                gap: 8px;
+            }
+            .tech-card,
+            .setup-card {
+                padding: 22px 18px;
+            }
+            .footer-content {
+                flex-direction: column;
+                text-align: center;
+                gap: 16px;
+                font-size: 12px;
+            }
+            .footer-links {
+                justify-content: center;
+                flex-wrap: wrap;
+                gap: 16px;
+            }
+        }
+
+        /* Small Phones (iPhone SE, Galaxy A series, etc.) */
+        @media (max-width: 380px) {
+            .hero-title {
+                font-size: 24px;
+            }
+            .btn-volt, .btn-slate {
+                font-size: 11px;
+                padding: 12px 14px;
             }
         }
     </style>
@@ -868,7 +969,7 @@
                     requestAnimationFrame(applyMotionBlur);
                 } else {
                     if (blurNode) blurNode.setAttribute('stdDeviation', '0 0');
-                    bg.style.filter = 'brightness(0.24) contrast(1.15) saturate(1.1)';
+                    bg.style.filter = 'brightness(0.78) contrast(1.06) saturate(1.20)';
                     bg.style.transform = 'scale(1.02)';
                     currentVelocity = 0;
                     isRafActive = false;
