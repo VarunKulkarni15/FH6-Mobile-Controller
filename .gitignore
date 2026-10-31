@@ -20,3 +20,7 @@ $RECYCLE.BIN/
 !dist-windows/fh6-controller-windows.exe
 !dist-android/fh6-controller-android.apk
 
+# Temporary scratch and raw upscale source
+scratch/
+site-media/
+

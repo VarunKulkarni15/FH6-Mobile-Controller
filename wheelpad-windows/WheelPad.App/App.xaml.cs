@@ -1,5 +1,7 @@
 using System;
-using System.Runtime.InteropServices;
+using System.Diagnostics;
+using System.IO;
+using System.IO.Pipes;
 using System.Threading;
 using System.Windows;
 
@@ -7,66 +9,103 @@ namespace WheelPad.App;
 
 /// <summary>
 /// Interaction logic for App.xaml
+/// Provides single-instance enforcement and instant foreground window restore via Named Pipes.
 /// </summary>
 public partial class App : System.Windows.Application
 {
-    private static Mutex? _mutex;
-    private static EventWaitHandle? _restoreEvent;
-    private const string AppGuid = "FH6Controller_WheelPad_SingleInstance_Mutex";
-    public const string RestoreEventName = "FH6Controller_Restore_Event_Signal";
-
-    [DllImport("user32.dll")]
-    private static extern bool SetForegroundWindow(IntPtr hWnd);
-
-    [DllImport("user32.dll")]
-    private static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
-
-    [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Auto)]
-    private static extern IntPtr FindWindow(string? lpClassName, string lpWindowName);
-
-    private const int SW_RESTORE = 9;
+    private const string PipeName = "FH6Controller_Ipc_Pipe_V1";
+    private static Thread? _pipeThread;
+    private static volatile bool _isRunning = true;
 
     protected override void OnStartup(StartupEventArgs e)
     {
-        _mutex = new Mutex(true, AppGuid, out bool createdNew);
-
-        if (!createdNew)
-        {
-            // Another instance is already running. Signal it to restore immediately!
-            try
-            {
-                using var existingEvent = EventWaitHandle.OpenExisting(RestoreEventName);
-                existingEvent.Set();
-            }
-            catch
-            {
-                // Fallback to Win32 window message
-                IntPtr hWnd = FindWindow(null, "FH6 CONTROLLER // WINDOWS COMPANION");
-                if (hWnd != IntPtr.Zero)
-                {
-                    ShowWindow(hWnd, SW_RESTORE);
-                    SetForegroundWindow(hWnd);
-                }
-            }
-
-            Current.Shutdown();
-            return;
-        }
-
-        // Create the auto-reset event for signaling window restore
+        // 1. Attempt to signal an existing running instance via Named Pipe
         try
         {
-            _restoreEvent = new EventWaitHandle(false, EventResetMode.AutoReset, RestoreEventName);
+            using var client = new NamedPipeClientStream(".", PipeName, PipeDirection.Out);
+            client.Connect(300); // 300ms timeout
+            using var writer = new StreamWriter(client) { AutoFlush = true };
+            writer.WriteLine("RESTORE_WINDOW");
+            // Running instance was notified. Terminate duplicate immediately!
+            Environment.Exit(0);
+            return;
+        }
+        catch
+        {
+            // No active responsive instance detected
+        }
+
+        // 2. Kill any frozen/zombie background instances of fh6-controller-windows
+        int currentPid = Environment.ProcessId;
+        try
+        {
+            foreach (var proc in Process.GetProcessesByName("fh6-controller-windows"))
+            {
+                if (proc.Id != currentPid)
+                {
+                    try { proc.Kill(); proc.WaitForExit(500); } catch { }
+                }
+            }
         }
         catch { }
+
+        // 3. Start Named Pipe IPC Server to listen for future double-clicks/restores
+        StartIpcServer();
 
         base.OnStartup(e);
     }
 
+    private static void StartIpcServer()
+    {
+        _pipeThread = new Thread(() =>
+        {
+            while (_isRunning)
+            {
+                NamedPipeServerStream? server = null;
+                try
+                {
+                    server = new NamedPipeServerStream(
+                        PipeName,
+                        PipeDirection.In,
+                        NamedPipeServerStream.MaxAllowedServerInstances,
+                        PipeTransmissionMode.Byte
+                    );
+
+                    server.WaitForConnection();
+
+                    using var reader = new StreamReader(server);
+                    string? msg = reader.ReadLine();
+                    if (msg == "RESTORE_WINDOW")
+                    {
+                        Current?.Dispatcher.InvokeAsync(() =>
+                        {
+                            if (Current.MainWindow is MainWindow mw)
+                            {
+                                mw.RestoreFromTray();
+                            }
+                        });
+                    }
+                }
+                catch
+                {
+                    Thread.Sleep(200);
+                }
+                finally
+                {
+                    try { server?.Dispose(); } catch { }
+                }
+            }
+        })
+        {
+            IsBackground = true,
+            Name = "FH6Controller_IPC_Listener"
+        };
+        _pipeThread.Start();
+    }
+
     protected override void OnExit(ExitEventArgs e)
     {
-        _restoreEvent?.Dispose();
-        _mutex?.Dispose();
+        _isRunning = false;
         base.OnExit(e);
     }
 }

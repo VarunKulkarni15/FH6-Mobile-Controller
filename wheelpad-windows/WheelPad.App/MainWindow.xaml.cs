@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Drawing;
 using System.Net;
 using System.Net.Sockets;
@@ -22,15 +21,8 @@ namespace WheelPad.App
         private readonly UdpFastStreamReceiver _udpReceiver;
         private readonly BeaconBroadcaster _beaconBroadcaster;
         private readonly GameDetector _gameDetector;
-        private readonly SpotifyManager _spotifyManager;
-        private readonly UniversalRadioService _radioService;
         private readonly Forms.NotifyIcon _notifyIcon;
         private bool _isExplicitExit = false;
-
-        private int _currentBgIndex = 0;
-        private readonly List<BitmapImage> _bgImages = new();
-        private System.Windows.Threading.DispatcherTimer? _bgTimer;
-        private bool _activeOnFirstImage = true;
 
         public MainWindow()
         {
@@ -48,22 +40,18 @@ namespace WheelPad.App
             _udpReceiver = new UdpFastStreamReceiver(_dispatcher);
             _beaconBroadcaster = new BeaconBroadcaster();
             _gameDetector = new GameDetector(_profileManager, _syncServer);
-            _spotifyManager = new SpotifyManager();
-            _syncServer.Spotify = _spotifyManager;
-            _radioService = new UniversalRadioService();
-            _syncServer.Radio = _radioService;
 
-            // Ambient background slideshow
-            InitAmbientBackgroundSlideshow();
+            // Ambient background: Single Forza Horizon GT-R image
+            InitAmbientBackground();
 
             // 2. Initialize System Tray NotifyIcon with custom Forza Horizon logo
             System.Drawing.Icon? trayIcon = null;
             try
             {
-                string exePath = Environment.ProcessPath ?? System.Diagnostics.Process.GetCurrentProcess().MainModule?.FileName ?? "";
-                if (System.IO.File.Exists(exePath))
+                string iconPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "app_icon.ico");
+                if (System.IO.File.Exists(iconPath))
                 {
-                    trayIcon = System.Drawing.Icon.ExtractAssociatedIcon(exePath);
+                    trayIcon = new System.Drawing.Icon(iconPath, 32, 32);
                 }
             }
             catch { }
@@ -72,18 +60,10 @@ namespace WheelPad.App
             {
                 try
                 {
-                    string iconPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "app_icon.ico");
-                    if (System.IO.File.Exists(iconPath))
+                    var stream = System.Windows.Application.GetResourceStream(new Uri("pack://application:,,,/app_icon.ico"))?.Stream;
+                    if (stream != null)
                     {
-                        trayIcon = new System.Drawing.Icon(iconPath);
-                    }
-                    else
-                    {
-                        var stream = System.Windows.Application.GetResourceStream(new Uri("pack://application:,,,/app_icon.ico"))?.Stream;
-                        if (stream != null)
-                        {
-                            trayIcon = new System.Drawing.Icon(stream);
-                        }
+                        trayIcon = new System.Drawing.Icon(stream, 32, 32);
                     }
                 }
                 catch { }
@@ -104,8 +84,8 @@ namespace WheelPad.App
 
             _notifyIcon = new Forms.NotifyIcon
             {
-                Text = "FH6 Controller // Forza Horizon",
-                Icon = trayIcon ?? SystemIcons.Application,
+                Text = "FH6 Controller // Windows Companion",
+                Icon = trayIcon ?? System.Drawing.SystemIcons.Application,
                 Visible = true
             };
 
@@ -113,30 +93,10 @@ namespace WheelPad.App
             trayMenu.Items.Add("Open Dashboard", null, (s, e) => RestoreFromTray());
             trayMenu.Items.Add("Cycle Profile", null, (s, e) => CycleProfile());
             trayMenu.Items.Add(new Forms.ToolStripSeparator());
-            trayMenu.Items.Add("Exit FH6 Controller", null, (s, e) => ExitApplication());
+            trayMenu.Items.Add("Exit Companion", null, (s, e) => ExitApplication());
             _notifyIcon.ContextMenuStrip = trayMenu;
             _notifyIcon.Click += (s, e) => RestoreFromTray();
             _notifyIcon.DoubleClick += (s, e) => RestoreFromTray();
-
-            // Background listener for single-instance foreground restore
-            Task.Run(() =>
-            {
-                try
-                {
-                    using var restoreHandle = EventWaitHandle.OpenExisting(App.RestoreEventName);
-                    while (!_isExplicitExit)
-                    {
-                        if (restoreHandle.WaitOne(1000))
-                        {
-                            if (!_isExplicitExit)
-                            {
-                                Dispatcher.InvokeAsync(() => RestoreFromTray());
-                            }
-                        }
-                    }
-                }
-                catch { }
-            });
 
             // 3. Setup Telemetry & FastStream Listeners
             _dispatcher.InputDispatched += OnInputDispatched;
@@ -153,7 +113,6 @@ namespace WheelPad.App
             TxtLocalIp.Text = localIp;
             try
             {
-                // Web deep-link payload: camera scanners open website with IP parameters which deep-links to app
                 string qrPayload = $"https://horizoncontro.varunkulkarni.dpdns.org/?ip={localIp}&tcp=4243&udp=4242";
                 ImgQrCode.Source = QrCodeHelper.GenerateQrCode(qrPayload);
             }
@@ -163,15 +122,13 @@ namespace WheelPad.App
             {
                 TxtControllerStatus.Text = "STEAM / ViGEmBUS ACTIVE";
                 StatusDot.Fill = new SolidColorBrush(System.Windows.Media.Color.FromRgb(0xCC, 0xFF, 0x00));
-                PillViGEm.BorderBrush = new SolidColorBrush(System.Windows.Media.Color.FromRgb(0xCC, 0xFF, 0x00));
             }
             else
             {
                 TxtControllerStatus.Text = "CHECKING VIGEMBUS DRIVER...";
                 StatusDot.Fill = new SolidColorBrush(System.Windows.Media.Color.FromRgb(0xFF, 0xCC, 0x00));
-                PillViGEm.BorderBrush = new SolidColorBrush(System.Windows.Media.Color.FromRgb(0xFF, 0xCC, 0x00));
 
-                // Auto-download and install ViGEmBus driver seamlessly
+                // Seamless ViGEm installer fallback
                 Task.Run(async () =>
                 {
                     if (!ViGEmInstallerService.IsDriverInstalled())
@@ -179,7 +136,6 @@ namespace WheelPad.App
                         await Dispatcher.InvokeAsync(() =>
                         {
                             TxtControllerStatus.Text = "AUTO-DOWNLOADING VIGEMBUS...";
-                            PillViGEm.BorderBrush = new SolidColorBrush(System.Windows.Media.Color.FromRgb(0x00, 0xF2, 0xFE));
                         });
 
                         bool success = await ViGEmInstallerService.DownloadAndInstallDriverAsync(msg =>
@@ -199,7 +155,6 @@ namespace WheelPad.App
                                 {
                                     TxtControllerStatus.Text = "STEAM / ViGEmBUS ACTIVE";
                                     StatusDot.Fill = new SolidColorBrush(System.Windows.Media.Color.FromRgb(0xCC, 0xFF, 0x00));
-                                    PillViGEm.BorderBrush = new SolidColorBrush(System.Windows.Media.Color.FromRgb(0xCC, 0xFF, 0x00));
                                 }
                             });
                         }
@@ -248,13 +203,13 @@ namespace WheelPad.App
             {
                 if (connected)
                 {
-                    TxtPhoneStatus.Text = "CONNECTED (0-DELAY STREAM)";
+                    TxtPhoneStatus.Text = "CONNECTED (120Hz STREAM)";
                     TxtPhoneStatus.Foreground = new SolidColorBrush(System.Windows.Media.Color.FromRgb(0xCC, 0xFF, 0x00));
 
                     _notifyIcon.ShowBalloonTip(
-                        3500,
+                        3000,
                         "FH6 Controller Companion",
-                        "Mobile Controller connected.\nVirtual Xbox 360 controller is synchronized for Forza Horizon 6.",
+                        "Mobile Controller connected. Xbox 360 controller synchronized.",
                         Forms.ToolTipIcon.Info
                     );
                 }
@@ -264,9 +219,9 @@ namespace WheelPad.App
                     TxtPhoneStatus.Foreground = new SolidColorBrush(System.Windows.Media.Color.FromRgb(0xFF, 0xCC, 0x00));
 
                     _notifyIcon.ShowBalloonTip(
-                        3000,
+                        2500,
                         "FH6 Controller Companion",
-                        "Mobile Controller disconnected. Inputs reset to neutral.",
+                        "Mobile Controller disconnected. Inputs neutral.",
                         Forms.ToolTipIcon.Warning
                     );
                 }
@@ -285,25 +240,18 @@ namespace WheelPad.App
                     TxtProcessId.Foreground = new SolidColorBrush(System.Windows.Media.Color.FromRgb(0xCC, 0xFF, 0x00));
 
                     _notifyIcon.ShowBalloonTip(
-                        4000,
+                        3500,
                         $"{e.GameName} Active",
-                        $"{e.GameName} detected (PID {e.ProcessId})! FastStream 120Hz synchronized.",
+                        $"{e.GameName} detected (PID {e.ProcessId}). FastStream synchronized.",
                         Forms.ToolTipIcon.Info
                     );
                 }
                 else
                 {
                     TxtGameStatus.Text = "Scanning for game...";
-                    TxtGameStatus.Foreground = new SolidColorBrush(System.Windows.Media.Color.FromRgb(0x7E, 0xE6, 0xD8));
+                    TxtGameStatus.Foreground = new SolidColorBrush(System.Windows.Media.Color.FromRgb(0x7E, 0x94, 0xAD));
                     TxtProcessId.Text = "--";
-                    TxtProcessId.Foreground = new SolidColorBrush(System.Windows.Media.Color.FromRgb(0xA0, 0xD0, 0xCC));
-
-                    _notifyIcon.ShowBalloonTip(
-                        3000,
-                        "Forza Horizon",
-                        $"{e.GameName} exited. Controller in standby.",
-                        Forms.ToolTipIcon.Info
-                    );
+                    TxtProcessId.Foreground = new SolidColorBrush(System.Windows.Media.Color.FromRgb(0x95, 0xA7, 0xBC));
                 }
             });
         }
@@ -327,7 +275,7 @@ namespace WheelPad.App
             _profileManager.SetActiveProfile(profiles[nextIndex].ProfileId);
 
             _notifyIcon.ShowBalloonTip(
-                2500,
+                2000,
                 "Profile Switched",
                 $"Active Profile: {_profileManager.ActiveProfile.ProfileName}",
                 Forms.ToolTipIcon.Info
@@ -340,14 +288,15 @@ namespace WheelPad.App
             _notifyIcon.ShowBalloonTip(
                 2000,
                 "FH6 Controller Companion",
-                "Minimized to system tray. FH6 Controller is active in the background.",
+                "Minimized to system tray. Companion is active in the background.",
                 Forms.ToolTipIcon.Info
             );
         }
 
-        private void RestoreFromTray()
+        public void RestoreFromTray()
         {
             Show();
+            Visibility = Visibility.Visible;
             WindowState = WindowState.Normal;
             Activate();
             Topmost = true;
@@ -363,8 +312,8 @@ namespace WheelPad.App
                 Hide();
                 _notifyIcon.ShowBalloonTip(
                     2000,
-                    "WheelPad Still Active",
-                    "WheelPad is running in the background for your game. Right-click the tray icon to exit.",
+                    "FH6 Controller Active",
+                    "Running in background for your game. Right-click tray icon to exit.",
                     Forms.ToolTipIcon.Info
                 );
             }
@@ -377,89 +326,39 @@ namespace WheelPad.App
             _notifyIcon.Dispose();
 
             _beaconBroadcaster.Dispose();
-            _radioService.Dispose();
-            _spotifyManager.Dispose();
             _gameDetector.Dispose();
             _udpReceiver.Dispose();
             _syncServer.Dispose();
             _dispatcher.Dispose();
             _xbox.Dispose();
-            _bgTimer?.Stop();
 
             System.Windows.Application.Current.Shutdown();
         }
 
-        private void InitAmbientBackgroundSlideshow()
+        private void InitAmbientBackground()
         {
-            string[] imageNames = new[]
+            try
             {
-                "forza_night_drift.jpg",
-                "forza_pagoda_pass.jpg",
-                "forza_flower_circuit.jpg",
-                "forza_mountain_valley.jpg"
-            };
-
-            foreach (var imgName in imageNames)
-            {
-                try
+                string path = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "Images", "forza_bg.jpg");
+                BitmapImage bmp = new BitmapImage();
+                bmp.BeginInit();
+                if (System.IO.File.Exists(path))
                 {
-                    string path = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "Images", imgName);
-                    if (System.IO.File.Exists(path))
-                    {
-                        var bmp = new BitmapImage();
-                        bmp.BeginInit();
-                        bmp.UriSource = new Uri(path, UriKind.Absolute);
-                        bmp.CacheOption = BitmapCacheOption.OnLoad;
-                        bmp.EndInit();
-                        bmp.Freeze();
-                        _bgImages.Add(bmp);
-                    }
+                    bmp.UriSource = new Uri(path, UriKind.Absolute);
                 }
-                catch { }
-            }
-
-            if (_bgImages.Count > 0)
-            {
-                ImgAmbientBg1.Source = _bgImages[0];
-                ImgAmbientBg1.Opacity = 0.16;
-                ImgAmbientBg2.Opacity = 0;
-
-                _bgTimer = new System.Windows.Threading.DispatcherTimer
+                else
                 {
-                    Interval = TimeSpan.FromSeconds(9)
-                };
-                _bgTimer.Tick += (s, e) => TransitionNextBackground();
-                _bgTimer.Start();
+                    bmp.UriSource = new Uri("pack://application:,,,/Assets/Images/forza_bg.jpg", UriKind.Absolute);
+                }
+                bmp.CacheOption = BitmapCacheOption.OnLoad;
+                bmp.EndInit();
+                bmp.Freeze();
+                ImgAmbientBg.Source = bmp;
             }
+            catch { }
         }
 
-        private void TransitionNextBackground()
-        {
-            if (_bgImages.Count <= 1) return;
-
-            _currentBgIndex = (_currentBgIndex + 1) % _bgImages.Count;
-            var nextImage = _bgImages[_currentBgIndex];
-
-            var fadeIn = new System.Windows.Media.Animation.DoubleAnimation(0, 0.16, TimeSpan.FromMilliseconds(1600));
-            var fadeOut = new System.Windows.Media.Animation.DoubleAnimation(0.16, 0, TimeSpan.FromMilliseconds(1600));
-
-            if (_activeOnFirstImage)
-            {
-                ImgAmbientBg2.Source = nextImage;
-                ImgAmbientBg2.BeginAnimation(UIElement.OpacityProperty, fadeIn);
-                ImgAmbientBg1.BeginAnimation(UIElement.OpacityProperty, fadeOut);
-                _activeOnFirstImage = false;
-            }
-            else
-            {
-                ImgAmbientBg1.Source = nextImage;
-                ImgAmbientBg1.BeginAnimation(UIElement.OpacityProperty, fadeIn);
-                ImgAmbientBg2.BeginAnimation(UIElement.OpacityProperty, fadeOut);
-                _activeOnFirstImage = true;
-            }
-        }
-
-        private static string GetLocalIpAddress()
+        private string GetLocalIpAddress()
         {
             try
             {
@@ -471,6 +370,20 @@ namespace WheelPad.App
                 }
             }
             catch { }
+
+            try
+            {
+                var host = Dns.GetHostEntry(Dns.GetHostName());
+                foreach (var ip in host.AddressList)
+                {
+                    if (ip.AddressFamily == AddressFamily.InterNetwork && !IPAddress.IsLoopback(ip))
+                    {
+                        return ip.ToString();
+                    }
+                }
+            }
+            catch { }
+
             return "127.0.0.1";
         }
     }

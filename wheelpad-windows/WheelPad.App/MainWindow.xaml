@@ -3,34 +3,34 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="FH6 CONTROLLER // WINDOWS COMPANION" 
         Icon="app_icon.ico"
-        Height="640" Width="960"
+        Height="640" Width="980"
         WindowStartupLocation="CenterScreen"
-        Background="#062220"
+        Background="#080C12"
         Foreground="#FFFFFF"
         FontFamily="./Assets/Fonts/#Chakra Petch, Bahnschrift, Segoe UI"
         ResizeMode="CanResize">
     
     <Window.Resources>
-        <!-- Forza Horizon Card Style -->
-        <Style x:Key="ForzaCard" TargetType="Border">
-            <Setter Property="Background" Value="#0A2C29"/>
-            <Setter Property="BorderBrush" Value="#144C47"/>
+        <!-- Motorsport Cockpit Card Style (Obsidian Dark with Hairline Slate Border) -->
+        <Style x:Key="CockpitCard" TargetType="Border">
+            <Setter Property="Background" Value="#0D131C"/>
+            <Setter Property="BorderBrush" Value="#1C2738"/>
             <Setter Property="BorderThickness" Value="1.5"/>
-            <Setter Property="CornerRadius" Value="10"/>
+            <Setter Property="CornerRadius" Value="6"/>
             <Setter Property="Padding" Value="18"/>
         </Style>
 
         <!-- Metric Header Label -->
-        <Style x:Key="ForzaHeaderLabel" TargetType="TextBlock">
-            <Setter Property="Foreground" Value="#7EE6D8"/>
+        <Style x:Key="MetricHeaderLabel" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="#7E94AD"/>
             <Setter Property="FontSize" Value="11"/>
             <Setter Property="FontWeight" Value="Black"/>
             <Setter Property="Margin" Value="0,0,0,12"/>
         </Style>
 
-        <!-- Forza Volt Button -->
-        <Style x:Key="ForzaVoltButton" TargetType="Button">
-            <Setter Property="Background" Value="#0A0A0A"/>
+        <!-- Volt Action Button -->
+        <Style x:Key="VoltButton" TargetType="Button">
+            <Setter Property="Background" Value="#0A0E15"/>
             <Setter Property="Foreground" Value="#CCFF00"/>
             <Setter Property="BorderBrush" Value="#CCFF00"/>
             <Setter Property="BorderThickness" Value="1.5"/>
@@ -44,14 +44,14 @@
                         <Border x:Name="btnBorder" Background="{TemplateBinding Background}" 
                                 BorderBrush="{TemplateBinding BorderBrush}" 
                                 BorderThickness="{TemplateBinding BorderThickness}" 
-                                CornerRadius="6" 
+                                CornerRadius="4" 
                                 Padding="{TemplateBinding Padding}">
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
                                 <Setter TargetName="btnBorder" Property="Background" Value="#CCFF00"/>
-                                <Setter Property="Foreground" Value="#062220"/>
+                                <Setter Property="Foreground" Value="#080C12"/>
                             </Trigger>
                             <Trigger Property="IsPressed" Value="True">
                                 <Setter TargetName="btnBorder" Property="Background" Value="#FFFFFF"/>
@@ -62,267 +62,235 @@
                 </Setter.Value>
             </Setter>
         </Style>
-
-        <!-- Forza White Button -->
-        <Style x:Key="ForzaWhiteButton" TargetType="Button">
-            <Setter Property="Background" Value="#FFFFFF"/>
-            <Setter Property="Foreground" Value="#0A0A0A"/>
-            <Setter Property="BorderBrush" Value="#FFFFFF"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="FontWeight" Value="Black"/>
-            <Setter Property="FontSize" Value="11"/>
-            <Setter Property="Padding" Value="16,8"/>
-            <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border x:Name="btnBorder" Background="{TemplateBinding Background}" 
-                                BorderBrush="{TemplateBinding BorderBrush}" 
-                                BorderThickness="{TemplateBinding BorderThickness}" 
-                                CornerRadius="6" 
-                                Padding="{TemplateBinding Padding}">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="btnBorder" Property="Background" Value="#CCFF00"/>
-                                <Setter Property="Foreground" Value="#0A0A0A"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
     </Window.Resources>
 
     <Grid>
-        <!-- 0. Ambient Cinematic Forza Horizon Background Engine -->
+        <!-- 0. Ambient Cinematic Forza Horizon Background (Single Night Drift Image) -->
         <Grid x:Name="GridAmbientBg">
-            <Image x:Name="ImgAmbientBg1" Stretch="UniformToFill" HorizontalAlignment="Center" VerticalAlignment="Center" Opacity="0.16"/>
-            <Image x:Name="ImgAmbientBg2" Stretch="UniformToFill" HorizontalAlignment="Center" VerticalAlignment="Center" Opacity="0"/>
-            <!-- Dark Teal Vignette Mask -->
+            <Image x:Name="ImgAmbientBg" Stretch="UniformToFill" HorizontalAlignment="Center" VerticalAlignment="Center" Opacity="0.16"/>
+            <!-- Dark Vignette Mask -->
             <Rectangle>
                 <Rectangle.Fill>
-                    <RadialGradientBrush Center="0.5,0.4" GradientOrigin="0.5,0.4" RadiusX="0.85" RadiusY="0.85">
-                        <GradientStop Color="#40062220" Offset="0.0"/>
-                        <GradientStop Color="#CC062220" Offset="0.65"/>
-                        <GradientStop Color="#F8041816" Offset="1.0"/>
+                    <RadialGradientBrush Center="0.5,0.4" GradientOrigin="0.5,0.4" RadiusX="0.9" RadiusY="0.9">
+                        <GradientStop Color="#40080C12" Offset="0.0"/>
+                        <GradientStop Color="#C0080C12" Offset="0.65"/>
+                        <GradientStop Color="#F8080C12" Offset="1.0"/>
                     </RadialGradientBrush>
                 </Rectangle.Fill>
             </Rectangle>
         </Grid>
 
-        <Grid Margin="22">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
-        </Grid.RowDefinitions>
+        <Grid Margin="24">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
 
-        <!-- 1. Top Header: Authentic Forza Horizon Festival Banner -->
-        <Grid Grid.Row="0" Margin="0,0,0,16">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="Auto"/>
-            </Grid.ColumnDefinitions>
+            <!-- 1. Top Header: Clean Technical Motorsport Banner -->
+            <Grid Grid.Row="0" Margin="0,0,0,18">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
 
-            <StackPanel Grid.Column="0" VerticalAlignment="Center">
-                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                    <Border Background="#CCFF00" CornerRadius="4" Padding="10,4" Margin="0,0,10,0" VerticalAlignment="Center">
-                        <TextBlock Text="HORIZON COMPANION" FontSize="12" FontWeight="Black" Foreground="#062220"/>
-                    </Border>
-                    <TextBlock Text="FH6 CONTROLLER" FontSize="22" FontWeight="Black" Foreground="#FFFFFF" VerticalAlignment="Center"/>
-                    <Border Background="#FF007F" CornerRadius="4" Margin="10,0,0,0" Padding="8,3" VerticalAlignment="Center">
-                        <TextBlock Text="FASTSTREAM 120Hz" FontSize="10" FontWeight="Black" Foreground="#FFFFFF"/>
-                    </Border>
-                </StackPanel>
-                <TextBlock Text="Native Hardware Xbox 360 Controller Emulation via ViGEmBus | Pure C# / Zero Web CMD" FontSize="11" Foreground="#7EE6D8" Margin="0,4,0,0"/>
-            </StackPanel>
-
-            <!-- Controller Connected Status Pill -->
-            <Border Grid.Column="1" x:Name="PillViGEm" Background="#0A0A0A" BorderBrush="#CCFF00" BorderThickness="2" CornerRadius="20" Padding="16,8" VerticalAlignment="Center">
-                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                    <Ellipse x:Name="StatusDot" Width="9" Height="9" Fill="#CCFF00" Margin="0,0,8,0"/>
-                    <TextBlock x:Name="TxtControllerStatus" Text="STEAM / ViGEmBUS ACTIVE" FontSize="11" FontWeight="Black" Foreground="#CCFF00"/>
-                </StackPanel>
-            </Border>
-        </Grid>
-
-        <!-- 2. Main Dashboard Content Grid -->
-        <Grid Grid.Row="1">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="1.1*"/>
-                <ColumnDefinition Width="1.4*"/>
-            </Grid.ColumnDefinitions>
-
-            <!-- Left Column: Pairing & Auto-Drive Assist -->
-            <Grid Grid.Column="0" Margin="0,0,12,0">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="*"/>
-                </Grid.RowDefinitions>
-
-                <!-- Card 1: Instant QR Connect & LAN Auto-Discovery -->
-                <Border Grid.Row="0" Style="{StaticResource ForzaCard}" Margin="0,0,0,14">
-                    <StackPanel>
-                        <Grid Margin="0,0,0,10">
-                            <TextBlock Text="PHONE PAIRING // DEEP-LINK" Style="{StaticResource ForzaHeaderLabel}"/>
-                            <TextBlock Text="UDP AUTO-DISCOVERY ACTIVE" Foreground="#CCFF00" FontSize="9" FontWeight="Black" HorizontalAlignment="Right"/>
-                        </Grid>
-
-                        <Grid Margin="0,0,0,12">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-
-                            <!-- QR Code Box (Crisp White with Volt Lime Border) -->
-                            <Border Grid.Column="0" Background="#FFFFFF" BorderBrush="#CCFF00" BorderThickness="2" CornerRadius="8" Padding="6" Margin="0,0,14,0">
-                                <Image x:Name="ImgQrCode" Width="108" Height="108" RenderOptions.BitmapScalingMode="NearestNeighbor"/>
-                            </Border>
-
-                            <!-- Host Connection Info -->
-                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                <TextBlock Text="YOUR PC IP ADDRESS:" FontSize="10" Foreground="#7EE6D8" FontWeight="SemiBold"/>
-                                <TextBlock x:Name="TxtLocalIp" Text="127.0.0.1" FontSize="19" FontWeight="Black" Foreground="#CCFF00" Margin="0,2,0,6"/>
-                                <TextBlock Text="Scan with FH6 Controller in-app scanner to pair instantly." FontSize="10" Foreground="#A0D0CC" TextWrapping="Wrap" Margin="0,0,0,6"/>
-                                <TextBlock Text="UDP Port: 4242 | TCP: 4243" FontSize="10" FontWeight="SemiBold" Foreground="#7EE6D8"/>
-                            </StackPanel>
-                        </Grid>
-
-                        <Border Height="1" Background="#144C47" Margin="0,0,0,10"/>
-
-                        <!-- Phone Live Connection Status -->
-                        <Grid>
-                            <TextBlock Text="MOBILE CONTROLLER:" FontSize="10" Foreground="#7EE6D8" FontWeight="Bold" VerticalAlignment="Center"/>
-                            <TextBlock x:Name="TxtPhoneStatus" Text="Waiting for connection..." FontWeight="Black" FontSize="11" Foreground="#FFCC00" HorizontalAlignment="Right" VerticalAlignment="Center"/>
-                        </Grid>
-                    </StackPanel>
-                </Border>
-
-                <!-- Card 2: Forza Horizon & Motorsport Auto-Detection -->
-                <Border Grid.Row="1" Style="{StaticResource ForzaCard}">
-                    <StackPanel VerticalAlignment="Center">
-                        <TextBlock Text="FORZA HORIZON AUTO-DETECTION" Style="{StaticResource ForzaHeaderLabel}"/>
-
-                        <TextBlock Text="Monitors: FH5, FH4, FH6, Forza Motorsport" FontSize="10" Foreground="#7EE6D8" FontWeight="SemiBold" Margin="0,0,0,10"/>
-
-                        <!-- Live Status Display Panel -->
-                        <Border Background="#071E1C" BorderBrush="#144C47" BorderThickness="1.5" CornerRadius="8" Padding="14,12">
-                            <StackPanel>
-                                <Grid Margin="0,0,0,6">
-                                    <TextBlock Text="ACTIVE GAME:" FontSize="10" Foreground="#7EE6D8" FontWeight="Bold"/>
-                                    <TextBlock x:Name="TxtGameStatus" Text="Scanning for game..." FontWeight="Black" FontSize="11" Foreground="#7EE6D8" HorizontalAlignment="Right"/>
-                                </Grid>
-                                <Grid>
-                                    <TextBlock Text="PROCESS ID (PID):" FontSize="10" Foreground="#7EE6D8" FontWeight="Bold"/>
-                                    <TextBlock x:Name="TxtProcessId" Text="--" FontWeight="Bold" FontSize="11" Foreground="#A0D0CC" HorizontalAlignment="Right"/>
-                                </Grid>
-                            </StackPanel>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <Border Background="#CCFF00" CornerRadius="3" Padding="8,3" Margin="0,0,10,0" VerticalAlignment="Center">
+                            <TextBlock Text="COMPANION" FontSize="11" FontWeight="Black" Foreground="#080C12"/>
                         </Border>
+                        <TextBlock Text="FORZA HORIZON CONTROLLER" FontSize="20" FontWeight="Black" Foreground="#FFFFFF" VerticalAlignment="Center"/>
+                        <Border Background="#1C2738" BorderBrush="#2D3E56" BorderThickness="1" CornerRadius="3" Margin="10,0,0,0" Padding="8,3" VerticalAlignment="Center">
+                            <TextBlock Text="120Hz FASTSTREAM" FontSize="10" FontWeight="Black" Foreground="#CCFF00"/>
+                        </Border>
+                    </StackPanel>
+                    <TextBlock Text="Hardware Xbox 360 controller emulation via ViGEmBus · Sub-millisecond UDP telemetry" FontSize="11" Foreground="#7E94AD" Margin="0,4,0,0"/>
+                </StackPanel>
+
+                <!-- Controller Connected Status (Clean Technical HUD Card) -->
+                <Border Grid.Column="1" x:Name="PillViGEm" Background="#0A0E15" BorderBrush="#1C2738" BorderThickness="1.5" CornerRadius="4" Padding="14,8" VerticalAlignment="Center">
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <Rectangle x:Name="StatusDot" Width="7" Height="7" Fill="#CCFF00" Margin="0,0,10,0"/>
+                        <TextBlock x:Name="TxtControllerStatus" Text="STEAM / ViGEmBUS ACTIVE" FontSize="11" FontWeight="Black" Foreground="#CCFF00"/>
                     </StackPanel>
                 </Border>
             </Grid>
 
-            <!-- Right Column: Interactive Forza Horizon Rig Preview (Steering + Accel + Reverse/Brake ONLY) -->
-            <Border Grid.Column="1" Style="{StaticResource ForzaCard}" Margin="12,0,0,0">
-                <Grid>
+            <!-- 2. Main Dashboard Content Grid -->
+            <Grid Grid.Row="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="1.1*"/>
+                    <ColumnDefinition Width="1.4*"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Left Column: Pairing & Game Detection -->
+                <Grid Grid.Column="0" Margin="0,0,12,0">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
 
-                    <Grid Grid.Row="0" Margin="0,0,0,16">
-                        <TextBlock Text="LIVE RIG PREVIEW // STEERING &amp; PEDALS" Style="{StaticResource ForzaHeaderLabel}" Margin="0"/>
-                        <TextBlock x:Name="TxtPacketRate" Text="0 PACKETS/SEC" Foreground="#CCFF00" FontSize="10" FontWeight="Black" HorizontalAlignment="Right"/>
-                    </Grid>
+                    <!-- Card 1: Phone Pairing QR & Direct Link -->
+                    <Border Grid.Row="0" Style="{StaticResource CockpitCard}" Margin="0,0,0,14">
+                        <StackPanel>
+                            <Grid Margin="0,0,0,10">
+                                <TextBlock Text="MOBILE PAIRING // IN-APP SCANNER" Style="{StaticResource MetricHeaderLabel}"/>
+                                <TextBlock Text="UDP BROADCAST ACTIVE" Foreground="#CCFF00" FontSize="9" FontWeight="Black" HorizontalAlignment="Right"/>
+                            </Grid>
 
-                    <Grid Grid.Row="1">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="1.2*"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
+                            <Grid Margin="0,0,0,12">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
 
-                        <!-- 1. Live Rotating Steering Wheel Display -->
-                        <Grid Grid.Column="0" VerticalAlignment="Center">
-                            <Canvas x:Name="CanvasWheel" Width="190" Height="190" HorizontalAlignment="Center" VerticalAlignment="Center">
-                                <!-- Rotating Wheel Container -->
-                                <Grid x:Name="WheelContainer" Width="190" Height="190" RenderTransformOrigin="0.5,0.5">
-                                    <Grid.RenderTransform>
-                                        <RotateTransform x:Name="WheelRotation" Angle="0"/>
-                                    </Grid.RenderTransform>
+                                <!-- QR Code Box -->
+                                <Border Grid.Column="0" Background="#FFFFFF" BorderBrush="#CCFF00" BorderThickness="2" CornerRadius="6" Padding="6" Margin="0,0,14,0">
+                                    <Image x:Name="ImgQrCode" Width="104" Height="104" RenderOptions.BitmapScalingMode="NearestNeighbor"/>
+                                </Border>
 
-                                    <!-- Outer Hairline Rim -->
-                                    <Ellipse Stroke="#FFFFFF" StrokeThickness="2.8" Width="184" Height="184" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                    <!-- Inner Chamfer Rim -->
-                                    <Ellipse Stroke="#40FFFFFF" StrokeThickness="1.2" Width="154" Height="154" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                    
-                                    <!-- 12 O'Clock Volt Lime Center Alignment Notch -->
-                                    <Rectangle Fill="#CCFF00" Width="6" Height="18" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,3,0,0"/>
+                                <!-- Host Connection Info -->
+                                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                    <TextBlock Text="PC HOST IP ADDRESS:" FontSize="10" Foreground="#7E94AD" FontWeight="Bold"/>
+                                    <TextBlock x:Name="TxtLocalIp" Text="127.0.0.1" FontSize="18" FontWeight="Black" Foreground="#CCFF00" Margin="0,2,0,6"/>
+                                    <TextBlock Text="Scan with the Android in-app scanner to sync instantly." FontSize="10" Foreground="#95A7BC" TextWrapping="Wrap" Margin="0,0,0,6"/>
+                                    <TextBlock Text="FastStream: UDP 4242 · TCP 4243" FontSize="10" FontWeight="SemiBold" Foreground="#7E94AD"/>
+                                </StackPanel>
+                            </Grid>
 
-                                    <!-- 9 o'clock spoke -->
-                                    <Rectangle Fill="#80FFFFFF" Width="62" Height="16" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="16,0,0,0"/>
-                                    <!-- 3 o'clock spoke -->
-                                    <Rectangle Fill="#80FFFFFF" Width="62" Height="16" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,16,0"/>
-                                    <!-- 6 o'clock spoke -->
-                                    <Rectangle Fill="#80FFFFFF" Width="16" Height="58" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,0,16"/>
+                            <Border Height="1" Background="#1C2738" Margin="0,0,0,10"/>
 
-                                    <!-- Central Hub with FH Badge -->
-                                    <Ellipse Fill="#062220" Stroke="#CCFF00" StrokeThickness="2" Width="48" Height="48" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                    <TextBlock Text="FH6" FontSize="13" FontWeight="Black" Foreground="#CCFF00" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                </Grid>
-                            </Canvas>
+                            <!-- Phone Live Connection Status -->
+                            <Grid>
+                                <TextBlock Text="MOBILE CONTROLLER:" FontSize="10" Foreground="#7E94AD" FontWeight="Bold" VerticalAlignment="Center"/>
+                                <TextBlock x:Name="TxtPhoneStatus" Text="Waiting for connection..." FontWeight="Black" FontSize="11" Foreground="#FFCC00" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
 
-                            <TextBlock x:Name="TxtSteerVal" Text="STEERING: CENTER (0%)" FontSize="12" FontWeight="Black" Foreground="#FFFFFF" HorizontalAlignment="Center" Margin="0,220,0,0"/>
+                    <!-- Card 2: Forza Horizon & Motorsport Auto-Detection -->
+                    <Border Grid.Row="1" Style="{StaticResource CockpitCard}">
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="FORZA TELEMETRY ENGINE" Style="{StaticResource MetricHeaderLabel}"/>
+
+                            <TextBlock Text="Monitored: FH5 · FH4 · FH3 · FH6 · Forza Motorsport" FontSize="10" Foreground="#7E94AD" FontWeight="SemiBold" Margin="0,0,0,10"/>
+
+                            <!-- Live Game Status Display Panel -->
+                            <Border Background="#090E16" BorderBrush="#1C2738" BorderThickness="1.5" CornerRadius="4" Padding="14,12">
+                                <StackPanel>
+                                    <Grid Margin="0,0,0,8">
+                                        <TextBlock Text="DETECTED TITLE:" FontSize="10" Foreground="#7E94AD" FontWeight="Bold"/>
+                                        <TextBlock x:Name="TxtGameStatus" Text="Scanning for game..." FontWeight="Black" FontSize="11" Foreground="#7E94AD" HorizontalAlignment="Right"/>
+                                    </Grid>
+                                    <Grid>
+                                        <TextBlock Text="PROCESS ID (PID):" FontSize="10" Foreground="#7E94AD" FontWeight="Bold"/>
+                                        <TextBlock x:Name="TxtProcessId" Text="--" FontWeight="Bold" FontSize="11" Foreground="#95A7BC" HorizontalAlignment="Right"/>
+                                    </Grid>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+
+                <!-- Right Column: Interactive Sim Rig Preview (Steering + Accel + Brake) -->
+                <Border Grid.Column="1" Style="{StaticResource CockpitCard}" Margin="12,0,0,0">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+
+                        <Grid Grid.Row="0" Margin="0,0,0,16">
+                            <TextBlock Text="LIVE TELEMETRY // STEERING &amp; PEDALS" Style="{StaticResource MetricHeaderLabel}" Margin="0"/>
+                            <TextBlock x:Name="TxtPacketRate" Text="0 PACKETS/SEC" Foreground="#CCFF00" FontSize="10" FontWeight="Black" HorizontalAlignment="Right"/>
                         </Grid>
 
-                        <!-- 2. Vertical RT Accel & LT Brake LED Bars -->
-                        <Grid Grid.Column="1" VerticalAlignment="Center" Margin="8,0,0,0">
+                        <Grid Grid.Row="1">
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="1.2*"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
 
-                            <!-- Reverse / Brake LT Column -->
-                            <StackPanel Grid.Column="0" HorizontalAlignment="Center">
-                                <TextBlock Text="REVERSE / BRAKE" FontSize="10" FontWeight="Black" Foreground="#FF007F" HorizontalAlignment="Center" Margin="0,0,0,8"/>
-                                
-                                <!-- Brake Meter Container (Height: 220px) -->
-                                <Border Width="48" Height="220" Background="#0A0A0A" BorderBrush="#FF007F" BorderThickness="1.8" CornerRadius="8" Padding="3">
-                                    <Grid VerticalAlignment="Bottom">
-                                        <Border x:Name="BarBrakeFill" Height="0" Background="#FF007F" CornerRadius="5"/>
+                            <!-- 1. Live Rotating Steering Wheel Display -->
+                            <Grid Grid.Column="0" VerticalAlignment="Center">
+                                <Canvas x:Name="CanvasWheel" Width="190" Height="190" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                    <!-- Rotating Wheel Container -->
+                                    <Grid x:Name="WheelContainer" Width="190" Height="190" RenderTransformOrigin="0.5,0.5">
+                                        <Grid.RenderTransform>
+                                            <RotateTransform x:Name="WheelRotation" Angle="0"/>
+                                        </Grid.RenderTransform>
+
+                                        <!-- Outer Hairline Rim -->
+                                        <Ellipse Stroke="#FFFFFF" StrokeThickness="2.8" Width="184" Height="184" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        <!-- Inner Chamfer Rim -->
+                                        <Ellipse Stroke="#40FFFFFF" StrokeThickness="1.2" Width="154" Height="154" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        
+                                        <!-- 12 O'Clock Volt Lime Center Alignment Notch -->
+                                        <Rectangle Fill="#CCFF00" Width="6" Height="18" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,3,0,0"/>
+
+                                        <!-- 9 o'clock spoke -->
+                                        <Rectangle Fill="#80FFFFFF" Width="62" Height="16" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="16,0,0,0"/>
+                                        <!-- 3 o'clock spoke -->
+                                        <Rectangle Fill="#80FFFFFF" Width="62" Height="16" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,16,0"/>
+                                        <!-- 6 o'clock spoke -->
+                                        <Rectangle Fill="#80FFFFFF" Width="16" Height="58" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,0,16"/>
+
+                                        <!-- Central Hub with FH Badge -->
+                                        <Ellipse Fill="#080C12" Stroke="#CCFF00" StrokeThickness="2" Width="48" Height="48" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        <TextBlock Text="FH" FontSize="13" FontWeight="Black" Foreground="#CCFF00" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                     </Grid>
-                                </Border>
+                                </Canvas>
 
-                                <TextBlock x:Name="TxtBrakeVal" Text="0%" FontSize="13" FontWeight="Black" Foreground="#FF007F" HorizontalAlignment="Center" Margin="0,8,0,0"/>
-                            </StackPanel>
+                                <TextBlock x:Name="TxtSteerVal" Text="STEERING: CENTER (0%)" FontSize="12" FontWeight="Black" Foreground="#FFFFFF" HorizontalAlignment="Center" Margin="0,220,0,0"/>
+                            </Grid>
 
-                            <!-- Throttle RT Column -->
-                            <StackPanel Grid.Column="1" HorizontalAlignment="Center">
-                                <TextBlock Text="ACCEL (RT)" FontSize="10" FontWeight="Black" Foreground="#CCFF00" HorizontalAlignment="Center" Margin="0,0,0,8"/>
-                                
-                                <!-- Throttle Meter Container (Height: 220px) -->
-                                <Border Width="48" Height="220" Background="#0A0A0A" BorderBrush="#CCFF00" BorderThickness="1.8" CornerRadius="8" Padding="3">
-                                    <Grid VerticalAlignment="Bottom">
-                                        <Border x:Name="BarThrottleFill" Height="0" Background="#CCFF00" CornerRadius="5"/>
-                                    </Grid>
-                                </Border>
+                            <!-- 2. Vertical RT Accel & LT Brake LED Bars -->
+                            <Grid Grid.Column="1" VerticalAlignment="Center" Margin="8,0,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
 
-                                <TextBlock x:Name="TxtThrottleVal" Text="0%" FontSize="13" FontWeight="Black" Foreground="#CCFF00" HorizontalAlignment="Center" Margin="0,8,0,0"/>
-                            </StackPanel>
+                                <!-- Reverse / Brake LT Column -->
+                                <StackPanel Grid.Column="0" HorizontalAlignment="Center">
+                                    <TextBlock Text="BRAKE (LT)" FontSize="10" FontWeight="Black" Foreground="#FF007F" HorizontalAlignment="Center" Margin="0,0,0,8"/>
+                                    
+                                    <!-- Brake Meter Container (Height: 220px) -->
+                                    <Border Width="48" Height="220" Background="#070A0F" BorderBrush="#FF007F" BorderThickness="1.5" CornerRadius="6" Padding="3">
+                                        <Grid VerticalAlignment="Bottom">
+                                            <Border x:Name="BarBrakeFill" Height="0" Background="#FF007F" CornerRadius="3"/>
+                                        </Grid>
+                                    </Border>
+
+                                    <TextBlock x:Name="TxtBrakeVal" Text="0%" FontSize="13" FontWeight="Black" Foreground="#FF007F" HorizontalAlignment="Center" Margin="0,8,0,0"/>
+                                </StackPanel>
+
+                                <!-- Throttle RT Column -->
+                                <StackPanel Grid.Column="1" HorizontalAlignment="Center">
+                                    <TextBlock Text="ACCEL (RT)" FontSize="10" FontWeight="Black" Foreground="#CCFF00" HorizontalAlignment="Center" Margin="0,0,0,8"/>
+                                    
+                                    <!-- Throttle Meter Container (Height: 220px) -->
+                                    <Border Width="48" Height="220" Background="#070A0F" BorderBrush="#CCFF00" BorderThickness="1.5" CornerRadius="6" Padding="3">
+                                        <Grid VerticalAlignment="Bottom">
+                                            <Border x:Name="BarThrottleFill" Height="0" Background="#CCFF00" CornerRadius="3"/>
+                                        </Grid>
+                                    </Border>
+
+                                    <TextBlock x:Name="TxtThrottleVal" Text="0%" FontSize="13" FontWeight="Black" Foreground="#CCFF00" HorizontalAlignment="Center" Margin="0,8,0,0"/>
+                                </StackPanel>
+                            </Grid>
                         </Grid>
                     </Grid>
+                </Border>
+            </Grid>
+
+            <!-- 3. Bottom Status Bar -->
+            <Border Grid.Row="2" Background="#0D131C" BorderBrush="#1C2738" BorderThickness="1.5" CornerRadius="6" Padding="14,10" Margin="0,14,0,0">
+                <Grid>
+                    <TextBlock x:Name="TxtFooter" Text="Forza Horizon Companion running · ViGEmBus controller slot 1 mapped · UDP FastStream active." FontSize="11" Foreground="#7E94AD" VerticalAlignment="Center"/>
+                    <Button HorizontalAlignment="Right" Style="{StaticResource VoltButton}" Content="MINIMIZE TO TRAY" Click="BtnMinimizeTray_Click"/>
                 </Grid>
             </Border>
         </Grid>
-
-        <!-- 3. Bottom Status Bar -->
-        <Border Grid.Row="2" Background="#0A2C29" BorderBrush="#144C47" BorderThickness="1.5" CornerRadius="10" Padding="14,10" Margin="0,14,0,0">
-            <Grid>
-                <TextBlock x:Name="TxtFooter" Text="FH6 Companion running. Virtual Xbox 360 controller is connected and ready." FontSize="11" Foreground="#7EE6D8" VerticalAlignment="Center"/>
-                <Button HorizontalAlignment="Right" Style="{StaticResource ForzaVoltButton}" Content="MINIMIZE TO TRAY" Click="BtnMinimizeTray_Click"/>
-            </Grid>
-        </Border>
     </Grid>
-</Grid>
 </Window>

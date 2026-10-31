@@ -32,10 +32,14 @@ namespace WheelPad.Core.Services
             "forzahorizon5",
             "ForzaHorizon4",
             "forzahorizon4",
+            "ForzaHorizon3",
+            "forzahorizon3",
             "ForzaMotorsport",
             "forzamotorsport",
             "ForzaHorizon6",
-            "forzahorizon6"
+            "forzahorizon6",
+            "Forza",
+            "forza"
         };
 
         private readonly string[] _targetProcessNames;
@@ -55,11 +59,12 @@ namespace WheelPad.Core.Services
         public static string GetFriendlyGameName(string processName)
         {
             string lower = processName.ToLowerInvariant();
-            if (lower.Contains("forzahorizon5")) return "Forza Horizon 5";
-            if (lower.Contains("forzahorizon4")) return "Forza Horizon 4";
+            if (lower.Contains("forzahorizon6") || lower.Contains("fh6")) return "Forza Horizon 6";
+            if (lower.Contains("forzahorizon5") || lower.Contains("fh5")) return "Forza Horizon 5";
+            if (lower.Contains("forzahorizon4") || lower.Contains("fh4")) return "Forza Horizon 4";
+            if (lower.Contains("forzahorizon3") || lower.Contains("fh3")) return "Forza Horizon 3";
             if (lower.Contains("forzamotorsport")) return "Forza Motorsport";
-            if (lower.Contains("forzahorizon6")) return "Forza Horizon 6";
-            return "Forza Horizon";
+            return "Forza Horizon Series";
         }
 
         public event EventHandler<GameStatusEventArgs>? GameStatusChanged;

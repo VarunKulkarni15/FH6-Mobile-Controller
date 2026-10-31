@@ -493,9 +493,9 @@ fun DrivingScreen(
                                 letterSpacing = 2.sp
                             )
                             Text(
-                                text = "[ESC] CLOSE",
+                                text = "CLOSE",
                                 color = Color.Black,
-                                fontSize = 10.sp,
+                                fontSize = 11.sp,
                                 fontWeight = FontWeight.Black,
                                 modifier = Modifier.clickable { viewModel.setActionCatalogVisible(false) }
                             )
@@ -581,7 +581,7 @@ fun DrivingScreen(
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = "[ESC] CANCEL",
+                            text = "CANCEL",
                             color = Color(0xCCFFFFFF),
                             fontWeight = FontWeight.Black,
                             fontSize = 11.sp,
