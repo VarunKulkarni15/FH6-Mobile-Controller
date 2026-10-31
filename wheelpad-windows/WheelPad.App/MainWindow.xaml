@@ -95,7 +95,24 @@
         </Style>
     </Window.Resources>
 
-    <Grid Margin="22">
+    <Grid>
+        <!-- 0. Ambient Cinematic Forza Horizon Background Engine -->
+        <Grid x:Name="GridAmbientBg">
+            <Image x:Name="ImgAmbientBg1" Stretch="UniformToFill" HorizontalAlignment="Center" VerticalAlignment="Center" Opacity="0.16"/>
+            <Image x:Name="ImgAmbientBg2" Stretch="UniformToFill" HorizontalAlignment="Center" VerticalAlignment="Center" Opacity="0"/>
+            <!-- Dark Teal Vignette Mask -->
+            <Rectangle>
+                <Rectangle.Fill>
+                    <RadialGradientBrush Center="0.5,0.4" GradientOrigin="0.5,0.4" RadiusX="0.85" RadiusY="0.85">
+                        <GradientStop Color="#40062220" Offset="0.0"/>
+                        <GradientStop Color="#CC062220" Offset="0.65"/>
+                        <GradientStop Color="#F8041816" Offset="1.0"/>
+                    </RadialGradientBrush>
+                </Rectangle.Fill>
+            </Rectangle>
+        </Grid>
+
+        <Grid Margin="22">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
@@ -307,4 +324,5 @@
             </Grid>
         </Border>
     </Grid>
+</Grid>
 </Window>

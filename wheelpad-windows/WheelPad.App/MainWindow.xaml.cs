@@ -1,10 +1,12 @@
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using WheelPad.Core.Models;
 using WheelPad.Core.Services;
 using Forms = System.Windows.Forms;
@@ -24,6 +26,11 @@ namespace WheelPad.App
         private readonly UniversalRadioService _radioService;
         private readonly Forms.NotifyIcon _notifyIcon;
         private bool _isExplicitExit = false;
+
+        private int _currentBgIndex = 0;
+        private readonly List<BitmapImage> _bgImages = new();
+        private System.Windows.Threading.DispatcherTimer? _bgTimer;
+        private bool _activeOnFirstImage = true;
 
         public MainWindow()
         {
@@ -45,6 +52,9 @@ namespace WheelPad.App
             _syncServer.Spotify = _spotifyManager;
             _radioService = new UniversalRadioService();
             _syncServer.Radio = _radioService;
+
+            // Ambient background slideshow
+            InitAmbientBackgroundSlideshow();
 
             // 2. Initialize System Tray NotifyIcon with custom Forza Horizon logo
             System.Drawing.Icon? trayIcon = null;
@@ -374,8 +384,79 @@ namespace WheelPad.App
             _syncServer.Dispose();
             _dispatcher.Dispose();
             _xbox.Dispose();
+            _bgTimer?.Stop();
 
             System.Windows.Application.Current.Shutdown();
+        }
+
+        private void InitAmbientBackgroundSlideshow()
+        {
+            string[] imageNames = new[]
+            {
+                "forza_night_drift.jpg",
+                "forza_pagoda_pass.jpg",
+                "forza_flower_circuit.jpg",
+                "forza_mountain_valley.jpg"
+            };
+
+            foreach (var imgName in imageNames)
+            {
+                try
+                {
+                    string path = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "Images", imgName);
+                    if (System.IO.File.Exists(path))
+                    {
+                        var bmp = new BitmapImage();
+                        bmp.BeginInit();
+                        bmp.UriSource = new Uri(path, UriKind.Absolute);
+                        bmp.CacheOption = BitmapCacheOption.OnLoad;
+                        bmp.EndInit();
+                        bmp.Freeze();
+                        _bgImages.Add(bmp);
+                    }
+                }
+                catch { }
+            }
+
+            if (_bgImages.Count > 0)
+            {
+                ImgAmbientBg1.Source = _bgImages[0];
+                ImgAmbientBg1.Opacity = 0.16;
+                ImgAmbientBg2.Opacity = 0;
+
+                _bgTimer = new System.Windows.Threading.DispatcherTimer
+                {
+                    Interval = TimeSpan.FromSeconds(9)
+                };
+                _bgTimer.Tick += (s, e) => TransitionNextBackground();
+                _bgTimer.Start();
+            }
+        }
+
+        private void TransitionNextBackground()
+        {
+            if (_bgImages.Count <= 1) return;
+
+            _currentBgIndex = (_currentBgIndex + 1) % _bgImages.Count;
+            var nextImage = _bgImages[_currentBgIndex];
+
+            var fadeIn = new System.Windows.Media.Animation.DoubleAnimation(0, 0.16, TimeSpan.FromMilliseconds(1600));
+            var fadeOut = new System.Windows.Media.Animation.DoubleAnimation(0.16, 0, TimeSpan.FromMilliseconds(1600));
+
+            if (_activeOnFirstImage)
+            {
+                ImgAmbientBg2.Source = nextImage;
+                ImgAmbientBg2.BeginAnimation(UIElement.OpacityProperty, fadeIn);
+                ImgAmbientBg1.BeginAnimation(UIElement.OpacityProperty, fadeOut);
+                _activeOnFirstImage = false;
+            }
+            else
+            {
+                ImgAmbientBg1.Source = nextImage;
+                ImgAmbientBg1.BeginAnimation(UIElement.OpacityProperty, fadeIn);
+                ImgAmbientBg2.BeginAnimation(UIElement.OpacityProperty, fadeOut);
+                _activeOnFirstImage = true;
+            }
         }
 
         private static string GetLocalIpAddress()
