@@ -7,7 +7,7 @@
         WindowStartupLocation="CenterScreen"
         Background="#062220"
         Foreground="#FFFFFF"
-        FontFamily="Segoe UI"
+        FontFamily="./Assets/Fonts/#Chakra Petch, Bahnschrift, Segoe UI"
         ResizeMode="CanResize">
     
     <Window.Resources>
@@ -168,7 +168,7 @@
                             <StackPanel Grid.Column="1" VerticalAlignment="Center">
                                 <TextBlock Text="YOUR PC IP ADDRESS:" FontSize="10" Foreground="#7EE6D8" FontWeight="SemiBold"/>
                                 <TextBlock x:Name="TxtLocalIp" Text="127.0.0.1" FontSize="19" FontWeight="Black" Foreground="#CCFF00" Margin="0,2,0,6"/>
-                                <TextBlock Text="Scan with Samsung / phone camera to launch or pair automatically." FontSize="10" Foreground="#A0D0CC" TextWrapping="Wrap" Margin="0,0,0,6"/>
+                                <TextBlock Text="Scan with FH6 Controller in-app scanner to pair instantly." FontSize="10" Foreground="#A0D0CC" TextWrapping="Wrap" Margin="0,0,0,6"/>
                                 <TextBlock Text="UDP Port: 4242 | TCP: 4243" FontSize="10" FontWeight="SemiBold" Foreground="#7EE6D8"/>
                             </StackPanel>
                         </Grid>
@@ -183,30 +183,25 @@
                     </StackPanel>
                 </Border>
 
-                <!-- Card 2: Forza Horizon 6 Game Process & Auto-Drive Assist -->
+                <!-- Card 2: Forza Horizon & Motorsport Auto-Detection -->
                 <Border Grid.Row="1" Style="{StaticResource ForzaCard}">
                     <StackPanel VerticalAlignment="Center">
-                        <TextBlock Text="FORZA HORIZON 6 &amp; ASSIST SYSTEM" Style="{StaticResource ForzaHeaderLabel}"/>
+                        <TextBlock Text="FORZA HORIZON AUTO-DETECTION" Style="{StaticResource ForzaHeaderLabel}"/>
 
-                        <Grid Margin="0,0,0,10">
-                            <TextBlock Text="FORZA HORIZON 6:" FontSize="11" Foreground="#7EE6D8" FontWeight="SemiBold"/>
-                            <TextBlock x:Name="TxtGameStatus" Text="Scanning for game..." FontWeight="Bold" FontSize="11" Foreground="#FFFFFF" HorizontalAlignment="Right"/>
-                        </Grid>
+                        <TextBlock Text="Monitors: FH5, FH4, FH6, Forza Motorsport" FontSize="10" Foreground="#7EE6D8" FontWeight="SemiBold" Margin="0,0,0,10"/>
 
-                        <Grid Margin="0,0,0,14">
-                            <TextBlock Text="RADIO MOD BRIDGE:" FontSize="11" Foreground="#7EE6D8" FontWeight="SemiBold"/>
-                            <TextBlock x:Name="TxtRadioStatus" Text="http://localhost:8420" FontWeight="SemiBold" FontSize="11" Foreground="#A0D0CC" HorizontalAlignment="Right"/>
-                        </Grid>
-
-                        <!-- Auto-Drive 1-Click Trigger Button -->
-                        <Border Background="#0A0A0A" BorderBrush="#CCFF00" BorderThickness="1.5" CornerRadius="8" Padding="14,12">
-                            <Grid>
-                                <StackPanel VerticalAlignment="Center">
-                                    <TextBlock Text="AUTO-DRIVING ASSIST" FontSize="12" FontWeight="Black" Foreground="#CCFF00"/>
-                                    <TextBlock Text="Hardware Win32 SendInput (C then NumPad 2)" FontSize="10" Foreground="#A0D0CC" Margin="0,2,0,0"/>
-                                </StackPanel>
-                                <Button HorizontalAlignment="Right" Style="{StaticResource ForzaVoltButton}" Content="TRIGGER NOW" Click="BtnAutoDrive_Click"/>
-                            </Grid>
+                        <!-- Live Status Display Panel -->
+                        <Border Background="#071E1C" BorderBrush="#144C47" BorderThickness="1.5" CornerRadius="8" Padding="14,12">
+                            <StackPanel>
+                                <Grid Margin="0,0,0,6">
+                                    <TextBlock Text="ACTIVE GAME:" FontSize="10" Foreground="#7EE6D8" FontWeight="Bold"/>
+                                    <TextBlock x:Name="TxtGameStatus" Text="Scanning for game..." FontWeight="Black" FontSize="11" Foreground="#7EE6D8" HorizontalAlignment="Right"/>
+                                </Grid>
+                                <Grid>
+                                    <TextBlock Text="PROCESS ID (PID):" FontSize="10" Foreground="#7EE6D8" FontWeight="Bold"/>
+                                    <TextBlock x:Name="TxtProcessId" Text="--" FontWeight="Bold" FontSize="11" Foreground="#A0D0CC" HorizontalAlignment="Right"/>
+                                </Grid>
+                            </StackPanel>
                         </Border>
                     </StackPanel>
                 </Border>

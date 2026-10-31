@@ -23,12 +23,19 @@ import androidx.compose.ui.unit.sp
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import androidx.lifecycle.lifecycleScope
+import com.google.mlkit.vision.barcode.common.Barcode
+import com.google.mlkit.vision.codescanner.GmsBarcodeScannerOptions
+import com.google.mlkit.vision.codescanner.GmsBarcodeScanning
 import com.wheelpad.app.data.repository.ProfileRepository
 import com.wheelpad.app.network.ControlSyncClient
 import com.wheelpad.app.network.UdpFastStreamClient
 import com.wheelpad.app.sensor.GyroSteeringManager
 import com.wheelpad.app.ui.controls.ControlEditorViewModel
 import com.wheelpad.app.ui.driving.DrivingScreen
+import com.wheelpad.app.ui.theme.ChakraPetchFontFamily
+import com.wheelpad.app.util.NotificationHelper
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
 
@@ -72,6 +79,33 @@ class MainActivity : ComponentActivity() {
 
         // 6. Handle QR Code camera scanner / deep link URL if launched via link
         handleIntent(intent)
+
+        // 7. System Push Notifications Setup
+        NotificationHelper.createNotificationChannel(this)
+
+        lifecycleScope.launch {
+            syncClient.isConnected.collect { connected ->
+                if (connected) {
+                    NotificationHelper.showStatusNotification(
+                        this@MainActivity,
+                        "FH6 Companion Connected",
+                        "Connected to Windows Rig • 120Hz Ultra-Low Latency Active"
+                    )
+                }
+            }
+        }
+
+        lifecycleScope.launch {
+            syncClient.gameStatus.collect { game ->
+                if (game.isRunning && game.gameName.isNotBlank()) {
+                    NotificationHelper.showStatusNotification(
+                        this@MainActivity,
+                        "${game.gameName} Detected",
+                        "${game.gameName} running on PC (PID ${game.processId})! FastStream active."
+                    )
+                }
+            }
+        }
 
         setContent {
             var showConnectDialog by remember { mutableStateOf(false) }
@@ -257,7 +291,7 @@ fun PairingDialog(
                     )
                 }
 
-                // Option B: Scan QR Code Button
+                // Option B: In-App Play Services QR Scanner
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -265,25 +299,39 @@ fun PairingDialog(
                         .background(Color(0xFFCCFF00))
                         .clickable {
                             try {
-                                val scanIntent = android.content.Intent("com.google.zxing.client.android.SCAN").apply {
-                                    putExtra("SCAN_MODE", "QR_CODE_MODE")
-                                }
-                                context.startActivity(scanIntent)
+                                val options = GmsBarcodeScannerOptions.Builder()
+                                    .setBarcodeFormats(Barcode.FORMAT_QR_CODE)
+                                    .enableAutoZoom()
+                                    .build()
+                                val scanner = GmsBarcodeScanning.getClient(context, options)
+                                scanner.startScan()
+                                    .addOnSuccessListener { barcode ->
+                                        val raw = barcode.rawValue ?: return@addOnSuccessListener
+                                        val uri = android.net.Uri.parse(raw)
+                                        val ip = uri.getQueryParameter("ip") ?: if (!raw.startsWith("http")) raw.trim() else null
+                                        if (!ip.isNullOrBlank()) {
+                                            val tcp = uri.getQueryParameter("tcp")?.toIntOrNull() ?: 4243
+                                            val udp = uri.getQueryParameter("udp")?.toIntOrNull() ?: 4242
+                                            hostText = ip
+                                            onSaveHost(ip)
+                                            syncClient.connect(ip, tcp)
+                                            udpClient.initialize(ip, udp)
+                                        }
+                                    }
+                                    .addOnFailureListener {
+                                        // Scan canceled or failed
+                                    }
                             } catch (e: Exception) {
-                                try {
-                                    val camIntent = android.content.Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE)
-                                    context.startActivity(camIntent)
-                                } catch (ex: Exception) {
-                                    // Open default camera
-                                }
+                                e.printStackTrace()
                             }
                         }
                         .padding(vertical = 10.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        "SCAN PC QR CODE (CAMERA)",
+                        "IN-APP SCAN PC QR CODE",
                         color = Color.Black,
+                        fontFamily = ChakraPetchFontFamily,
                         fontWeight = FontWeight.Black,
                         fontSize = 11.sp,
                         letterSpacing = 1.5.sp

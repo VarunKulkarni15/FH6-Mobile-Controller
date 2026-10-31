@@ -13,6 +13,10 @@
 
   <ItemGroup>
     <Resource Include="app_icon.ico" />
+    <None Update="app_icon.ico">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <Resource Include="Assets\Fonts\*.ttf" />
   </ItemGroup>
 
   <ItemGroup>

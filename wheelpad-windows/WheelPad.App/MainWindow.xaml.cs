@@ -47,28 +47,54 @@ namespace WheelPad.App
             _syncServer.Radio = _radioService;
 
             // 2. Initialize System Tray NotifyIcon with custom Forza Horizon logo
-            Icon? trayIcon = null;
+            System.Drawing.Icon? trayIcon = null;
             try
             {
-                string iconPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "app_icon.ico");
-                if (System.IO.File.Exists(iconPath))
+                string exePath = Environment.ProcessPath ?? System.Diagnostics.Process.GetCurrentProcess().MainModule?.FileName ?? "";
+                if (System.IO.File.Exists(exePath))
                 {
-                    trayIcon = new Icon(iconPath);
-                }
-                else
-                {
-                    var stream = System.Windows.Application.GetResourceStream(new Uri("pack://application:,,,/app_icon.ico"))?.Stream;
-                    if (stream != null)
-                    {
-                        trayIcon = new Icon(stream);
-                    }
+                    trayIcon = System.Drawing.Icon.ExtractAssociatedIcon(exePath);
                 }
             }
             catch { }
 
+            if (trayIcon == null)
+            {
+                try
+                {
+                    string iconPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "app_icon.ico");
+                    if (System.IO.File.Exists(iconPath))
+                    {
+                        trayIcon = new System.Drawing.Icon(iconPath);
+                    }
+                    else
+                    {
+                        var stream = System.Windows.Application.GetResourceStream(new Uri("pack://application:,,,/app_icon.ico"))?.Stream;
+                        if (stream != null)
+                        {
+                            trayIcon = new System.Drawing.Icon(stream);
+                        }
+                    }
+                }
+                catch { }
+            }
+
+            if (trayIcon != null)
+            {
+                try
+                {
+                    this.Icon = System.Windows.Interop.Imaging.CreateBitmapSourceFromHIcon(
+                        trayIcon.Handle,
+                        Int32Rect.Empty,
+                        System.Windows.Media.Imaging.BitmapSizeOptions.FromEmptyOptions()
+                    );
+                }
+                catch { }
+            }
+
             _notifyIcon = new Forms.NotifyIcon
             {
-                Text = "FH6 Controller // Forza Horizon 6",
+                Text = "FH6 Controller // Forza Horizon",
                 Icon = trayIcon ?? SystemIcons.Application,
                 Visible = true
             };
@@ -77,16 +103,35 @@ namespace WheelPad.App
             trayMenu.Items.Add("Open Dashboard", null, (s, e) => RestoreFromTray());
             trayMenu.Items.Add("Cycle Profile", null, (s, e) => CycleProfile());
             trayMenu.Items.Add(new Forms.ToolStripSeparator());
-            trayMenu.Items.Add("Exit WheelPad", null, (s, e) => ExitApplication());
+            trayMenu.Items.Add("Exit FH6 Controller", null, (s, e) => ExitApplication());
             _notifyIcon.ContextMenuStrip = trayMenu;
             _notifyIcon.Click += (s, e) => RestoreFromTray();
             _notifyIcon.DoubleClick += (s, e) => RestoreFromTray();
+
+            // Background listener for single-instance foreground restore
+            Task.Run(() =>
+            {
+                try
+                {
+                    using var restoreHandle = EventWaitHandle.OpenExisting(App.RestoreEventName);
+                    while (!_isExplicitExit)
+                    {
+                        if (restoreHandle.WaitOne(1000))
+                        {
+                            if (!_isExplicitExit)
+                            {
+                                Dispatcher.InvokeAsync(() => RestoreFromTray());
+                            }
+                        }
+                    }
+                }
+                catch { }
+            });
 
             // 3. Setup Telemetry & FastStream Listeners
             _dispatcher.InputDispatched += OnInputDispatched;
             _syncServer.ClientConnectionChanged += OnClientConnectionChanged;
             _gameDetector.GameStatusChanged += OnGameStatusChanged;
-            _radioService.StatusUpdated += OnRadioStatusUpdated;
             _udpReceiver.PacketsPerSecondUpdated += OnPacketsPerSecondUpdated;
 
             // 4. Start Servers & Broadcaster
@@ -218,49 +263,37 @@ namespace WheelPad.App
             });
         }
 
-        private void BtnAutoDrive_Click(object sender, RoutedEventArgs e)
-        {
-            _dispatcher.TriggerAutoDriveSequence();
-            _notifyIcon.ShowBalloonTip(
-                2000,
-                "Auto-Drive Assist",
-                "Auto-drive assist sequence dispatched (C + Num 2)",
-                Forms.ToolTipIcon.Info
-            );
-        }
-
         private void OnGameStatusChanged(object? sender, GameStatusEventArgs e)
         {
             Dispatcher.InvokeAsync(() =>
             {
                 if (e.IsRunning)
                 {
-                    TxtGameStatus.Text = $"RUNNING (PID {e.ProcessId})";
-                    TxtGameStatus.Foreground = new SolidColorBrush(System.Windows.Media.Color.FromRgb(0x00, 0xE6, 0x76));
+                    TxtGameStatus.Text = e.GameName.ToUpper();
+                    TxtGameStatus.Foreground = new SolidColorBrush(System.Windows.Media.Color.FromRgb(0xCC, 0xFF, 0x00));
+                    TxtProcessId.Text = e.ProcessId.ToString();
+                    TxtProcessId.Foreground = new SolidColorBrush(System.Windows.Media.Color.FromRgb(0xCC, 0xFF, 0x00));
 
                     _notifyIcon.ShowBalloonTip(
-                        3500,
-                        "Forza Horizon 6 Detected",
-                        $"Forza Horizon 6 is active (PID {e.ProcessId})! WheelPad is ready.",
+                        4000,
+                        $"{e.GameName} Active",
+                        $"{e.GameName} detected (PID {e.ProcessId})! FastStream 120Hz synchronized.",
                         Forms.ToolTipIcon.Info
                     );
                 }
                 else
                 {
                     TxtGameStatus.Text = "Scanning for game...";
-                    TxtGameStatus.Foreground = new SolidColorBrush(System.Windows.Media.Color.FromRgb(0x88, 0x99, 0xB0));
-                }
-            });
-        }
+                    TxtGameStatus.Foreground = new SolidColorBrush(System.Windows.Media.Color.FromRgb(0x7E, 0xE6, 0xD8));
+                    TxtProcessId.Text = "--";
+                    TxtProcessId.Foreground = new SolidColorBrush(System.Windows.Media.Color.FromRgb(0xA0, 0xD0, 0xCC));
 
-        private void OnRadioStatusUpdated(object? sender, UniversalRadioStatus radio)
-        {
-            Dispatcher.InvokeAsync(() =>
-            {
-                if (radio.IsInstalled)
-                {
-                    TxtRadioStatus.Text = $"Synced: {radio.CurrentStation}";
-                    TxtRadioStatus.Foreground = new SolidColorBrush(System.Windows.Media.Color.FromRgb(0x00, 0xE6, 0x76));
+                    _notifyIcon.ShowBalloonTip(
+                        3000,
+                        "Forza Horizon",
+                        $"{e.GameName} exited. Controller in standby.",
+                        Forms.ToolTipIcon.Info
+                    );
                 }
             });
         }

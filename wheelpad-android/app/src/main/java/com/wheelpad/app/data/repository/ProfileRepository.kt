@@ -37,6 +37,23 @@ class ProfileRepository(private val context: Context) {
             try {
                 val json = file.readText()
                 val profile = parseProfileFromJson(json)
+
+                // Auto-upgrade: Ensure all canonical actions exist in the profile
+                val existingIds = profile.actions.map { it.id }.toSet()
+                var modified = false
+                for (action in ALL_FORZA_ACTIONS) {
+                    if (!existingIds.contains(action.id)) {
+                        profile.actions.add(action)
+                        modified = true
+                    }
+                }
+                // Strip removed auto_drive if present
+                if (profile.actions.removeIf { it.id == "auto_drive" }) {
+                    modified = true
+                }
+                if (modified) {
+                    saveProfile(profile)
+                }
                 list.add(profile)
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -198,25 +215,7 @@ class ProfileRepository(private val context: Context) {
             isDefault = true,
             steeringConfig = SteeringConfig(maxRotationDegrees = 540, deadzonePercent = 0.02f, gammaCurve = 1.15f)
         ).apply {
-            actions.add(GameAction(id = "steer", name = "Steering", inputType = InputType.AnalogAxis, bindingType = BindingType.XboxController, xboxTarget = XboxButton.LeftThumbX))
-            actions.add(GameAction(id = "throttle", name = "Accelerator (RT)", inputType = InputType.AnalogTrigger, bindingType = BindingType.XboxController, xboxTarget = XboxButton.RightTrigger, keyboardKeyCode = 87, keyboardKeyName = "W"))
-            actions.add(GameAction(id = "brake", name = "Brake / Rev (LT)", inputType = InputType.AnalogTrigger, bindingType = BindingType.XboxController, xboxTarget = XboxButton.LeftTrigger, keyboardKeyCode = 83, keyboardKeyName = "S"))
-            actions.add(GameAction(id = "handbrake", name = "Handbrake (A)", inputType = InputType.DigitalButton, bindingType = BindingType.Composite, xboxTarget = XboxButton.A, keyboardKeyCode = 32, keyboardKeyName = "Space", behavior = InputBehavior.Hold))
-            actions.add(GameAction(id = "btn_a", name = "A Button", inputType = InputType.DigitalButton, bindingType = BindingType.XboxController, xboxTarget = XboxButton.A))
-            actions.add(GameAction(id = "btn_b", name = "B Button", inputType = InputType.DigitalButton, bindingType = BindingType.XboxController, xboxTarget = XboxButton.B))
-            actions.add(GameAction(id = "btn_x", name = "X Button", inputType = InputType.DigitalButton, bindingType = BindingType.XboxController, xboxTarget = XboxButton.X))
-            actions.add(GameAction(id = "rewind", name = "Y Button (Rewind)", inputType = InputType.DigitalButton, bindingType = BindingType.XboxController, xboxTarget = XboxButton.Y, keyboardKeyCode = 82, keyboardKeyName = "R"))
-            actions.add(GameAction(id = "btn_lb", name = "LB (Clutch)", inputType = InputType.DigitalButton, bindingType = BindingType.XboxController, xboxTarget = XboxButton.LeftBumper))
-            actions.add(GameAction(id = "camera", name = "RB (Camera)", inputType = InputType.DigitalButton, bindingType = BindingType.XboxController, xboxTarget = XboxButton.RightBumper, keyboardKeyCode = 67, keyboardKeyName = "C"))
-            actions.add(GameAction(id = "btn_ls", name = "LS (Horn / Click)", inputType = InputType.DigitalButton, bindingType = BindingType.XboxController, xboxTarget = XboxButton.LeftThumbClick))
-            actions.add(GameAction(id = "btn_rs", name = "RS (Look Back)", inputType = InputType.DigitalButton, bindingType = BindingType.XboxController, xboxTarget = XboxButton.RightThumbClick))
-            actions.add(GameAction(id = "map", name = "View / Map", inputType = InputType.DigitalButton, bindingType = BindingType.XboxController, xboxTarget = XboxButton.Back))
-            actions.add(GameAction(id = "pause", name = "Menu / Pause", inputType = InputType.DigitalButton, bindingType = BindingType.XboxController, xboxTarget = XboxButton.Start))
-            actions.add(GameAction(id = "dpad_up", name = "D-Pad UP", inputType = InputType.DigitalButton, bindingType = BindingType.XboxController, xboxTarget = XboxButton.DpadUp))
-            actions.add(GameAction(id = "dpad_down", name = "D-Pad DOWN", inputType = InputType.DigitalButton, bindingType = BindingType.XboxController, xboxTarget = XboxButton.DpadDown))
-            actions.add(GameAction(id = "dpad_left", name = "D-Pad LEFT", inputType = InputType.DigitalButton, bindingType = BindingType.XboxController, xboxTarget = XboxButton.DpadLeft))
-            actions.add(GameAction(id = "dpad_right", name = "D-Pad RIGHT", inputType = InputType.DigitalButton, bindingType = BindingType.XboxController, xboxTarget = XboxButton.DpadRight))
-            actions.add(GameAction(id = "auto_drive", name = "Auto Drive (C+2)", inputType = InputType.DigitalButton, bindingType = BindingType.KeyboardKey, keyboardKeyCode = 67, keyboardKeyName = "C+2", description = "1-Click Full Auto Drive (triggers C then Num 2)"))
+            actions.addAll(ALL_FORZA_ACTIONS)
 
             layout.add(TouchControlElement(elementId = "wheel", actionId = "steer", label = "STEER", shape = ControlShape.CircleWheel, normalizedX = 0.04f, normalizedY = 0.12f, normalizedWidth = 0.44f, normalizedHeight = 0.78f, accentColorHex = "#FFFFFF"))
             layout.add(TouchControlElement(elementId = "brake", actionId = "brake", label = "BRAKE", shape = ControlShape.VerticalPedal, normalizedX = 0.68f, normalizedY = 0.12f, normalizedWidth = 0.13f, normalizedHeight = 0.58f, accentColorHex = "#FF1744"))
@@ -225,6 +224,29 @@ class ProfileRepository(private val context: Context) {
         }
 
         return listOf(standard)
+    }
+
+    companion object {
+        val ALL_FORZA_ACTIONS = listOf(
+            GameAction(id = "steer", name = "Steering Wheel", inputType = InputType.AnalogAxis, bindingType = BindingType.XboxController, xboxTarget = XboxButton.LeftThumbX, description = "Proportional analog steering (-1.0 to +1.0)"),
+            GameAction(id = "throttle", name = "Accelerator (RT)", inputType = InputType.AnalogTrigger, bindingType = BindingType.XboxController, xboxTarget = XboxButton.RightTrigger, keyboardKeyCode = 87, keyboardKeyName = "W", description = "Analog accelerator pedal"),
+            GameAction(id = "brake", name = "Brake / Rev (LT)", inputType = InputType.AnalogTrigger, bindingType = BindingType.XboxController, xboxTarget = XboxButton.LeftTrigger, keyboardKeyCode = 83, keyboardKeyName = "S", description = "Analog brake & reverse pedal"),
+            GameAction(id = "handbrake", name = "Handbrake / E-Brake", inputType = InputType.DigitalButton, bindingType = BindingType.Composite, xboxTarget = XboxButton.A, keyboardKeyCode = 32, keyboardKeyName = "Space", behavior = InputBehavior.Hold, description = "Instant drift / e-brake"),
+            GameAction(id = "btn_a", name = "A Button (Select / OK)", inputType = InputType.DigitalButton, bindingType = BindingType.XboxController, xboxTarget = XboxButton.A, description = "Xbox (A) button"),
+            GameAction(id = "btn_b", name = "B Button (Shift Up)", inputType = InputType.DigitalButton, bindingType = BindingType.XboxController, xboxTarget = XboxButton.B, description = "Xbox (B) / Shift Up"),
+            GameAction(id = "btn_x", name = "X Button (Shift Down)", inputType = InputType.DigitalButton, bindingType = BindingType.XboxController, xboxTarget = XboxButton.X, description = "Xbox (X) / Shift Down"),
+            GameAction(id = "rewind", name = "Y Button (Rewind)", inputType = InputType.DigitalButton, bindingType = BindingType.XboxController, xboxTarget = XboxButton.Y, keyboardKeyCode = 82, keyboardKeyName = "R", description = "Xbox (Y) / Forza Rewind"),
+            GameAction(id = "btn_lb", name = "LB (Clutch)", inputType = InputType.DigitalButton, bindingType = BindingType.XboxController, xboxTarget = XboxButton.LeftBumper, description = "Left Bumper / Manual Clutch"),
+            GameAction(id = "camera", name = "RB (Switch Camera)", inputType = InputType.DigitalButton, bindingType = BindingType.XboxController, xboxTarget = XboxButton.RightBumper, keyboardKeyCode = 67, keyboardKeyName = "C", description = "Right Bumper / Switch Camera"),
+            GameAction(id = "btn_ls", name = "LS (Horn / Click)", inputType = InputType.DigitalButton, bindingType = BindingType.XboxController, xboxTarget = XboxButton.LeftThumbClick, description = "Left Stick Click / Car Horn"),
+            GameAction(id = "btn_rs", name = "RS (Look Back / Click)", inputType = InputType.DigitalButton, bindingType = BindingType.XboxController, xboxTarget = XboxButton.RightThumbClick, description = "Right Stick Click / Look Back"),
+            GameAction(id = "map", name = "View (World Map)", inputType = InputType.DigitalButton, bindingType = BindingType.XboxController, xboxTarget = XboxButton.Back, description = "View Button / World Map"),
+            GameAction(id = "pause", name = "Menu (Pause Game)", inputType = InputType.DigitalButton, bindingType = BindingType.XboxController, xboxTarget = XboxButton.Start, description = "Menu Button / Pause"),
+            GameAction(id = "dpad_up", name = "D-Pad UP (Photo Mode)", inputType = InputType.DigitalButton, bindingType = BindingType.XboxController, xboxTarget = XboxButton.DpadUp, description = "Photo Mode / Telemetry"),
+            GameAction(id = "dpad_down", name = "D-Pad DOWN (ANNA / Chat)", inputType = InputType.DigitalButton, bindingType = BindingType.XboxController, xboxTarget = XboxButton.DpadDown, description = "ANNA Navigation / Link Chat"),
+            GameAction(id = "dpad_left", name = "D-Pad LEFT (Forza LINK)", inputType = InputType.DigitalButton, bindingType = BindingType.XboxController, xboxTarget = XboxButton.DpadLeft, description = "Forza LINK / Previous Station"),
+            GameAction(id = "dpad_right", name = "D-Pad RIGHT (Radio Next)", inputType = InputType.DigitalButton, bindingType = BindingType.XboxController, xboxTarget = XboxButton.DpadRight, description = "Next Radio Station / Telemetry")
+        )
     }
 }
 

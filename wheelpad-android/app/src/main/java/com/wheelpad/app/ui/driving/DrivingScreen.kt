@@ -43,9 +43,11 @@ import com.wheelpad.app.data.model.ControlShape
 import com.wheelpad.app.data.model.GameAction
 import com.wheelpad.app.data.model.InputType
 import com.wheelpad.app.data.model.XboxButton
+import com.wheelpad.app.data.repository.ProfileRepository
 import com.wheelpad.app.network.ControlSyncClient
 import com.wheelpad.app.network.UdpFastStreamClient
 import com.wheelpad.app.ui.controls.ControlEditorViewModel
+import com.wheelpad.app.ui.theme.ChakraPetchFontFamily
 import kotlin.math.atan2
 
 /**
@@ -117,6 +119,69 @@ fun DrivingScreen(
         val density = androidx.compose.ui.platform.LocalDensity.current
         val screenWidthPx = with(density) { screenWidth.toPx() }
         val screenHeightPx = with(density) { screenHeight.toPx() }
+
+        // PUBG-Style Dynamic Full-Left-Screen Steering (Thumb Dragging)
+        var pubgTouchActive by remember { mutableStateOf(false) }
+        var pubgTouchCurrent by remember { mutableStateOf(Offset.Zero) }
+        var pubgAnchorX by remember { mutableStateOf(0f) }
+        val maxTravelPx = with(density) { 72.dp.toPx() }
+
+        // 0. PUBG-Style Dynamic Steering Touch Zone (Full Left 52% of Display)
+        if (!state.isEditMode && !isGyroEnabled) {
+            Box(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .fillMaxWidth(0.52f)
+                    .pointerInput(Unit) {
+                        awaitPointerEventScope {
+                            while (true) {
+                                val event = awaitPointerEvent()
+                                val pressedChanges = event.changes.filter { it.pressed }
+                                if (pressedChanges.isNotEmpty()) {
+                                    val primary = pressedChanges.first()
+                                    primary.consume()
+                                    if (!pubgTouchActive) {
+                                        pubgTouchActive = true
+                                        pubgAnchorX = primary.position.x
+                                        pubgTouchCurrent = primary.position
+                                    } else {
+                                        pubgTouchCurrent = primary.position
+                                        val dx = primary.position.x - pubgAnchorX
+                                        val normSteer = (dx / maxTravelPx).coerceIn(-1.0f, 1.0f)
+                                        steeringAngle = normSteer
+                                    }
+                                } else {
+                                    if (pubgTouchActive) {
+                                        pubgTouchActive = false
+                                        steeringAngle = 0f
+                                    }
+                                }
+                            }
+                        }
+                    }
+            )
+
+            // Dynamic PUBG-Style Thumb Target Ring Feedback
+            if (pubgTouchActive) {
+                Canvas(
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    // Outer Volt Lime glow ring
+                    drawCircle(
+                        color = Color(0x33CCFF00),
+                        radius = with(density) { 42.dp.toPx() },
+                        center = pubgTouchCurrent,
+                        style = Stroke(width = with(density) { 2.dp.toPx() })
+                    )
+                    // Inner solid Volt Lime thumb core
+                    drawCircle(
+                        color = Color(0xFFCCFF00),
+                        radius = with(density) { 14.dp.toPx() },
+                        center = pubgTouchCurrent
+                    )
+                }
+            }
+        }
 
         // 1. Render all HUD controls from active profile
         state.currentProfile.layout.forEach { element ->
@@ -389,27 +454,7 @@ fun DrivingScreen(
 
         // 4. Authentic Forza Horizon Action Catalog Modal Dialog
         if (state.isActionCatalogVisible) {
-            val allActions = listOf(
-                GameAction(id = "auto_drive", name = "Auto Drive Assist (C+2)", inputType = InputType.DigitalButton),
-                GameAction(id = "rewind", name = "Y Button (Rewind)", inputType = InputType.DigitalButton, xboxTarget = XboxButton.Y),
-                GameAction(id = "btn_a", name = "A Button (E-Brake)", inputType = InputType.DigitalButton, xboxTarget = XboxButton.A),
-                GameAction(id = "btn_b", name = "B Button (Shift Up)", inputType = InputType.DigitalButton, xboxTarget = XboxButton.B),
-                GameAction(id = "btn_x", name = "X Button (Activate)", inputType = InputType.DigitalButton, xboxTarget = XboxButton.X),
-                GameAction(id = "camera", name = "RB (Switch Camera)", inputType = InputType.DigitalButton, xboxTarget = XboxButton.RightBumper),
-                GameAction(id = "btn_lb", name = "LB (Clutch / Cam)", inputType = InputType.DigitalButton, xboxTarget = XboxButton.LeftBumper),
-                GameAction(id = "btn_ls", name = "LS (Convertible / Horn)", inputType = InputType.DigitalButton, xboxTarget = XboxButton.LeftThumbClick),
-                GameAction(id = "btn_rs", name = "RS (Horn / Look Back)", inputType = InputType.DigitalButton, xboxTarget = XboxButton.RightThumbClick),
-                GameAction(id = "map", name = "View / World Map", inputType = InputType.DigitalButton, xboxTarget = XboxButton.Back),
-                GameAction(id = "pause", name = "Menu / Pause", inputType = InputType.DigitalButton, xboxTarget = XboxButton.Start),
-                GameAction(id = "dpad_up", name = "D-Pad UP (Photo Mode)", inputType = InputType.DigitalButton, xboxTarget = XboxButton.DpadUp),
-                GameAction(id = "dpad_down", name = "D-Pad DOWN (Activate ANNA)", inputType = InputType.DigitalButton, xboxTarget = XboxButton.DpadDown),
-                GameAction(id = "dpad_left", name = "D-Pad LEFT (Forza LINK)", inputType = InputType.DigitalButton, xboxTarget = XboxButton.DpadLeft),
-                GameAction(id = "dpad_right", name = "D-Pad RIGHT (Radio / Telemetry)", inputType = InputType.DigitalButton, xboxTarget = XboxButton.DpadRight),
-                GameAction(id = "steer", name = "Steering Wheel", inputType = InputType.AnalogAxis, xboxTarget = XboxButton.LeftThumbX),
-                GameAction(id = "throttle", name = "Accelerator (RT)", inputType = InputType.AnalogTrigger, xboxTarget = XboxButton.RightTrigger),
-                GameAction(id = "brake", name = "Brake / Rev (LT)", inputType = InputType.AnalogTrigger, xboxTarget = XboxButton.LeftTrigger),
-                GameAction(id = "handbrake", name = "Handbrake (A)", inputType = InputType.DigitalButton, xboxTarget = XboxButton.A)
-            )
+            val allActions = ProfileRepository.ALL_FORZA_ACTIONS
 
             Box(
                 modifier = Modifier
@@ -489,7 +534,6 @@ fun DrivingScreen(
                                     )
 
                                     val tagText = when (action.id) {
-                                        "auto_drive" -> "C+2"
                                         "rewind" -> "Y"
                                         "btn_a" -> "A"
                                         "btn_b" -> "B"
@@ -511,10 +555,7 @@ fun DrivingScreen(
                                     Box(
                                         modifier = Modifier
                                             .clip(RoundedCornerShape(3.dp))
-                                            .background(
-                                                if (action.id == "auto_drive") Color(0xFFCCFF00)
-                                                else Color(0xFFE0E0E0)
-                                            )
+                                            .background(Color(0xFFE0E0E0))
                                             .padding(horizontal = 8.dp, vertical = 2.dp)
                                     ) {
                                         Text(
@@ -801,13 +842,7 @@ fun FH6ExactSvgSteeringWheel(
     currentAngleNormalized: Float,
     onSteerChange: (Float) -> Unit
 ) {
-    var rawAngleDeg by remember { mutableStateOf(0f) }
-
-    val targetDegrees = if (isGyroActive) {
-        currentAngleNormalized * 90f // Physical gyro tilt lock
-    } else {
-        rawAngleDeg
-    }
+    val targetDegrees = currentAngleNormalized * 90f
 
     val visualRotation by animateFloatAsState(
         targetValue = targetDegrees,
@@ -816,37 +851,7 @@ fun FH6ExactSvgSteeringWheel(
     )
 
     Canvas(
-        modifier = Modifier
-            .fillMaxSize()
-            .pointerInput(isEditMode, isGyroActive) {
-                if (!isEditMode && !isGyroActive) {
-                    awaitPointerEventScope {
-                        while (true) {
-                            val event = awaitPointerEvent()
-                            val change = event.changes.firstOrNull { it.pressed }
-                            if (change != null) {
-                                change.consume()
-                                val center = Offset(size.width / 2f, size.height / 2f)
-                                val dx = change.position.x - center.x
-                                val dy = change.position.y - center.y
-
-                                // Angle relative to top notch (12 o'clock): 0 deg straight ahead
-                                val angleRad = atan2(dx.toDouble(), -dy.toDouble())
-                                val deg = Math.toDegrees(angleRad).toFloat().coerceIn(-90f, 90f)
-
-                                rawAngleDeg = deg
-                                val normalized = (deg / 90f).coerceIn(-1.0f, 1.0f)
-                                onSteerChange(normalized)
-                            } else {
-                                if (event.changes.all { !it.pressed }) {
-                                    rawAngleDeg = 0f
-                                    onSteerChange(0f)
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+        modifier = Modifier.fillMaxSize()
     ) {
         val s = size.minDimension / 500f
         val center = Offset(size.width / 2f, size.height / 2f)

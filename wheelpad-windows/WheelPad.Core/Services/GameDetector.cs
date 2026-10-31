@@ -12,6 +12,7 @@ namespace WheelPad.Core.Services
         public bool IsRunning { get; }
         public int ProcessId { get; }
         public string ProcessName { get; }
+        public string GameName => GameDetector.GetFriendlyGameName(ProcessName);
         public string? ExecutablePath { get; }
 
         public GameStatusEventArgs(bool isRunning, int processId, string processName, string? executablePath = null)
@@ -25,7 +26,18 @@ namespace WheelPad.Core.Services
 
     public class GameDetector : IDisposable
     {
-        public const string DefaultTargetExecutable = "forzahorizon6";
+        public static readonly string[] DefaultTargetProcesses = new[]
+        {
+            "ForzaHorizon5",
+            "forzahorizon5",
+            "ForzaHorizon4",
+            "forzahorizon4",
+            "ForzaMotorsport",
+            "forzamotorsport",
+            "ForzaHorizon6",
+            "forzahorizon6"
+        };
+
         private readonly string[] _targetProcessNames;
         private readonly ProfileManager _profileManager;
         private readonly ControlSyncServer? _syncServer;
@@ -37,7 +49,18 @@ namespace WheelPad.Core.Services
 
         public bool IsGameRunning => _isGameRunning;
         public int CurrentProcessId => _lastProcessId;
+        public string? CurrentGameName { get; private set; }
         public bool AutoProfileSwitchEnabled { get; set; } = true;
+
+        public static string GetFriendlyGameName(string processName)
+        {
+            string lower = processName.ToLowerInvariant();
+            if (lower.Contains("forzahorizon5")) return "Forza Horizon 5";
+            if (lower.Contains("forzahorizon4")) return "Forza Horizon 4";
+            if (lower.Contains("forzamotorsport")) return "Forza Motorsport";
+            if (lower.Contains("forzahorizon6")) return "Forza Horizon 6";
+            return "Forza Horizon";
+        }
 
         public event EventHandler<GameStatusEventArgs>? GameStatusChanged;
         public event EventHandler<string>? LogMessage;
@@ -50,7 +73,7 @@ namespace WheelPad.Core.Services
         {
             _profileManager = profileManager;
             _syncServer = syncServer;
-            _targetProcessNames = targetProcessNames ?? new[] { "forzahorizon6" };
+            _targetProcessNames = targetProcessNames ?? DefaultTargetProcesses;
             _autoActivateProfileId = autoActivateProfileId;
 
             // Poll process table every 2 seconds (0.001% CPU)
@@ -78,17 +101,20 @@ namespace WheelPad.Core.Services
                     // Game just launched!
                     _isGameRunning = true;
                     _lastProcessId = activeProcess.Id;
+                    string friendlyName = GetFriendlyGameName(activeProcess.ProcessName);
+                    CurrentGameName = friendlyName;
+
                     string? path = null;
                     try { path = activeProcess.MainModule?.FileName; } catch { }
 
-                    LogMessage?.Invoke(this, $"[GameDetector] Detected Forza Horizon 6 started (PID {_lastProcessId})");
+                    LogMessage?.Invoke(this, $"[GameDetector] Detected {friendlyName} started (PID {_lastProcessId})");
 
                     if (AutoProfileSwitchEnabled && !string.IsNullOrEmpty(_autoActivateProfileId))
                     {
                         _profileManager.SetActiveProfile(_autoActivateProfileId);
                     }
 
-                    var args = new GameStatusEventArgs(true, _lastProcessId, activeProcess.ProcessName, path);
+                    var args = new GameStatusEventArgs(true, _lastProcessId, friendlyName, path);
                     GameStatusChanged?.Invoke(this, args);
 
                     // Notify Android companion via TCP sync
@@ -96,7 +122,7 @@ namespace WheelPad.Core.Services
                     {
                         type = "GAME_STATUS_CHANGED",
                         isRunning = true,
-                        gameName = "Forza Horizon 6",
+                        gameName = friendlyName,
                         processId = _lastProcessId
                     });
                 }
@@ -104,9 +130,11 @@ namespace WheelPad.Core.Services
                 {
                     // Game just exited
                     _isGameRunning = false;
-                    LogMessage?.Invoke(this, $"[GameDetector] Forza Horizon 6 closed (PID {_lastProcessId})");
+                    string closedGame = CurrentGameName ?? "Forza Horizon";
+                    CurrentGameName = null;
+                    LogMessage?.Invoke(this, $"[GameDetector] {closedGame} closed (PID {_lastProcessId})");
 
-                    var args = new GameStatusEventArgs(false, _lastProcessId, "forzahorizon6");
+                    var args = new GameStatusEventArgs(false, _lastProcessId, closedGame);
                     _lastProcessId = 0;
                     GameStatusChanged?.Invoke(this, args);
 
@@ -115,7 +143,7 @@ namespace WheelPad.Core.Services
                     {
                         type = "GAME_STATUS_CHANGED",
                         isRunning = false,
-                        gameName = "Forza Horizon 6",
+                        gameName = closedGame,
                         processId = 0
                     });
                 }

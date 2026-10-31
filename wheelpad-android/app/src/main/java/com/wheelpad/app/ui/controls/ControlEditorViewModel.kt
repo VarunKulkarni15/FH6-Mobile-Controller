@@ -28,7 +28,7 @@ class ControlEditorViewModel(
     private val _uiState = MutableStateFlow(
         ControlEditorUiState(
             currentProfile = repository.loadActiveProfile(),
-            availableActions = repository.loadActiveProfile().actions
+            availableActions = ProfileRepository.ALL_FORZA_ACTIONS
         )
     )
     val uiState: StateFlow<ControlEditorUiState> = _uiState.asStateFlow()
@@ -67,7 +67,7 @@ class ControlEditorViewModel(
         val defaultProfile = repository.resetActiveProfileToDefault()
         _uiState.value = _uiState.value.copy(
             currentProfile = defaultProfile,
-            availableActions = defaultProfile.actions,
+            availableActions = ProfileRepository.ALL_FORZA_ACTIONS,
             selectedElementId = null,
             statusMessage = "Reset layout to default FH6 configuration."
         )
