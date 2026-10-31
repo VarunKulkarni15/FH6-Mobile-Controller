@@ -76,9 +76,17 @@ namespace WheelPad.Core.Services
                 {
                     _controller.SetAxisValue(Xbox360Axis.LeftThumbX, value);
                 }
+                else if (axis == XboxButton.LeftThumbY)
+                {
+                    _controller.SetAxisValue(Xbox360Axis.LeftThumbY, value);
+                }
                 else if (axis == XboxButton.RightThumbX)
                 {
                     _controller.SetAxisValue(Xbox360Axis.RightThumbX, value);
+                }
+                else if (axis == XboxButton.RightThumbY)
+                {
+                    _controller.SetAxisValue(Xbox360Axis.RightThumbY, value);
                 }
             }
             catch { }

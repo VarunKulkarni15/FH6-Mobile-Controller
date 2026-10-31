@@ -76,6 +76,24 @@ class ControlEditorViewModel(
         _uiState.value = _uiState.value.copy(selectedElementId = elementId)
     }
 
+    fun getAvailableProfiles(): List<ControllerProfile> {
+        return repository.loadAllProfiles()
+    }
+
+    fun selectProfileById(profileId: String) {
+        val all = repository.loadAllProfiles()
+        val target = all.find { it.profileId == profileId } ?: return
+        repository.setActiveProfileId(profileId)
+        val actions = if (profileId == "profile_tlou2") ProfileRepository.ALL_TLOU_ACTIONS else ProfileRepository.ALL_FORZA_ACTIONS
+        _uiState.value = _uiState.value.copy(
+            currentProfile = target,
+            availableActions = actions,
+            selectedElementId = null,
+            statusMessage = "Active Profile: ${target.profileName}"
+        )
+        syncClient.syncProfileToWindows(target)
+    }
+
     fun resetToDefaultLayout() {
         val defaultProfile = repository.resetActiveProfileToDefault()
         _uiState.value = _uiState.value.copy(

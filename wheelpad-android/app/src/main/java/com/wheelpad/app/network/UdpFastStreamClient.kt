@@ -15,7 +15,7 @@ class UdpFastStreamClient {
     private var serverPort: Int = 4242
     private var sequenceNumber: Long = 0
 
-    private val packetBuffer = ByteBuffer.allocate(24).order(ByteOrder.LITTLE_ENDIAN)
+    private val packetBuffer = ByteBuffer.allocate(32).order(ByteOrder.LITTLE_ENDIAN)
 
     // Current input state (Continuously streamed at 120Hz)
     @Volatile private var currentSteering: Float = 0f
@@ -23,6 +23,9 @@ class UdpFastStreamClient {
     @Volatile private var currentBrake: Float = 0f
     @Volatile private var currentHandbrake: Boolean = false
     @Volatile private var currentButtonsBitmask: Int = 0
+    @Volatile private var currentLeftThumbY: Float = 0f
+    @Volatile private var currentRightThumbX: Float = 0f
+    @Volatile private var currentRightThumbY: Float = 0f
 
     private var streamJob: Job? = null
     private var discoveryJob: Job? = null
@@ -54,13 +57,19 @@ class UdpFastStreamClient {
         throttle: Float,
         brake: Float,
         handbrake: Boolean,
-        buttonsBitmask: Int = 0
+        buttonsBitmask: Int = 0,
+        leftThumbY: Float = 0f,
+        rightThumbX: Float = 0f,
+        rightThumbY: Float = 0f
     ) {
         currentSteering = steering
         currentThrottle = throttle
         currentBrake = brake
         currentHandbrake = handbrake
         currentButtonsBitmask = buttonsBitmask
+        currentLeftThumbY = leftThumbY
+        currentRightThumbX = rightThumbX
+        currentRightThumbY = rightThumbY
 
         // Immediate fast flush
         sendCurrentPacket()
@@ -74,9 +83,12 @@ class UdpFastStreamClient {
         throttle: Float,
         brake: Float,
         handbrake: Boolean,
-        buttonsBitmask: Int = 0
+        buttonsBitmask: Int = 0,
+        leftThumbY: Float = 0f,
+        rightThumbX: Float = 0f,
+        rightThumbY: Float = 0f
     ) {
-        updateInputs(steering, throttle, brake, handbrake, buttonsBitmask)
+        updateInputs(steering, throttle, brake, handbrake, buttonsBitmask, leftThumbY, rightThumbX, rightThumbY)
     }
 
     private fun startContinuousStream() {
@@ -98,6 +110,9 @@ class UdpFastStreamClient {
             val throttleByte = (currentThrottle.coerceIn(0.0f, 1.0f) * 255f).toInt().toByte()
             val brakeByte = (currentBrake.coerceIn(0.0f, 1.0f) * 255f).toInt().toByte()
             val handbrakeByte = if (currentHandbrake) 255.toByte() else 0.toByte()
+            val ltyShort = (currentLeftThumbY.coerceIn(-1.0f, 1.0f) * 32767f).toInt().toShort()
+            val rtxShort = (currentRightThumbX.coerceIn(-1.0f, 1.0f) * 32767f).toInt().toShort()
+            val rtyShort = (currentRightThumbY.coerceIn(-1.0f, 1.0f) * 32767f).toInt().toShort()
 
             synchronized(packetBuffer) {
                 packetBuffer.clear()
@@ -107,7 +122,7 @@ class UdpFastStreamClient {
                 packetBuffer.putInt((sequenceNumber++ and 0xFFFFFFFFL).toInt())
                 // 0x06: Timestamp (uint64)
                 packetBuffer.putLong(System.nanoTime() / 1000)
-                // 0x0E: Steering (int16)
+                // 0x0E: Steering / LeftThumbX (int16)
                 packetBuffer.putShort(steerShort)
                 // 0x10: Throttle (uint8)
                 packetBuffer.put(throttleByte)
@@ -119,12 +134,18 @@ class UdpFastStreamClient {
                 packetBuffer.put((currentButtonsBitmask and 0xFF).toByte())
                 packetBuffer.put(((currentButtonsBitmask shr 8) and 0xFF).toByte())
                 packetBuffer.put(((currentButtonsBitmask shr 16) and 0xFF).toByte())
+                // 0x16: LeftThumbY (int16)
+                packetBuffer.putShort(ltyShort)
+                // 0x18: RightThumbX (int16)
+                packetBuffer.putShort(rtxShort)
+                // 0x1A: RightThumbY (int16)
+                packetBuffer.putShort(rtyShort)
 
-                // 0x16: CRC16 Checksum over first 22 bytes
-                val crc = computeCrc16(packetBuffer.array(), 0, 22)
+                // 0x1C: CRC16 Checksum over first 28 bytes
+                val crc = computeCrc16(packetBuffer.array(), 0, 28)
                 packetBuffer.putShort(crc.toShort())
 
-                val packet = DatagramPacket(packetBuffer.array(), 24, addr, serverPort)
+                val packet = DatagramPacket(packetBuffer.array(), 30, addr, serverPort)
                 s.send(packet)
             }
         } catch (e: Exception) {

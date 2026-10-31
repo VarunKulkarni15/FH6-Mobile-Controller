@@ -7,3 +7,4 @@ if (Test-Path $cerPath) {
 } else {
     Write-Warning "VarunKulkarni.cer not found in $PSScriptRoot."
 }
+

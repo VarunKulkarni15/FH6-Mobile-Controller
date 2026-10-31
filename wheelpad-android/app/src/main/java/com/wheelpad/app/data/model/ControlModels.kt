@@ -32,7 +32,9 @@ enum class XboxButton {
     DpadLeft,
     DpadRight,
     LeftThumbX,
+    LeftThumbY,
     RightThumbX,
+    RightThumbY,
     LeftTrigger,
     RightTrigger
 }
@@ -49,7 +51,9 @@ enum class ControlShape {
     VerticalPedal,
     RoundedButton,
     WideBar,
-    PillToggle
+    PillToggle,
+    AnalogStick,
+    TouchLookArea
 }
 
 data class GameAction(

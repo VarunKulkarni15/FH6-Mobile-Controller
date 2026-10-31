@@ -40,7 +40,9 @@ namespace WheelPad.Core.Models
         DpadLeft,
         DpadRight,
         LeftThumbX,
+        LeftThumbY,
         RightThumbX,
+        RightThumbY,
         LeftTrigger,
         RightTrigger
     }
@@ -61,7 +63,9 @@ namespace WheelPad.Core.Models
         VerticalPedal,
         RoundedButton,
         WideBar,
-        PillToggle
+        PillToggle,
+        AnalogStick,
+        TouchLookArea
     }
 
     public class GameAction

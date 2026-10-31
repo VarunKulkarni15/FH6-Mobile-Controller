@@ -56,10 +56,33 @@ namespace WheelPad.Core.Services
 
         public void DispatchAnalogInput(string actionId, float normalizedValue)
         {
+            normalizedValue = Math.Clamp(normalizedValue, -1.0f, 1.0f);
+
+            // Fast path for direct analog axes
+            if (_xboxController != null && _xboxController.IsConnected)
+            {
+                if (actionId == "left_stick_y")
+                {
+                    short raw = (short)(normalizedValue * 32767f);
+                    _xboxController.SetAxis(XboxButton.LeftThumbY, raw);
+                    return;
+                }
+                else if (actionId == "right_stick_x")
+                {
+                    short raw = (short)(normalizedValue * 32767f);
+                    _xboxController.SetAxis(XboxButton.RightThumbX, raw);
+                    return;
+                }
+                else if (actionId == "right_stick_y")
+                {
+                    short raw = (short)(normalizedValue * 32767f);
+                    _xboxController.SetAxis(XboxButton.RightThumbY, raw);
+                    return;
+                }
+            }
+
             var action = FindAction(actionId);
             if (action == null) return;
-
-            normalizedValue = Math.Clamp(normalizedValue, -1.0f, 1.0f);
 
             if (action.BindingType is BindingType.XboxController or BindingType.Composite)
             {
@@ -70,6 +93,21 @@ namespace WheelPad.Core.Services
                         var cfg = _profileManager.ActiveProfile.SteeringConfig;
                         short rawAxis = ApplySteeringCurve(normalizedValue, cfg);
                         _xboxController.SetAxis(XboxButton.LeftThumbX, rawAxis);
+                    }
+                    else if (action.XboxTarget == XboxButton.LeftThumbY)
+                    {
+                        short raw = (short)(normalizedValue * 32767f);
+                        _xboxController.SetAxis(XboxButton.LeftThumbY, raw);
+                    }
+                    else if (action.XboxTarget == XboxButton.RightThumbX)
+                    {
+                        short raw = (short)(normalizedValue * 32767f);
+                        _xboxController.SetAxis(XboxButton.RightThumbX, raw);
+                    }
+                    else if (action.XboxTarget == XboxButton.RightThumbY)
+                    {
+                        short raw = (short)(normalizedValue * 32767f);
+                        _xboxController.SetAxis(XboxButton.RightThumbY, raw);
                     }
                     else if (action.XboxTarget == XboxButton.RightTrigger)
                     {

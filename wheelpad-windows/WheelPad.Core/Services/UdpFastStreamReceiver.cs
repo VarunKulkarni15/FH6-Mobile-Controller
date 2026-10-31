@@ -72,15 +72,18 @@ namespace WheelPad.Core.Services
 
         private void ProcessPacket(byte[] data)
         {
-            // Minimum binary packet size is 24 bytes
+            // Minimum binary packet size is 24 bytes (legacy) or 30 bytes (extended dual sticks)
             if (data.Length < 24) return;
 
             ushort magic = BitConverter.ToUInt16(data, 0);
             if (magic != PacketMagic) return;
 
+            bool isExtended = data.Length >= 30;
+            int crcOffset = isExtended ? 28 : 22;
+
             // Verify checksum
-            ushort expectedCrc = BitConverter.ToUInt16(data, 22);
-            ushort computedCrc = ComputeCrc16(data, 0, 22);
+            ushort expectedCrc = BitConverter.ToUInt16(data, crcOffset);
+            ushort computedCrc = ComputeCrc16(data, 0, crcOffset);
             if (expectedCrc != computedCrc) return;
 
             uint seq = BitConverter.ToUInt32(data, 2);
@@ -111,6 +114,17 @@ namespace WheelPad.Core.Services
             _inputDispatcher.DispatchAnalogInput("steer", normalizedSteer);
             _inputDispatcher.DispatchAnalogInput("throttle", normalizedThrottle);
             _inputDispatcher.DispatchAnalogInput("brake", normalizedBrake);
+
+            if (isExtended)
+            {
+                short leftThumbYRaw = BitConverter.ToInt16(data, 22);
+                short rightThumbXRaw = BitConverter.ToInt16(data, 24);
+                short rightThumbYRaw = BitConverter.ToInt16(data, 26);
+
+                _inputDispatcher.DispatchAnalogInput("left_stick_y", leftThumbYRaw / 32767f);
+                _inputDispatcher.DispatchAnalogInput("right_stick_x", rightThumbXRaw / 32767f);
+                _inputDispatcher.DispatchAnalogInput("right_stick_y", rightThumbYRaw / 32767f);
+            }
 
             // Separate handbrake & A button dispatch
             bool handbrakePressed = handbrakePressure > 30 || ((buttons & 0x01) != 0);

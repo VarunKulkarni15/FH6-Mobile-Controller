@@ -73,6 +73,12 @@ fun DrivingScreen(
     var handbrakeState by remember { mutableStateOf(false) }
     var buttonsBitmask by remember { mutableStateOf(0) }
 
+    // Dual Analog Sticks (For TLOU2 / Action Games)
+    var leftStickX by remember { mutableStateOf(0f) }
+    var leftStickY by remember { mutableStateOf(0f) }
+    var rightStickX by remember { mutableStateOf(0f) }
+    var rightStickY by remember { mutableStateOf(0f) }
+
     // HUD Quick Menu & Feature Toggles
     var isMenuOpen by remember { mutableStateOf(false) }
     var isGyroEnabled by remember { mutableStateOf(false) }
@@ -98,13 +104,18 @@ fun DrivingScreen(
     }
 
     // Continuously stream inputs to UdpFastStream
-    LaunchedEffect(steeringAngle, throttlePressure, brakePressure, handbrakeState, buttonsBitmask) {
+    LaunchedEffect(steeringAngle, throttlePressure, brakePressure, handbrakeState, buttonsBitmask, leftStickX, leftStickY, rightStickX, rightStickY) {
+        val isTlou = state.currentProfile.profileId == "profile_tlou2"
+        val effectiveSteer = if (isTlou) leftStickX else steeringAngle
         udpClient.updateInputs(
-            steering = steeringAngle,
+            steering = effectiveSteer,
             throttle = throttlePressure,
             brake = brakePressure,
             handbrake = handbrakeState,
-            buttonsBitmask = buttonsBitmask
+            buttonsBitmask = buttonsBitmask,
+            leftThumbY = leftStickY,
+            rightThumbX = rightStickX,
+            rightThumbY = rightStickY
         )
     }
 
@@ -270,6 +281,23 @@ fun DrivingScreen(
                             )
                         }
                     }
+                    ControlShape.AnalogStick -> {
+                        val isMove = element.actionId == "move_stick" || element.actionId == "left_stick"
+                        FH6AnalogJoystick(
+                            label = element.label,
+                            accentColor = if (isMove) Color(0xFF00E5FF) else Color(0xFFCCFF00),
+                            isEditMode = state.isEditMode,
+                            onValueChange = { x, y ->
+                                if (isMove) {
+                                    leftStickX = x
+                                    leftStickY = y
+                                } else {
+                                    rightStickX = x
+                                    rightStickY = y
+                                }
+                            }
+                        )
+                    }
                     ControlShape.WideBar -> {
                         FH6ExactSvgHandbrake(
                             label = "HANDBRAKE",
@@ -284,16 +312,16 @@ fun DrivingScreen(
                     }
                     else -> {
                         val bit = when (element.actionId) {
-                            "btn_a", "handbrake" -> 1 shl 0
-                            "rewind", "btn_y" -> 1 shl 1
-                            "camera", "btn_rb" -> 1 shl 2
-                            "map", "btn_back", "btn_view" -> 1 shl 3
+                            "btn_a", "handbrake", "jump" -> 1 shl 0
+                            "rewind", "btn_y", "interact" -> 1 shl 1
+                            "camera", "btn_rb", "listen_mode" -> 1 shl 2
+                            "map", "btn_back", "btn_view", "backpack" -> 1 shl 3
                             "pause", "btn_start", "btn_menu" -> 1 shl 4
-                            "btn_x" -> 1 shl 5
-                            "btn_b" -> 1 shl 6
-                            "btn_lb", "clutch" -> 1 shl 7
-                            "btn_ls", "horn" -> 1 shl 8
-                            "btn_rs", "look_back" -> 1 shl 9
+                            "btn_x", "strike" -> 1 shl 5
+                            "btn_b", "crouch" -> 1 shl 6
+                            "btn_lb", "clutch", "dodge" -> 1 shl 7
+                            "btn_ls", "horn", "sprint" -> 1 shl 8
+                            "btn_rs", "look_back", "zoom" -> 1 shl 9
                             "dpad_up" -> 1 shl 10
                             "dpad_down" -> 1 shl 11
                             "dpad_left" -> 1 shl 12
@@ -302,26 +330,33 @@ fun DrivingScreen(
                             "auto_drive" -> 1 shl 15
                             else -> 0
                         }
-                        val isPressed = if (bit != 0) ((buttonsBitmask and bit) != 0) else false
+                        val isTrigger = element.actionId == "aim_weapon" || element.actionId == "fire_weapon"
+                        val isPressed = if (isTrigger) {
+                            if (element.actionId == "aim_weapon") brakePressure > 0.5f else throttlePressure > 0.5f
+                        } else if (bit != 0) {
+                            ((buttonsBitmask and bit) != 0)
+                        } else false
 
                         FH6ExactSvgActionButton(
                             actionId = element.actionId,
                             label = element.label,
                             subLabel = when (element.actionId) {
-                                "rewind", "btn_y" -> "(Y)"
-                                "btn_a" -> "(A)"
-                                "btn_b" -> "+ (B)"
-                                "btn_x" -> "− (X)"
-                                "camera", "btn_rb" -> "(RB)"
-                                "btn_lb", "clutch" -> "(LB)"
-                                "btn_ls", "horn" -> "(LS)"
-                                "btn_rs", "look_back" -> "(RS)"
-                                "map", "btn_back", "btn_view" -> "VIEW"
+                                "rewind", "btn_y", "interact" -> "(Y)"
+                                "btn_a", "jump" -> "(A)"
+                                "btn_b", "crouch" -> "(B)"
+                                "btn_x", "strike" -> "(X)"
+                                "camera", "btn_rb", "listen_mode" -> "(RB)"
+                                "btn_lb", "clutch", "dodge" -> "(LB)"
+                                "aim_weapon" -> "LT"
+                                "fire_weapon" -> "RT"
+                                "btn_ls", "horn", "sprint" -> "(LS)"
+                                "btn_rs", "look_back", "zoom" -> "(RS)"
+                                "map", "btn_back", "btn_view", "backpack" -> "BAG"
                                 "pause", "btn_start", "btn_menu" -> "MENU"
-                                "dpad_up" -> "UP"
-                                "dpad_down" -> "DOWN"
-                                "dpad_left" -> "LEFT"
-                                "dpad_right" -> "RIGHT"
+                                "dpad_up" -> "MED"
+                                "dpad_down" -> "ITEM"
+                                "dpad_left" -> "SIDE"
+                                "dpad_right" -> "GUN"
                                 "auto_drive" -> "C+2"
                                 else -> ""
                             },
@@ -331,11 +366,19 @@ fun DrivingScreen(
                                 if (pressed) {
                                     view.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
                                     syncClient?.testActionInput(element.actionId, true)
-                                    if (bit != 0) {
+                                    if (element.actionId == "aim_weapon") {
+                                        brakePressure = 1.0f
+                                    } else if (element.actionId == "fire_weapon") {
+                                        throttlePressure = 1.0f
+                                    } else if (bit != 0) {
                                         buttonsBitmask = buttonsBitmask or bit
                                     }
                                 } else {
-                                    if (bit != 0) {
+                                    if (element.actionId == "aim_weapon") {
+                                        brakePressure = 0.0f
+                                    } else if (element.actionId == "fire_weapon") {
+                                        throttlePressure = 0.0f
+                                    } else if (bit != 0) {
                                         buttonsBitmask = buttonsBitmask and bit.inv()
                                     }
                                     syncClient?.testActionInput(element.actionId, false)
@@ -735,6 +778,41 @@ fun DrivingScreen(
                                 Text("Check Wi-Fi, VPN & Windows Firewall", color = Color(0xFF555555), fontSize = 9.sp)
                             }
                             Text("HEALTH >", color = Color.Black, fontSize = 10.sp, fontWeight = FontWeight.Black)
+                        }
+
+                        // Option 1c: Controller Profiles (Forza Horizon vs The Last of Us Part II)
+                        val isTlouProfile = state.currentProfile.profileId == "profile_tlou2"
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(6.dp))
+                                .background(Color(0xFF0F1722))
+                                .border(1.5.dp, Color(0xFFCCFF00), RoundedCornerShape(6.dp))
+                                .clickable {
+                                    val nextId = if (isTlouProfile) "profile_standard" else "profile_tlou2"
+                                    viewModel.selectProfileById(nextId)
+                                }
+                                .padding(horizontal = 14.dp, vertical = 10.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Column {
+                                Text("GAME PROFILE", color = Color(0xFFCCFF00), fontSize = 11.sp, fontWeight = FontWeight.Black)
+                                Text(
+                                    if (isTlouProfile) "The Last of Us Part II (Survival)" else "Forza Horizon (Sim Racing)",
+                                    color = Color.White,
+                                    fontSize = 10.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+                            Box(
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(4.dp))
+                                    .background(Color(0xFFCCFF00))
+                                    .padding(horizontal = 8.dp, vertical = 4.dp)
+                            ) {
+                                Text("SWITCH >", color = Color.Black, fontSize = 9.sp, fontWeight = FontWeight.Black)
+                            }
                         }
 
                         // Option 2: Gyroscope Tilt Steering Toggle
@@ -1834,4 +1912,134 @@ fun FH6MiniActionPreview(actionId: String) {
         isPressed = false,
         onPressedChange = {}
     )
+}
+
+/**
+ * High-Precision 360° Analog Thumbstick for Character Movement and Camera Aiming
+ */
+@Composable
+fun FH6AnalogJoystick(
+    label: String,
+    accentColor: Color = Color(0xFF00E5FF),
+    isEditMode: Boolean = false,
+    onValueChange: (x: Float, y: Float) -> Unit
+) {
+    var thumbOffset by remember { mutableStateOf(Offset.Zero) }
+    var baseRadiusPx by remember { mutableStateOf(100f) }
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .pointerInput(isEditMode) {
+                if (!isEditMode) {
+                    detectDragGestures(
+                        onDragStart = { offset ->
+                            val center = Offset(size.width / 2f, size.height / 2f)
+                            val raw = offset - center
+                            val dist = kotlin.math.sqrt(raw.x * raw.x + raw.y * raw.y)
+                            val clamped = if (dist > baseRadiusPx) Offset(raw.x * (baseRadiusPx / dist), raw.y * (baseRadiusPx / dist)) else raw
+                            thumbOffset = clamped
+                            onValueChange(clamped.x / baseRadiusPx, -clamped.y / baseRadiusPx)
+                        },
+                        onDrag = { change, dragAmount ->
+                            change.consume()
+                            val next = thumbOffset + dragAmount
+                            val dist = kotlin.math.sqrt(next.x * next.x + next.y * next.y)
+                            val clamped = if (dist > baseRadiusPx) Offset(next.x * (baseRadiusPx / dist), next.y * (baseRadiusPx / dist)) else next
+                            thumbOffset = clamped
+                            onValueChange(clamped.x / baseRadiusPx, -clamped.y / baseRadiusPx)
+                        },
+                        onDragEnd = {
+                            thumbOffset = Offset.Zero
+                            onValueChange(0f, 0f)
+                        },
+                        onDragCancel = {
+                            thumbOffset = Offset.Zero
+                            onValueChange(0f, 0f)
+                        }
+                    )
+                }
+            },
+        contentAlignment = Alignment.Center
+    ) {
+        Canvas(modifier = Modifier.fillMaxSize()) {
+            val center = Offset(size.width / 2f, size.height / 2f)
+            val outerRadius = (minOf(size.width, size.height) / 2f) * 0.90f
+            baseRadiusPx = outerRadius * 0.68f
+
+            // 1. Dark circular base
+            drawCircle(
+                color = Color(0x60081018),
+                radius = outerRadius,
+                center = center
+            )
+            // Outer guideline ring
+            drawCircle(
+                color = accentColor.copy(alpha = 0.40f),
+                radius = outerRadius,
+                center = center,
+                style = Stroke(width = 1.5.dp.toPx())
+            )
+            // Inner deadzone ring
+            drawCircle(
+                color = Color(0x25FFFFFF),
+                radius = outerRadius * 0.28f,
+                center = center,
+                style = Stroke(width = 1.dp.toPx())
+            )
+            // Subtle crosshairs
+            drawLine(
+                color = Color(0x20FFFFFF),
+                start = Offset(center.x - outerRadius * 0.5f, center.y),
+                end = Offset(center.x + outerRadius * 0.5f, center.y),
+                strokeWidth = 1.dp.toPx()
+            )
+            drawLine(
+                color = Color(0x20FFFFFF),
+                start = Offset(center.x, center.y - outerRadius * 0.5f),
+                end = Offset(center.x, center.y + outerRadius * 0.5f),
+                strokeWidth = 1.dp.toPx()
+            )
+
+            // 2. Movable Thumb Pad
+            val thumbCenter = center + thumbOffset
+            val thumbRadius = outerRadius * 0.36f
+
+            // Glow / Shadow behind thumb
+            drawCircle(
+                color = accentColor.copy(alpha = 0.22f),
+                radius = thumbRadius * 1.30f,
+                center = thumbCenter
+            )
+            // Solid dark thumb pad
+            drawCircle(
+                color = Color(0xF20D1520),
+                radius = thumbRadius,
+                center = thumbCenter
+            )
+            // Thumb metallic accent border
+            drawCircle(
+                color = accentColor,
+                radius = thumbRadius,
+                center = thumbCenter,
+                style = Stroke(width = 2.dp.toPx())
+            )
+            // Center tactile dot
+            drawCircle(
+                color = accentColor,
+                radius = 3.dp.toPx(),
+                center = thumbCenter
+            )
+        }
+
+        // Stick label overlay
+        Text(
+            text = label,
+            color = accentColor.copy(alpha = 0.85f),
+            fontSize = 9.sp,
+            fontWeight = FontWeight.Black,
+            letterSpacing = 1.sp,
+            modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 8.dp)
+        )
+    }
 }
