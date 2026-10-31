@@ -1,2252 +1,1038 @@
-<!DOCTYPE html>
-
-<html lang="en">
-
-<head>
-
-    <meta charset="UTF-8">
-
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>Forza Horizon Controller // Sim Racing Controller Suite for PC</title>
-
-    <link rel="icon" type="image/x-icon" href="favicon.ico">
-
-    <link rel="icon" type="image/png" href="assets/fh6_logo.png">
-
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-
-    <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-
-    <style>
-
-        :root {
-
-            --bg-base: #080C12;
-
-            --bg-panel: #0E141F;
-
-            --bg-card: #121A28;
-
-            --border-subtle: #1C2738;
-
-            --border-active: #2D3E56;
-
-            --volt: #CCFF00;
-
-            --magenta: #FF007F;
-
-            --white: #FFFFFF;
-
-            --text-muted: #7E94AD;
-
-            --text-dim: #95A7BC;
-
-            --font-racing: 'Chakra Petch', -apple-system, sans-serif;
-
-            --font-body: 'Inter', -apple-system, sans-serif;
-
-        }
-
-
-
-        * {
-
-            box-sizing: border-box;
-
-            margin: 0;
-
-            padding: 0;
-
-            scrollbar-width: none !important;
-
-            -ms-overflow-style: none !important;
-
-        }
-
-
-
-        *::-webkit-scrollbar,
-
-        html::-webkit-scrollbar,
-
-        body::-webkit-scrollbar {
-
-            width: 0px !important;
-
-            height: 0px !important;
-
-            display: none !important;
-
-            background: transparent !important;
-
-        }
-
-
-
-        html {
-
-            scroll-behavior: smooth;
-
-            background-color: var(--bg-base);
-
-            color: var(--white);
-
-            overflow-x: hidden;
-
-            scrollbar-width: none !important;
-
-            -ms-overflow-style: none !important;
-
-        }
-
-
-
-        body {
-
-            font-family: var(--font-body);
-
-            overflow-x: hidden;
-
-            line-height: 1.5;
-
-            -webkit-font-smoothing: antialiased;
-
-            background-color: transparent;
-
-            scrollbar-width: none !important;
-
-            -ms-overflow-style: none !important;
-
-        }
-
-
-
-        /* Fixed Single Ambient Background: forzahorizon1222.png (Zero-blink GPU composited) */
-
-        .ambient-fixed-bg {
-
-            position: fixed;
-
-            top: 0;
-
-            left: 0;
-
-            width: 100vw;
-
-            height: 100vh;
-
-            background-image: url('assets/forzahorizon1222.png');
-
-            background-size: cover;
-
-            background-position: center 32%;
-
-            background-repeat: no-repeat;
-
-            z-index: 0;
-
-            pointer-events: none;
-
-            transform: translate3d(0, 0, 0);
-
-            backface-visibility: hidden;
-
-        }
-
-
-
-        .ambient-vignette {
-
-            position: fixed;
-
-            top: 0;
-
-            left: 0;
-
-            width: 100vw;
-
-            height: 100vh;
-
-            background: 
-
-                radial-gradient(ellipse at 50% 35%, rgba(8, 12, 18, 0.15) 0%, rgba(8, 12, 18, 0.55) 65%, rgba(8, 12, 18, 0.90) 100%),
-
-                linear-gradient(180deg, rgba(8, 12, 18, 0.18) 0%, rgba(8, 12, 18, 0.38) 45%, rgba(8, 12, 18, 0.85) 85%, var(--bg-base) 100%);
-
-            z-index: 1;
-
-            pointer-events: none;
-
-            transform: translate3d(0, 0, 0);
-
-            backface-visibility: hidden;
-
-        }
-
-
-
-        /* Smooth Hardware Stage Container */
-
-        #motion-blur-stage {
-
-            position: relative;
-
-            z-index: 2;
-
-            transform: translate3d(0, 0, 0);
-
-        }
-
-
-
-        /* Top Navigation Bar: High-Tech Sim Racing Glassmorphism */
-
-        header {
-
-            position: fixed;
-
-            top: 0;
-
-            left: 0;
-
-            right: 0;
-
-            z-index: 1000;
-
-            background: rgba(8, 12, 18, 0.78);
-
-            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-
-            backdrop-filter: blur(16px);
-
-            -webkit-backdrop-filter: blur(16px);
-
-            padding: 12px 36px;
-
-            display: flex;
-
-            align-items: center;
-
-            justify-content: space-between;
-
-            transition: all 0.25s ease;
-
-        }
-
-
-
-        .brand-link {
-
-            display: flex;
-
-            align-items: center;
-
-            gap: 14px;
-
-            text-decoration: none;
-
-            color: var(--white);
-
-        }
-
-
-
-        .brand-logo-img {
-
-            width: 36px;
-
-            height: 36px;
-
-            border-radius: 8px;
-
-            object-fit: contain;
-
-            transition: transform 0.2s ease;
-
-        }
-
-
-
-        .brand-link:hover .brand-logo-img {
-
-            transform: scale(1.08) rotate(-2deg);
-
-        }
-
-
-
-        .brand-titles {
-
-            display: flex;
-
-            flex-direction: column;
-
-            gap: 1px;
-
-        }
-
-
-
-        .brand-text {
-
-            font-family: var(--font-racing);
-
-            font-size: 15px;
-
-            font-weight: 800;
-
-            letter-spacing: 1px;
-
-            text-transform: uppercase;
-
-            line-height: 1.1;
-
-        }
-
-
-
-        .brand-text .volt {
-
-            color: var(--volt);
-
-        }
-
-
-
-        .brand-subtext {
-
-            font-family: var(--font-racing);
-
-            font-size: 9px;
-
-            font-weight: 700;
-
-            letter-spacing: 1.5px;
-
-            color: var(--text-muted);
-
-            text-transform: uppercase;
-
-        }
-
-
-
-        nav {
-
-            display: flex;
-
-            align-items: center;
-
-            gap: 6px;
-
-            background: rgba(255, 255, 255, 0.03);
-
-            padding: 4px 6px;
-
-            border-radius: 8px;
-
-            border: 1px solid rgba(255, 255, 255, 0.05);
-
-        }
-
-
-
-        nav a {
-
-            color: var(--text-muted);
-
-            text-decoration: none;
-
-            font-family: var(--font-racing);
-
-            font-size: 11px;
-
-            font-weight: 700;
-
-            letter-spacing: 1px;
-
-            text-transform: uppercase;
-
-            padding: 7px 14px;
-
-            border-radius: 6px;
-
-            transition: all 0.2s ease;
-
-        }
-
-
-
-        nav a:hover {
-
-            color: #FFFFFF;
-
-            background: rgba(255, 255, 255, 0.08);
-
-        }
-
-
-
-        .btn-nav-repo {
-
-            display: inline-flex;
-
-            align-items: center;
-
-            gap: 8px;
-
-            background: rgba(255, 255, 255, 0.05);
-
-            color: var(--white);
-
-            border: 1px solid rgba(255, 255, 255, 0.12);
-
-            font-family: var(--font-racing);
-
-            font-size: 11px;
-
-            font-weight: 700;
-
-            letter-spacing: 1px;
-
-            padding: 8px 16px;
-
-            border-radius: 6px;
-
-            text-decoration: none;
-
-            text-transform: uppercase;
-
-            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-
-            backdrop-filter: blur(8px);
-
-            -webkit-backdrop-filter: blur(8px);
-
-        }
-
-
-
-        .header-actions {
-
-            display: flex;
-
-            align-items: center;
-
-            gap: 10px;
-
-        }
-
-
-
-        .btn-nav-store {
-
-            display: inline-flex;
-
-            align-items: center;
-
-            gap: 7px;
-
-            background: rgba(204, 255, 0, 0.10);
-
-            color: var(--volt);
-
-            border: 1px solid rgba(204, 255, 0, 0.35);
-
-            font-family: var(--font-racing);
-
-            font-size: 11px;
-
-            font-weight: 700;
-
-            letter-spacing: 1px;
-
-            padding: 8px 14px;
-
-            border-radius: 6px;
-
-            text-decoration: none;
-
-            text-transform: uppercase;
-
-            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-
-        }
-
-
-
-        .btn-nav-store:hover {
-
-            background: var(--volt);
-
-            color: var(--bg-base);
-
-            border-color: var(--volt);
-
-            transform: translateY(-1px);
-
-            box-shadow: 0 4px 16px rgba(204, 255, 0, 0.3);
-
-        }
-
-
-
-        .btn-nav-repo {
-
-            display: inline-flex;
-
-            align-items: center;
-
-            gap: 8px;
-
-            background: rgba(255, 255, 255, 0.05);
-
-            color: var(--white);
-
-            border: 1px solid rgba(255, 255, 255, 0.12);
-
-            font-family: var(--font-racing);
-
-            font-size: 11px;
-
-            font-weight: 700;
-
-            letter-spacing: 1px;
-
-            padding: 8px 14px;
-
-            border-radius: 6px;
-
-            text-decoration: none;
-
-            text-transform: uppercase;
-
-            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-
-        }
-
-
-
-        .btn-nav-repo:hover {
-
-            background: rgba(255, 255, 255, 0.12);
-
-            border-color: var(--white);
-
-            color: var(--white);
-
-            transform: translateY(-1px);
-
-        }
-
-
-
-        /* Hero Section */
-
-        .hero {
-
-            min-height: 85vh;
-
-            display: flex;
-
-            flex-direction: column;
-
-            justify-content: center;
-
-            align-items: center;
-
-            text-align: center;
-
-            padding: 140px 24px 60px;
-
-            max-width: 1040px;
-
-            margin: 0 auto;
-
-        }
-
-
-
-        .hero-title {
-
-            font-family: var(--font-racing);
-
-            font-size: clamp(38px, 6vw, 68px);
-
-            font-weight: 800;
-
-            line-height: 1.05;
-
-            letter-spacing: -0.5px;
-
-            text-transform: uppercase;
-
-            margin-bottom: 20px;
-
-        }
-
-
-
-        .hero-title span.volt {
-
-            color: var(--volt);
-
-        }
-
-
-
-        .hero-description {
-
-            font-size: clamp(16px, 1.8vw, 19px);
-
-            color: var(--text-dim);
-
-            max-width: 760px;
-
-            line-height: 1.6;
-
-            margin-bottom: 38px;
-
-        }
-
-
-
-        /* Single Prominent Download Row */
-
-        .hero-cta-group {
-
-            display: flex;
-
-            align-items: center;
-
-            justify-content: center;
-
-            flex-wrap: wrap;
-
-            gap: 16px;
-
-            margin-bottom: 36px;
-
-        }
-
-
-
-        .btn-volt {
-
-            background: var(--volt);
-
-            color: var(--bg-base);
-
-            font-family: var(--font-racing);
-
-            font-size: 13px;
-
-            font-weight: 800;
-
-            letter-spacing: 1px;
-
-            padding: 16px 28px;
-
-            border-radius: 4px;
-
-            text-decoration: none;
-
-            text-transform: uppercase;
-
-            display: inline-flex;
-
-            align-items: center;
-
-            gap: 10px;
-
-            transition: all 0.2s ease;
-
-            box-shadow: 0 4px 18px rgba(204, 255, 0, 0.22);
-
-        }
-
-
-
-        .btn-volt:hover {
-
-            background: #FFFFFF;
-
-            transform: translateY(-2px);
-
-            box-shadow: 0 6px 24px rgba(255, 255, 255, 0.3);
-
-        }
-
-
-
-        .btn-slate {
-
-            background: var(--bg-panel);
-
-            color: var(--white);
-
-            border: 1px solid var(--border-active);
-
-            font-family: var(--font-racing);
-
-            font-size: 13px;
-
-            font-weight: 800;
-
-            letter-spacing: 1px;
-
-            padding: 16px 28px;
-
-            border-radius: 4px;
-
-            text-decoration: none;
-
-            text-transform: uppercase;
-
-            display: inline-flex;
-
-            align-items: center;
-
-            gap: 10px;
-
-            transition: all 0.2s ease;
-
-        }
-
-
-
-        .btn-slate:hover {
-
-            border-color: var(--volt);
-
-            color: var(--volt);
-
-            transform: translateY(-2px);
-
-        }
-
-
-
-        .security-help-strip {
-
-            display: inline-flex;
-
-            align-items: center;
-
-            justify-content: center;
-
-            gap: 12px;
-
-            font-size: 11px;
-
-            color: var(--text-muted);
-
-            margin-top: -16px;
-
-            margin-bottom: 28px;
-
-            background: var(--bg-panel);
-
-            border: 1px solid var(--border-subtle);
-
-            padding: 7px 16px;
-
-            border-radius: 20px;
-
-        }
-
-
-
-        .security-help-strip strong {
-
-            color: #FFFFFF;
-
-        }
-
-
-
-        .security-help-strip .sep {
-
-            color: rgba(255, 255, 255, 0.2);
-
-        }
-
-
-
-        .hero-specs-strip {
-
-            display: flex;
-
-            align-items: center;
-
-            justify-content: center;
-
-            flex-wrap: wrap;
-
-            gap: 28px;
-
-            padding-top: 24px;
-
-            border-top: 1px solid var(--border-subtle);
-
-        }
-
-
-
-        .spec-item {
-
-            font-family: var(--font-racing);
-
-            font-size: 11px;
-
-            font-weight: 700;
-
-            letter-spacing: 1.5px;
-
-            color: var(--text-muted);
-
-            text-transform: uppercase;
-
-        }
-
-
-
-        .spec-item span {
-
-            color: var(--white);
-
-        }
-
-
-
-        /* Showcase Section: Real Mobile App Screenshots */
-
-        .showcase-section {
-
-            padding: 80px 24px;
-
-            max-width: 1200px;
-
-            margin: 0 auto;
-
-        }
-
-
-
-        .section-header {
-
-            margin-bottom: 48px;
-
-        }
-
-
-
-        .section-tag {
-
-            font-family: var(--font-racing);
-
-            font-size: 11px;
-
-            font-weight: 800;
-
-            letter-spacing: 2px;
-
-            color: var(--volt);
-
-            text-transform: uppercase;
-
-            margin-bottom: 6px;
-
-        }
-
-
-
-        .section-heading {
-
-            font-family: var(--font-racing);
-
-            font-size: clamp(26px, 3.5vw, 42px);
-
-            font-weight: 800;
-
-            letter-spacing: -0.5px;
-
-            text-transform: uppercase;
-
-            line-height: 1.15;
-
-        }
-
-
-
-        .showcase-grid {
-
-            display: flex;
-
-            flex-direction: column;
-
-            gap: 60px;
-
-        }
-
-
-
-        .showcase-card {
-
-            background: var(--bg-panel);
-
-            border: 1px solid var(--border-subtle);
-
-            border-radius: 8px;
-
-            overflow: hidden;
-
-            display: grid;
-
-            grid-template-columns: 1.1fr 1fr;
-
-            transition: border-color 0.2s ease;
-
-        }
-
-
-
-        .showcase-card:hover {
-
-            border-color: var(--border-active);
-
-        }
-
-
-
-        .showcase-card.reverse {
-
-            grid-template-columns: 1fr 1.1fr;
-
-        }
-
-
-
-        .showcase-card.reverse .showcase-visual {
-
-            order: 2;
-
-        }
-
-
-
-        .showcase-card.reverse .showcase-info {
-
-            order: 1;
-
-        }
-
-
-
-        .showcase-visual {
-
-            background: #05080C;
-
-            display: flex;
-
-            align-items: center;
-
-            justify-content: center;
-
-            padding: 24px;
-
-            border-right: 1px solid var(--border-subtle);
-
-        }
-
-
-
-        .showcase-card.reverse .showcase-visual {
-
-            border-right: none;
-
-            border-left: 1px solid var(--border-subtle);
-
-        }
-
-
-
-        .showcase-visual img {
-
-            width: 100%;
-
-            height: auto;
-
-            border-radius: 6px;
-
-            display: block;
-
-        }
-
-
-
-        .showcase-info {
-
-            padding: 42px 40px;
-
-            display: flex;
-
-            flex-direction: column;
-
-            justify-content: center;
-
-        }
-
-
-
-        .showcase-number {
-
-            font-family: var(--font-racing);
-
-            font-size: 11px;
-
-            font-weight: 800;
-
-            color: var(--volt);
-
-            letter-spacing: 2px;
-
-            text-transform: uppercase;
-
-            margin-bottom: 10px;
-
-        }
-
-
-
-        .showcase-title {
-
-            font-family: var(--font-racing);
-
-            font-size: 24px;
-
-            font-weight: 800;
-
-            text-transform: uppercase;
-
-            letter-spacing: 0.5px;
-
-            margin-bottom: 16px;
-
-            line-height: 1.2;
-
-        }
-
-
-
-        .showcase-body {
-
-            color: var(--text-dim);
-
-            font-size: 14px;
-
-            line-height: 1.65;
-
-            margin-bottom: 24px;
-
-        }
-
-
-
-        .showcase-bullets {
-
-            list-style: none;
-
-            display: flex;
-
-            flex-direction: column;
-
-            gap: 10px;
-
-        }
-
-
-
-        .showcase-bullets li {
-
-            font-family: var(--font-racing);
-
-            font-size: 12px;
-
-            font-weight: 700;
-
-            color: var(--white);
-
-            display: flex;
-
-            align-items: center;
-
-            gap: 10px;
-
-        }
-
-
-
-        .showcase-bullets li::before {
-
-            content: "";
-
-            width: 6px;
-
-            height: 6px;
-
-            background: var(--volt);
-
-            border-radius: 1px;
-
-        }
-
-
-
-        /* 3-Column Architecture Matrix */
-
-        .tech-section {
-
-            padding: 80px 24px;
-
-            max-width: 1200px;
-
-            margin: 0 auto;
-
-            border-top: 1px solid var(--border-subtle);
-
-        }
-
-
-
-        .tech-grid {
-
-            display: grid;
-
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-
-            gap: 24px;
-
-        }
-
-
-
-        .tech-card {
-
-            background: var(--bg-panel);
-
-            border: 1px solid var(--border-subtle);
-
-            border-radius: 6px;
-
-            padding: 32px;
-
-        }
-
-
-
-        .tech-card-header {
-
-            font-family: var(--font-racing);
-
-            font-size: 11px;
-
-            font-weight: 800;
-
-            color: var(--volt);
-
-            letter-spacing: 1.5px;
-
-            text-transform: uppercase;
-
-            margin-bottom: 12px;
-
-        }
-
-
-
-        .tech-card-title {
-
-            font-family: var(--font-racing);
-
-            font-size: 19px;
-
-            font-weight: 800;
-
-            text-transform: uppercase;
-
-            margin-bottom: 12px;
-
-            line-height: 1.25;
-
-        }
-
-
-
-        .tech-card-body {
-
-            color: var(--text-dim);
-
-            font-size: 13.5px;
-
-            line-height: 1.6;
-
-        }
-
-
-
-        /* 3-Step Setup Guide */
-
-        .setup-section {
-
-            padding: 80px 24px;
-
-            max-width: 1200px;
-
-            margin: 0 auto;
-
-            border-top: 1px solid var(--border-subtle);
-
-        }
-
-
-
-        .setup-grid {
-
-            display: grid;
-
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-
-            gap: 24px;
-
-        }
-
-
-
-        .setup-card {
-
-            background: var(--bg-panel);
-
-            border: 1px solid var(--border-subtle);
-
-            border-radius: 6px;
-
-            padding: 28px;
-
-        }
-
-
-
-        .setup-step {
-
-            font-family: var(--font-racing);
-
-            font-size: 12px;
-
-            font-weight: 800;
-
-            color: var(--volt);
-
-            letter-spacing: 1.5px;
-
-            margin-bottom: 12px;
-
-            text-transform: uppercase;
-
-        }
-
-
-
-        .setup-title {
-
-            font-family: var(--font-racing);
-
-            font-size: 17px;
-
-            font-weight: 800;
-
-            text-transform: uppercase;
-
-            margin-bottom: 10px;
-
-        }
-
-
-
-        .setup-desc {
-
-            font-size: 13.5px;
-
-            color: var(--text-dim);
-
-            line-height: 1.6;
-
-        }
-
-
-
-        /* Footer */
-
-        footer {
-
-            border-top: 1px solid var(--border-subtle);
-
-            padding: 40px 24px;
-
-            background: var(--bg-base);
-
-            font-size: 12px;
-
-            color: var(--text-muted);
-
-        }
-
-
-
-        .footer-content {
-
-            max-width: 1200px;
-
-            margin: 0 auto;
-
-            display: flex;
-
-            align-items: center;
-
-            justify-content: space-between;
-
-            flex-wrap: wrap;
-
-            gap: 20px;
-
-        }
-
-
-
-        .footer-links {
-
-            display: flex;
-
-            align-items: center;
-
-            gap: 24px;
-
-        }
-
-
-
-        .footer-links a {
-
-            color: var(--text-muted);
-
-            text-decoration: none;
-
-            font-family: var(--font-racing);
-
-            font-weight: 700;
-
-            transition: color 0.15s ease;
-
-        }
-
-
-
-        .footer-links a:hover {
-
-            color: var(--volt);
-
-        }
-
-
-
-        /* Adaptive Layout for Tablet & Medium Screens */
-
-        @media (max-width: 900px) {
-
-            header {
-
-                padding: 14px 20px;
-
-            }
-
-            nav {
-
-                display: none;
-
-            }
-
-            .ambient-fixed-bg {
-
-                background-position: 46% 26%;
-
-            }
-
-            .showcase-card, .showcase-card.reverse {
-
-                grid-template-columns: 1fr;
-
-            }
-
-            .showcase-card.reverse .showcase-visual {
-
-                order: 1;
-
-                border-left: none;
-
-                border-bottom: 1px solid var(--border-subtle);
-
-            }
-
-            .showcase-card.reverse .showcase-info {
-
-                order: 2;
-
-            }
-
-            .showcase-visual {
-
-                border-right: none;
-
-                border-bottom: 1px solid var(--border-subtle);
-
-            }
-
-            .showcase-info {
-
-                padding: 28px 24px;
-
-            }
-
-            .tech-grid {
-
-                grid-template-columns: 1fr;
-
-            }
-
-            .setup-grid {
-
-                grid-template-columns: 1fr;
-
-            }
-
-        }
-
-
-
-        /* Adaptive Layout for Mobile Devices */
-
-        @media (max-width: 640px) {
-
-            header {
-
-                padding: 12px 16px;
-
-            }
-
-            .brand-text {
-
-                font-size: 12px;
-
-            }
-
-            .btn-nav-repo {
-
-                padding: 7px 12px;
-
-                font-size: 10px;
-
-                letter-spacing: 0.5px;
-
-            }
-
-            .ambient-fixed-bg {
-
-                background-position: 48% 22%;
-
-                transform: scale(1.05);
-
-            }
-
-            .hero {
-
-                min-height: auto;
-
-                padding: 100px 16px 40px;
-
-            }
-
-            .hero-title {
-
-                font-size: clamp(26px, 7.5vw, 36px);
-
-                margin-bottom: 16px;
-
-            }
-
-            .hero-description {
-
-                font-size: 14px;
-
-                margin-bottom: 24px;
-
-            }
-
-            .hero-cta-group {
-
-                flex-direction: column;
-
-                width: 100%;
-
-                gap: 12px;
-
-                margin-bottom: 28px;
-
-            }
-
-            .btn-volt, .btn-slate {
-
-                width: 100%;
-
-                justify-content: center;
-
-                box-sizing: border-box;
-
-                padding: 14px 18px;
-
-                font-size: 12px;
-
-            }
-
-            .security-help-strip {
-
-            display: inline-flex;
-
-            align-items: center;
-
-            justify-content: center;
-
-            gap: 12px;
-
-            font-size: 11px;
-
-            color: var(--text-muted);
-
-            margin-top: -16px;
-
-            margin-bottom: 28px;
-
-            background: var(--bg-panel);
-
-            border: 1px solid var(--border-subtle);
-
-            padding: 7px 16px;
-
-            border-radius: 20px;
-
-        }
-
-
-
-        .security-help-strip strong {
-
-            color: #FFFFFF;
-
-        }
-
-
-
-        .security-help-strip .sep {
-
-            color: rgba(255, 255, 255, 0.2);
-
-        }
-
-
-
-        .security-help-strip {
-
-                flex-direction: column;
-
-                gap: 4px;
-
-                text-align: center;
-
-                font-size: 10px;
-
-                padding: 8px 12px;
-
-            }
-
-            .security-help-strip .sep {
-
-                display: none;
-
-            }
-
-            .hero-specs-strip {
-
-                gap: 12px;
-
-                display: flex;
-
-                flex-direction: column;
-
-                align-items: center;
-
-                text-align: center;
-
-            }
-
-            .showcase-section,
-
-            .tech-section,
-
-            .setup-section {
-
-                padding: 48px 16px;
-
-            }
-
-            .section-heading {
-
-                font-size: clamp(22px, 6vw, 28px);
-
-            }
-
-            .showcase-info {
-
-                padding: 22px 18px;
-
-            }
-
-            .showcase-bullets {
-
-                font-size: 13px;
-
-                gap: 8px;
-
-            }
-
-            .tech-card,
-
-            .setup-card {
-
-                padding: 22px 18px;
-
-            }
-
-            .footer-content {
-
-                flex-direction: column;
-
-                text-align: center;
-
-                gap: 16px;
-
-                font-size: 12px;
-
-            }
-
-            .footer-links {
-
-                justify-content: center;
-
-                flex-wrap: wrap;
-
-                gap: 16px;
-
-            }
-
-        }
-
-
-
-        /* Small Phones (iPhone SE, Galaxy A series, etc.) */
-
-        @media (max-width: 380px) {
-
-            .hero-title {
-
-                font-size: 24px;
-
-            }
-
-            .btn-volt, .btn-slate {
-
-                font-size: 11px;
-
-                padding: 12px 14px;
-
-            }
-
-        }
-
-    </style>
-
-</head>
-
-<body>
-
-    <!-- Fixed Single Ambient Forza Horizon GT-R Background -->
-
-    <div class="ambient-fixed-bg"></div>
-
-    <div class="ambient-vignette"></div>
-
-
-
-    <!-- Top Navigation Bar -->
-
-    <header>
-
-        <a href="#" class="brand-link">
-
-            <img src="assets/fh6_logo.svg" alt="Forza Horizon Controller Logo" class="brand-logo-img">
-
-            <div class="brand-titles">
-
-                <span class="brand-text">HORIZON <span class="volt">CONTROLLER</span></span>
-
-                <span class="brand-subtext">SIM RACING EMULATION</span>
-
-            </div>
-
-        </a>
-
-        <nav>
-
-            <a href="#showcase">Mobile Features</a>
-
-            <a href="#architecture">Architecture</a>
-
-            <a href="#setup">Setup Guide</a>
-
-        </nav>
-
-        <div class="header-actions">
-
-            <a href="https://apps.microsoft.com/detail/9PKKK7NB747K" target="_blank" class="btn-nav-store" title="Microsoft Store Certified">
-
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-
-                    <path d="M0 3.449L9.75 2.1v9.451H0m10.949-9.602L24 0v11.4H10.949M0 12.6h9.75v9.451L0 20.699M10.949 12.6H24V24l-12.951-1.801"/>
-
-                </svg>
-
-                <span>Microsoft Store</span>
-
-            </a>
-
-            <a href="https://github.com/VarunKulkarni15/FH6-Mobile-Controller" target="_blank" class="btn-nav-repo">
-
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-
-                    <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
-
-                </svg>
-
-                <span>GitHub</span>
-
-            </a>
-
-        </div>
-
-    </header>
-
-
-
-    <!-- Velocity-decayed scroll motion blur container -->
-
-    <main id="motion-blur-stage">
-
-        <!-- 1. Hero Section -->
-
-        <section class="hero">
-
-            <h1 class="hero-title">
-
-                Forza Horizon <br>
-
-                <span class="volt">Controller Suite</span>
-
-            </h1>
-
-            <p class="hero-description">
-
-                Direct hardware-level Xbox 360 controller emulation for PC. Transform your phone into a low-latency sim-racing rig featuring dynamic touch steering, 6-axis gyro tilt, and 120Hz UDP telemetry synchronization.
-
-            </p>
-
-
-
-            <!-- High-Impact Download Group -->
-
-            <div class="hero-cta-group">
-
-                <a href="https://apps.microsoft.com/detail/9PKKK7NB747K" target="_blank" class="btn-volt" title="Direct Microsoft Store Installation">
-
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-
-                        <path d="M0 3.449L9.75 2.1v9.451H0m10.949-9.602L24 0v11.4H10.949M0 12.6h9.75v9.451L0 20.699M10.949 12.6H24V24l-12.951-1.801"/>
-
-                    </svg>
-
-                    <span>Get from Microsoft Store</span>
-
-                </a>
-
-                <a href="releases/fh6-controller-windows.exe" download="fh6-controller-windows.exe" class="btn-slate">
-
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-
-                        <path d="M0 3.449L9.75 2.1v9.451H0m10.949-9.602L24 0v11.4H10.949M0 12.6h9.75v9.451L0 20.699M10.949 12.6H24V24l-12.951-1.801"/>
-
-                    </svg>
-
-                    <span>Download Windows Companion</span>
-
-                </a>
-
-                <a href="HorizonController.apk" download="HorizonController.apk" class="btn-slate">
-
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-
-                        <path d="M17.523 15.3414c-.5511 0-.9993-.4486-.9993-.9997s.4482-.9993.9993-.9993c.551 0 .9993.4482.9993.9993.0001.5511-.4483.9997-.9993.9997m-11.046 0c-.5511 0-.9993-.4486-.9993-.9997s.4482-.9993.9993-.9993c.5511 0 .9993.4482.9993.9993 0 .5511-.4482.9997-.9993.9997m11.4045-6.02l1.9973-3.4592a.416.416 0 00-.1521-.5676.416.416 0 00-.5676.1521l-2.0223 3.503C15.5902 8.4101 13.8559 8.082 12 8.082s-3.5902.3282-5.1368.8677L4.8409 5.4467a.4161.4161 0 00-.5677-.1521.4157.4157 0 00-.1521.5676l1.9973 3.4592C2.6889 11.1867.3432 14.6589 0 18.761h24c-.3432-4.1021-2.6889-7.5743-6.1185-9.4396"/>
-
-                    </svg>
-
-                    <span>Download Android App</span>
-
-                </a>
-
-            </div>
-
-
-
-            <!-- Helpful Sideload & SmartScreen Guidance Strip -->
-
-            <div class="security-help-strip">
-
-                <span>Microsoft Store: <strong>1-Click Install</strong> (Zero SmartScreen Warnings)</span>
-
-                <span class="sep">&bull;</span>
-
-                <span>Direct .exe: Click <strong>More info</strong> &rarr; <strong>Run anyway</strong></span>
-
-                <span class="sep">&bull;</span>
-
-                <span>Android APK: Tap <strong>Download anyway</strong> &rarr; <strong>Install</strong></span>
-
-            </div>
-
-
-
-            <!-- Authentic Technical Specs Strip -->
-
-            <div class="hero-specs-strip">
-
-                <div class="spec-item">FastStream Rate: <span>120Hz UDP</span></div>
-
-                <div class="spec-item">Emulation Target: <span>Xbox 360 Slot 1</span></div>
-
-                <div class="spec-item">Driver Architecture: <span>Kernel ViGEmBus</span></div>
-
-                <div class="spec-item">Network Routing: <span>Direct LAN (Zero Cloud)</span></div>
-
-            </div>
-
-        </section>
-
-
-
-        <!-- 2. Mobile App Showcase Section (Direct App Screenshots) -->
-
-        <section id="showcase" class="showcase-section">
-
-            <div class="section-header">
-
-                <div class="section-tag">Direct App Capture</div>
-
-                <h2 class="section-heading">Engineered for Forza Horizon</h2>
-
-            </div>
-
-
-
-            <div class="showcase-grid">
-
-                <!-- Feature 1: Clean Dynamic Driving Cockpit -->
-
-                <article class="showcase-card">
-
-                    <div class="showcase-visual">
-
-                        <img src="assets/app_screenshot_driving.png" alt="Clean Dynamic Driving Cockpit in Android App" loading="lazy">
-
-                    </div>
-
-                    <div class="showcase-info">
-
-                        <div class="showcase-number">Feature Module 01</div>
-
-                        <h3 class="showcase-title">Dynamic Steering Cockpit</h3>
-
-                        <p class="showcase-body">
-
-                            The full left screen acts as a responsive touch steering canvas with progressive angle modulation and a 12 o'clock notch. Independent RT acceleration and LT brake meters with an instant Handbrake drift paddle.
-
-                        </p>
-
-                        <ul class="showcase-bullets">
-
-                            <li>Left-screen full touch steering with 12 o'clock center notch</li>
-
-                            <li>Independent RT acceleration and LT brake threshold meters</li>
-
-                            <li>Instant handbrake drift paddle for hairpin turns</li>
-
-                            <li>Minimalist cockpit layout with sub-millisecond UDP dispatch</li>
-
-                        </ul>
-
-                    </div>
-
-                </article>
-
-
-
-                <!-- Feature 2: Real-time Layout Editor & Resizing -->
-
-                <article class="showcase-card reverse">
-
-                    <div class="showcase-visual">
-
-                        <img src="assets/app_screenshot_editor.png" alt="Dynamic Touch Steering and Live Layout Customizer in Android App" loading="lazy">
-
-                    </div>
-
-                    <div class="showcase-info">
-
-                        <div class="showcase-number">Feature Module 02</div>
-
-                        <h3 class="showcase-title">Live Layout Customizer</h3>
-
-                        <p class="showcase-body">
-
-                            Tap the 3-dots quick menu anytime to reposition controls, adjust element sizes (- / +), remove buttons, or reset to default. Customize the cockpit to match your exact finger span and device size.
-
-                        </p>
-
-                        <ul class="showcase-bullets">
-
-                            <li>Live drag-and-drop element repositioning</li>
-
-                            <li>Element sizing stepper (- / +) for pedal and button scale</li>
-
-                            <li>One-tap element removal and reset to default</li>
-
-                            <li>Tactile volt-accented selection bounds</li>
-
-                        </ul>
-
-                    </div>
-
-                </article>
-
-
-
-                <!-- Feature 3: 18-Action Forza Catalog & Auto-Drive -->
-
-                <article class="showcase-card">
-
-                    <div class="showcase-visual">
-
-                        <img src="assets/app_screenshot_catalog.png" alt="18-Action Forza Control Catalog with Auto-Drive in Android App" loading="lazy">
-
-                    </div>
-
-                    <div class="showcase-info">
-
-                        <div class="showcase-number">Feature Module 03</div>
-
-                        <h3 class="showcase-title">18-Action Catalog &amp; Auto-Drive</h3>
-
-                        <p class="showcase-body">
-
-                            Choose from the complete Forza Horizon control matrix. Add steering wheels, pedals, shifting triggers, horn, telemetry, rewind, or the hardware Auto-Drive driving assist with a single tap.
-
-                        </p>
-
-                        <ul class="showcase-bullets">
-
-                            <li>Dedicated Forza bindings: Handbrake [SPACE], A/B/X/Y, Camera, Horn</li>
-
-                            <li>Auto-Drive assist button toggle for cruise and straightaways</li>
-
-                            <li>One-tap addition to layout with instant drag positioning</li>
-
-                            <li>Native touch-friendly interface with zero keyboard dependencies</li>
-
-                        </ul>
-
-                    </div>
-
-                </article>
-
-
-
-                <!-- Feature 4: 3-Dots Quick Menu & 6-Axis Gyroscope Steering -->
-
-                <article class="showcase-card reverse">
-
-                    <div class="showcase-visual">
-
-                        <img src="assets/app_screenshot_gyro_settings.png" alt="3-Dots Quick Menu and Gyroscope Settings in Android App" loading="lazy">
-
-                    </div>
-
-                    <div class="showcase-info">
-
-                        <div class="showcase-number">Feature Module 04</div>
-
-                        <h3 class="showcase-title">Quick Menu &amp; Gyro Steering</h3>
-
-                        <p class="showcase-body">
-
-                            Access the sleek Horizon Settings drawer directly from the 3-dots button. Toggle hardware 6-axis gyroscope motion steering, monitor live tilt degrees in real time, and adjust sensitivity multipliers on the fly.
-
-                        </p>
-
-                        <ul class="showcase-bullets">
-
-                            <li>Hardware IMU sensor fusion with live degree readout (0° to 90°)</li>
-
-                            <li>Instant sensitivity presets: 0.75x, 1.0x, 1.5x, 2.0x, with fine stepper</li>
-
-                            <li>Direct access to PC pairing status and layout repositioning</li>
-
-                            <li>Integrated in-game Menu (Pause) and View (Map) controls</li>
-
-                        </ul>
-
-                    </div>
-
-                </article>
-
-
-
-                <!-- Feature 5: Instant In-App QR Scanner & Direct PC Pairing -->
-
-                <article class="showcase-card">
-
-                    <div class="showcase-visual">
-
-                        <img src="assets/app_screenshot_pairing.png" alt="In-App QR Scanner and Pairing Hub in Android App" loading="lazy">
-
-                    </div>
-
-                    <div class="showcase-info">
-
-                        <div class="showcase-number">Feature Module 05</div>
-
-                        <h3 class="showcase-title">In-App QR Scanner &amp; 120Hz Pairing</h3>
-
-                        <p class="showcase-body">
-
-                            Connect your phone to your PC in under one second. Use the embedded Google Play Services camera scanner to read the companion QR code, or trigger automatic local network broadcast discovery.
-
-                        </p>
-
-                        <ul class="showcase-bullets">
-
-                            <li>In-app camera viewfinder with zero external app redirects</li>
-
-                            <li>Auto-Discovery via UDP local network broadcast beacons</li>
-
-                            <li>Manual IP fallback with 1-tap direct connect</li>
-
-                            <li>Zero cloud relay: direct peer-to-peer 120Hz binary UDP</li>
-
-                        </ul>
-
-                    </div>
-
-                </article>
-
-            </div>
-
-        </section>
-
-
-
-        <!-- 3. Technical Architecture Matrix -->
-
-        <section id="architecture" class="tech-section">
-
-            <div class="section-header">
-
-                <div class="section-tag">System Core</div>
-
-                <h2 class="section-heading">Direct ViGEmBus Telemetry</h2>
-
-            </div>
-
-
-
-            <div class="tech-grid">
-
-                <div class="tech-card">
-
-                    <div class="tech-card-header">Kernel Emulation</div>
-
-                    <h3 class="tech-card-title">Virtual Xbox 360 Controller</h3>
-
-                    <p class="tech-card-body">
-
-                        Direct communication with the Windows Virtual Gamepad Emulation Bus (`ViGEmBus`). Forza Horizon, Steam, and Windows recognize the device as an authentic Xbox 360 gamepad with zero configuration required.
-
-                    </p>
-
-                </div>
-
-
-
-                <div class="tech-card">
-
-                    <div class="tech-card-header">Telemetry Engine</div>
-
-                    <h3 class="tech-card-title">All Horizon Games Auto-Detect</h3>
-
-                    <p class="tech-card-body">
-
-                        The Windows Companion continuously monitors process execution for Forza Horizon 5, Forza Horizon 4, Forza Horizon 3, Forza Horizon 6, and Forza Motorsport, dynamically synchronizing telemetry profiles.
-
-                    </p>
-
-                </div>
-
-
-
-                <div class="tech-card">
-
-                    <div class="tech-card-header">FastStream Protocol</div>
-
-                    <h3 class="tech-card-title">120Hz Binary Datagrams</h3>
-
-                    <p class="tech-card-body">
-
-                        Low-overhead binary UDP stream transmitting analog steering, brake, throttle, and digital button states directly between phone and PC with sub-millisecond latency.
-
-                    </p>
-
-                </div>
-
-            </div>
-
-        </section>
-
-
-
-        <!-- 4. Setup Guide -->
-
-        <section id="setup" class="setup-section">
-
-            <div class="section-header">
-
-                <div class="section-tag">Quick Start</div>
-
-                <h2 class="section-heading">Three-Step Deployment</h2>
-
-            </div>
-
-
-
-            <div class="setup-grid">
-
-                <div class="setup-card">
-
-                    <div class="setup-step">Step 01</div>
-
-                    <h3 class="setup-title">Run Windows Companion</h3>
-
-                    <p class="setup-desc">
-
-                        Launch `fh6-controller-windows.exe` on your PC. It auto-verifies ViGEmBus, starts the 120Hz UDP listener on port 4242, and generates your local pairing QR code.
-
-                    </p>
-
-                </div>
-
-
-
-                <div class="setup-card">
-
-                    <div class="setup-step">Step 02</div>
-
-                    <h3 class="setup-title">Scan QR From Phone</h3>
-
-                    <p class="setup-desc">
-
-                        Open FH6 Controller on your Android phone and tap the scanner icon. Point your phone camera at the PC screen QR code to sync network parameters automatically.
-
-                    </p>
-
-                </div>
-
-
-
-                <div class="setup-card">
-
-                    <div class="setup-step">Step 03</div>
-
-                    <h3 class="setup-title">Drive in Forza Horizon</h3>
-
-                    <p class="setup-desc">
-
-                        Launch Forza Horizon. The virtual Xbox 360 controller is already active and mapped. Drive with dynamic thumb steering or 6-axis gyro tilt immediately.
-
-                    </p>
-
-                </div>
-
-            </div>
-
-        </section>
-
-    </main>
-
-
-
-    <!-- Footer -->
-    <footer>
-        <div class="footer-content">
-            <div>
-                <strong>Horizon Mobile Controller Suite</strong> &bull; Open-source sim racing controller bridge for Forza Horizon.
-            </div>
-            <div class="footer-links">
-                <a href="https://apps.microsoft.com/detail/9PKKK7NB747K" target="_blank">Microsoft Store</a>
-                <a href="privacy.html">Privacy Policy</a>
-                <a href="terms.html">Terms &amp; License</a>
-                <a href="https://github.com/VarunKulkarni15/FH6-Mobile-Controller" target="_blank">GitHub</a>
-                <a href="https://horizoncontro.varunkulkarni.dpdns.org">Web Portal</a>
-                <a href="https://github.com/ViGEm/ViGEmBus" target="_blank">ViGEmBus Driver</a>
-            </div>
-        </div>
-        <div style="max-width: 1040px; margin: 18px auto 0; font-size: 11px; color: var(--text-muted); line-height: 1.5; border-top: 1px solid rgba(255, 255, 255, 0.05); padding-top: 14px; text-align: center;">
-            <strong>Legal Non-Affiliation Notice:</strong> <em>Forza, Forza Horizon, Xbox, Windows, and Microsoft</em> are registered trademarks of Microsoft Corporation. This software is an independent open-source virtual controller bridge and telemetry receiver. It is not affiliated with, endorsed by, or sponsored by Microsoft Corporation, Playground Games, or Turn 10 Studios.
-        </div>
-    </footer>
-
-
-
-    <!-- Directional SVG Motion Blur Filter for Cinematic Scroll -->
-
-    <!-- Background is rock-solid and stable -->
-
-</body>
-
-</html>
-
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Forza Horizon Controller // Sim Racing Controller Suite for PC</title>
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <link rel="icon" type="image/png" href="assets/fh6_logo.png">
+    <link rel="canonical" href="https://horizoncontro.varunkulkarni.dpdns.org/">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://horizoncontro.varunkulkarni.dpdns.org/">
+    <meta property="og:title" content="Horizon Controller // Sim Racing Controller Suite">
+    <meta property="og:description" content="Direct hardware-level Xbox 360 controller emulation for PC. Transform your phone into a low-latency sim-racing rig.">
+    <meta property="og:image" content="https://horizoncontro.varunkulkarni.dpdns.org/assets/forzahorizon1222.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-base: #080C12;
+            --bg-panel: #0E141F;
+            --bg-card: #121A28;
+            --border-subtle: #1C2738;
+            --border-active: #2D3E56;
+            --volt: #CCFF00;
+            --magenta: #FF007F;
+            --white: #FFFFFF;
+            --text-muted: #7E94AD;
+            --text-dim: #95A7BC;
+            --font-racing: 'Chakra Petch', -apple-system, sans-serif;
+            --font-body: 'Inter', -apple-system, sans-serif;
+        }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            scrollbar-width: none !important;
+            -ms-overflow-style: none !important;
+        }
+        *::-webkit-scrollbar,
+        html::-webkit-scrollbar,
+        body::-webkit-scrollbar {
+            width: 0px !important;
+            height: 0px !important;
+            display: none !important;
+            background: transparent !important;
+        }
+        html {
+            scroll-behavior: smooth;
+            background-color: var(--bg-base);
+            color: var(--white);
+            overflow-x: hidden;
+            scrollbar-width: none !important;
+            -ms-overflow-style: none !important;
+        }
+        body {
+            font-family: var(--font-body);
+            overflow-x: hidden;
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+            background-color: transparent;
+            scrollbar-width: none !important;
+            -ms-overflow-style: none !important;
+        }
+        /* Fixed Single Ambient Background: forzahorizon1222.png (Zero-blink GPU composited) */
+        .ambient-fixed-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-image: url('assets/forzahorizon1222.png');
+            background-size: cover;
+            background-position: center 32%;
+            background-repeat: no-repeat;
+            z-index: 0;
+            pointer-events: none;
+            transform: translate3d(0, 0, 0);
+            backface-visibility: hidden;
+        }
+        .ambient-vignette {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: 
+                radial-gradient(ellipse at 50% 35%, rgba(8, 12, 18, 0.15) 0%, rgba(8, 12, 18, 0.55) 65%, rgba(8, 12, 18, 0.90) 100%),
+                linear-gradient(180deg, rgba(8, 12, 18, 0.18) 0%, rgba(8, 12, 18, 0.38) 45%, rgba(8, 12, 18, 0.85) 85%, var(--bg-base) 100%);
+            z-index: 1;
+            pointer-events: none;
+            transform: translate3d(0, 0, 0);
+            backface-visibility: hidden;
+        }
+        /* Smooth Hardware Stage Container */
+        #motion-blur-stage {
+            position: relative;
+            z-index: 2;
+            transform: translate3d(0, 0, 0);
+        }
+        /* Top Navigation Bar: High-Tech Sim Racing Glassmorphism */
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            background: rgba(8, 12, 18, 0.78);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            padding: 12px 36px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: all 0.25s ease;
+        }
+        .brand-link {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            text-decoration: none;
+            color: var(--white);
+        }
+        .brand-logo-img {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            object-fit: contain;
+            transition: transform 0.2s ease;
+        }
+        .brand-link:hover .brand-logo-img {
+            transform: scale(1.08) rotate(-2deg);
+        }
+        .brand-titles {
+            display: flex;
+            flex-direction: column;
+            gap: 1px;
+        }
+        .brand-text {
+            font-family: var(--font-racing);
+            font-size: 15px;
+            font-weight: 800;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            line-height: 1.1;
+        }
+        .brand-text .volt {
+            color: var(--volt);
+        }
+        .brand-subtext {
+            font-family: var(--font-racing);
+            font-size: 9px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+        nav {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(255, 255, 255, 0.03);
+            padding: 4px 6px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        nav a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-family: var(--font-racing);
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            padding: 7px 14px;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+        }
+        nav a:hover {
+            color: #FFFFFF;
+            background: rgba(255, 255, 255, 0.08);
+        }
+        .btn-nav-repo {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--white);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            font-family: var(--font-racing);
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            padding: 8px 16px;
+            border-radius: 6px;
+            text-decoration: none;
+            text-transform: uppercase;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+        }
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .btn-nav-store {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            background: rgba(204, 255, 0, 0.10);
+            color: var(--volt);
+            border: 1px solid rgba(204, 255, 0, 0.35);
+            font-family: var(--font-racing);
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            padding: 8px 14px;
+            border-radius: 6px;
+            text-decoration: none;
+            text-transform: uppercase;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .btn-nav-store:hover {
+            background: var(--volt);
+            color: var(--bg-base);
+            border-color: var(--volt);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 16px rgba(204, 255, 0, 0.3);
+        }
+        .btn-nav-repo {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--white);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            font-family: var(--font-racing);
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            padding: 8px 14px;
+            border-radius: 6px;
+            text-decoration: none;
+            text-transform: uppercase;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .btn-nav-repo:hover {
+            background: rgba(255, 255, 255, 0.12);
+            border-color: var(--white);
+            color: var(--white);
+            transform: translateY(-1px);
+        }
+        /* Hero Section */
+        .hero {
+            min-height: 85vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 140px 24px 60px;
+            max-width: 1040px;
+            margin: 0 auto;
+        }
+        .hero-title {
+            font-family: var(--font-racing);
+            font-size: clamp(38px, 6vw, 68px);
+            font-weight: 800;
+            line-height: 1.05;
+            letter-spacing: -0.5px;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+        }
+        .hero-title span.volt {
+            color: var(--volt);
+        }
+        .hero-description {
+            font-size: clamp(16px, 1.8vw, 19px);
+            color: var(--text-dim);
+            max-width: 760px;
+            line-height: 1.6;
+            margin-bottom: 38px;
+        }
+        /* Single Prominent Download Row */
+        .hero-cta-group {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-bottom: 36px;
+        }
+        .btn-volt {
+            background: var(--volt);
+            color: var(--bg-base);
+            font-family: var(--font-racing);
+            font-size: 13px;
+            font-weight: 800;
+            letter-spacing: 1px;
+            padding: 16px 28px;
+            border-radius: 4px;
+            text-decoration: none;
+            text-transform: uppercase;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 18px rgba(204, 255, 0, 0.22);
+        }
+        .btn-volt:hover {
+            background: #FFFFFF;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 24px rgba(255, 255, 255, 0.3);
+        }
+        .btn-slate {
+            background: var(--bg-panel);
+            color: var(--white);
+            border: 1px solid var(--border-active);
+            font-family: var(--font-racing);
+            font-size: 13px;
+            font-weight: 800;
+            letter-spacing: 1px;
+            padding: 16px 28px;
+            border-radius: 4px;
+            text-decoration: none;
+            text-transform: uppercase;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.2s ease;
+        }
+        .btn-slate:hover {
+            border-color: var(--volt);
+            color: var(--volt);
+            transform: translateY(-2px);
+        }
+        .security-help-strip {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: -16px;
+            margin-bottom: 28px;
+            background: var(--bg-panel);
+            border: 1px solid var(--border-subtle);
+            padding: 7px 16px;
+            border-radius: 20px;
+        }
+        .security-help-strip strong {
+            color: #FFFFFF;
+        }
+        .security-help-strip .sep {
+            color: rgba(255, 255, 255, 0.2);
+        }
+        .hero-specs-strip {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 28px;
+            padding-top: 24px;
+            border-top: 1px solid var(--border-subtle);
+        }
+        .spec-item {
+            font-family: var(--font-racing);
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+        .spec-item span {
+            color: var(--white);
+        }
+        /* Showcase Section: Real Mobile App Screenshots */
+        .showcase-section {
+            padding: 80px 24px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .section-header {
+            margin-bottom: 48px;
+        }
+        .section-tag {
+            font-family: var(--font-racing);
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 2px;
+            color: var(--volt);
+            text-transform: uppercase;
+            margin-bottom: 6px;
+        }
+        .section-heading {
+            font-family: var(--font-racing);
+            font-size: clamp(26px, 3.5vw, 42px);
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            text-transform: uppercase;
+            line-height: 1.15;
+        }
+        .showcase-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 60px;
+        }
+        .showcase-card {
+            background: var(--bg-panel);
+            border: 1px solid var(--border-subtle);
+            border-radius: 8px;
+            overflow: hidden;
+            display: grid;
+            grid-template-columns: 1.1fr 1fr;
+            transition: border-color 0.2s ease;
+        }
+        .showcase-card:hover {
+            border-color: var(--border-active);
+        }
+        .showcase-card.reverse {
+            grid-template-columns: 1fr 1.1fr;
+        }
+        .showcase-card.reverse .showcase-visual {
+            order: 2;
+        }
+        .showcase-card.reverse .showcase-info {
+            order: 1;
+        }
+        .showcase-visual {
+            background: #05080C;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            border-right: 1px solid var(--border-subtle);
+        }
+        .showcase-card.reverse .showcase-visual {
+            border-right: none;
+            border-left: 1px solid var(--border-subtle);
+        }
+        .showcase-visual img {
+            width: 100%;
+            height: auto;
+            border-radius: 6px;
+            display: block;
+        }
+        .showcase-info {
+            padding: 42px 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .showcase-number {
+            font-family: var(--font-racing);
+            font-size: 11px;
+            font-weight: 800;
+            color: var(--volt);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+        .showcase-title {
+            font-family: var(--font-racing);
+            font-size: 24px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 16px;
+            line-height: 1.2;
+        }
+        .showcase-body {
+            color: var(--text-dim);
+            font-size: 14px;
+            line-height: 1.65;
+            margin-bottom: 24px;
+        }
+        .showcase-bullets {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .showcase-bullets li {
+            font-family: var(--font-racing);
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--white);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .showcase-bullets li::before {
+            content: "";
+            width: 6px;
+            height: 6px;
+            background: var(--volt);
+            border-radius: 1px;
+        }
+        /* 3-Column Architecture Matrix */
+        .tech-section {
+            padding: 80px 24px;
+            max-width: 1200px;
+            margin: 0 auto;
+            border-top: 1px solid var(--border-subtle);
+        }
+        .tech-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 24px;
+        }
+        .tech-card {
+            background: var(--bg-panel);
+            border: 1px solid var(--border-subtle);
+            border-radius: 6px;
+            padding: 32px;
+        }
+        .tech-card-header {
+            font-family: var(--font-racing);
+            font-size: 11px;
+            font-weight: 800;
+            color: var(--volt);
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+        }
+        .tech-card-title {
+            font-family: var(--font-racing);
+            font-size: 19px;
+            font-weight: 800;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+            line-height: 1.25;
+        }
+        .tech-card-body {
+            color: var(--text-dim);
+            font-size: 13.5px;
+            line-height: 1.6;
+        }
+        /* 3-Step Setup Guide */
+        .setup-section {
+            padding: 80px 24px;
+            max-width: 1200px;
+            margin: 0 auto;
+            border-top: 1px solid var(--border-subtle);
+        }
+        .setup-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+        }
+        .setup-card {
+            background: var(--bg-panel);
+            border: 1px solid var(--border-subtle);
+            border-radius: 6px;
+            padding: 28px;
+        }
+        .setup-step {
+            font-family: var(--font-racing);
+            font-size: 12px;
+            font-weight: 800;
+            color: var(--volt);
+            letter-spacing: 1.5px;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+        }
+        .setup-title {
+            font-family: var(--font-racing);
+            font-size: 17px;
+            font-weight: 800;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+        .setup-desc {
+            font-size: 13.5px;
+            color: var(--text-dim);
+            line-height: 1.6;
+        }
+        /* Footer */
+        footer {
+            border-top: 1px solid var(--border-subtle);
+            padding: 40px 24px;
+            background: var(--bg-base);
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        .footer-links {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+        .footer-links a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-family: var(--font-racing);
+            font-weight: 700;
+            transition: color 0.15s ease;
+        }
+        .footer-links a:hover {
+            color: var(--volt);
+        }
+        /* Adaptive Layout for Tablet & Medium Screens */
+        @media (max-width: 900px) {
+            header {
+                padding: 14px 20px;
+            }
+            nav {
+                display: none;
+            }
+            .ambient-fixed-bg {
+                background-position: 46% 26%;
+            }
+            .showcase-card, .showcase-card.reverse {
+                grid-template-columns: 1fr;
+            }
+            .showcase-card.reverse .showcase-visual {
+                order: 1;
+                border-left: none;
+                border-bottom: 1px solid var(--border-subtle);
+            }
+            .showcase-card.reverse .showcase-info {
+                order: 2;
+            }
+            .showcase-visual {
+                border-right: none;
+                border-bottom: 1px solid var(--border-subtle);
+            }
+            .showcase-info {
+                padding: 28px 24px;
+            }
+            .tech-grid {
+                grid-template-columns: 1fr;
+            }
+            .setup-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        /* Adaptive Layout for Mobile Devices */
+        @media (max-width: 640px) {
+            header {
+                padding: 12px 16px;
+            }
+            .brand-text {
+                font-size: 12px;
+            }
+            .btn-nav-repo {
+                padding: 7px 12px;
+                font-size: 10px;
+                letter-spacing: 0.5px;
+            }
+            .ambient-fixed-bg {
+                background-position: 48% 22%;
+                transform: scale(1.05);
+            }
+            .hero {
+                min-height: auto;
+                padding: 100px 16px 40px;
+            }
+            .hero-title {
+                font-size: clamp(26px, 7.5vw, 36px);
+                margin-bottom: 16px;
+            }
+            .hero-description {
+                font-size: 14px;
+                margin-bottom: 24px;
+            }
+            .hero-cta-group {
+                flex-direction: column;
+                width: 100%;
+                gap: 12px;
+                margin-bottom: 28px;
+            }
+            .btn-volt, .btn-slate {
+                width: 100%;
+                justify-content: center;
+                box-sizing: border-box;
+                padding: 14px 18px;
+                font-size: 12px;
+            }
+            .security-help-strip {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: -16px;
+            margin-bottom: 28px;
+            background: var(--bg-panel);
+            border: 1px solid var(--border-subtle);
+            padding: 7px 16px;
+            border-radius: 20px;
+        }
+        .security-help-strip strong {
+            color: #FFFFFF;
+        }
+        .security-help-strip .sep {
+            color: rgba(255, 255, 255, 0.2);
+        }
+        .security-help-strip {
+                flex-direction: column;
+                gap: 4px;
+                text-align: center;
+                font-size: 10px;
+                padding: 8px 12px;
+            }
+            .security-help-strip .sep {
+                display: none;
+            }
+            .hero-specs-strip {
+                gap: 12px;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+            }
+            .showcase-section,
+            .tech-section,
+            .setup-section {
+                padding: 48px 16px;
+            }
+            .section-heading {
+                font-size: clamp(22px, 6vw, 28px);
+            }
+            .showcase-info {
+                padding: 22px 18px;
+            }
+            .showcase-bullets {
+                font-size: 13px;
+                gap: 8px;
+            }
+            .tech-card,
+            .setup-card {
+                padding: 22px 18px;
+            }
+            .footer-content {
+                flex-direction: column;
+                text-align: center;
+                gap: 16px;
+                font-size: 12px;
+            }
+            .footer-links {
+                justify-content: center;
+                flex-wrap: wrap;
+                gap: 16px;
+            }
+        }
+        /* Small Phones (iPhone SE, Galaxy A series, etc.) */
+        @media (max-width: 380px) {
+            .hero-title {
+                font-size: 24px;
+            }
+            .btn-volt, .btn-slate {
+                font-size: 11px;
+                padding: 12px 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Fixed Single Ambient Forza Horizon GT-R Background -->
+    <div class="ambient-fixed-bg"></div>
+    <div class="ambient-vignette"></div>
+    <!-- Top Navigation Bar -->
+    <header>
+        <a href="#" class="brand-link">
+            <img src="assets/fh6_logo.svg" alt="Forza Horizon Controller Logo" class="brand-logo-img">
+            <div class="brand-titles">
+                <span class="brand-text">HORIZON <span class="volt">CONTROLLER</span></span>
+                <span class="brand-subtext">SIM RACING EMULATION</span>
+            </div>
+        </a>
+        <nav>
+            <a href="#showcase">Mobile Features</a>
+            <a href="#architecture">Architecture</a>
+            <a href="#setup">Setup Guide</a>
+        </nav>
+        <div class="header-actions">
+            <a href="https://apps.microsoft.com/detail/9PKKK7NB747K" target="_blank" class="btn-nav-store" title="Microsoft Store Certified">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M0 3.449L9.75 2.1v9.451H0m10.949-9.602L24 0v11.4H10.949M0 12.6h9.75v9.451L0 20.699M10.949 12.6H24V24l-12.951-1.801"/>
+                </svg>
+                <span>Microsoft Store</span>
+            </a>
+            <a href="https://github.com/VarunKulkarni15/FH6-Mobile-Controller" target="_blank" class="btn-nav-repo">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
+                </svg>
+                <span>GitHub</span>
+            </a>
+        </div>
+    </header>
+    <!-- Velocity-decayed scroll motion blur container -->
+    <main id="motion-blur-stage">
+        <!-- 1. Hero Section -->
+        <section class="hero">
+            <h1 class="hero-title">
+                Forza Horizon <br>
+                <span class="volt">Controller Suite</span>
+            </h1>
+            <p class="hero-description">
+                Direct hardware-level Xbox 360 controller emulation for PC. Transform your phone into a low-latency sim-racing rig featuring dynamic touch steering, 6-axis gyro tilt, and 120Hz UDP telemetry synchronization.
+            </p>
+            <!-- High-Impact Download Group -->
+            <div class="hero-cta-group">
+                <a href="https://apps.microsoft.com/detail/9PKKK7NB747K" target="_blank" class="btn-volt" title="Direct Microsoft Store Installation">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M0 3.449L9.75 2.1v9.451H0m10.949-9.602L24 0v11.4H10.949M0 12.6h9.75v9.451L0 20.699M10.949 12.6H24V24l-12.951-1.801"/>
+                    </svg>
+                    <span>Get from Microsoft Store</span>
+                </a>
+                <a href="releases/fh6-controller-windows.exe" download="fh6-controller-windows.exe" class="btn-slate">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M0 3.449L9.75 2.1v9.451H0m10.949-9.602L24 0v11.4H10.949M0 12.6h9.75v9.451L0 20.699M10.949 12.6H24V24l-12.951-1.801"/>
+                    </svg>
+                    <span>Download Windows Companion</span>
+                </a>
+                <a href="HorizonController.apk" download="HorizonController.apk" class="btn-slate">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M17.523 15.3414c-.5511 0-.9993-.4486-.9993-.9997s.4482-.9993.9993-.9993c.551 0 .9993.4482.9993.9993.0001.5511-.4483.9997-.9993.9997m-11.046 0c-.5511 0-.9993-.4486-.9993-.9997s.4482-.9993.9993-.9993c.5511 0 .9993.4482.9993.9993 0 .5511-.4482.9997-.9993.9997m11.4045-6.02l1.9973-3.4592a.416.416 0 00-.1521-.5676.416.416 0 00-.5676.1521l-2.0223 3.503C15.5902 8.4101 13.8559 8.082 12 8.082s-3.5902.3282-5.1368.8677L4.8409 5.4467a.4161.4161 0 00-.5677-.1521.4157.4157 0 00-.1521.5676l1.9973 3.4592C2.6889 11.1867.3432 14.6589 0 18.761h24c-.3432-4.1021-2.6889-7.5743-6.1185-9.4396"/>
+                    </svg>
+                    <span>Download Android App</span>
+                </a>
+            </div>
+            <!-- Helpful Sideload & SmartScreen Guidance Strip -->
+            <div class="security-help-strip">
+                <span>Microsoft Store: <strong>1-Click Install</strong> (Zero SmartScreen Warnings)</span>
+                <span class="sep">&bull;</span>
+                <span>Windows Companion: <strong>Self-Installing .exe</strong> (Auto-installs ViGEmBus driver)</span>
+                <span class="sep">&bull;</span>
+                <span>Android APK: Tap <strong>Download anyway</strong> &bull; Or <a href="HorizonController.zip" download="HorizonController.zip" style="color: var(--volt); text-decoration: underline;">Download as .ZIP</a></span>
+            </div>
+            <!-- Authentic Technical Specs Strip -->
+            <div class="hero-specs-strip">
+                <div class="spec-item">FastStream Rate: <span>120Hz UDP</span></div>
+                <div class="spec-item">Emulation Target: <span>Xbox 360 Slot 1</span></div>
+                <div class="spec-item">Driver Architecture: <span>Kernel ViGEmBus</span></div>
+                <div class="spec-item">Network Routing: <span>Direct LAN (Zero Cloud)</span></div>
+            </div>
+        </section>
+        <!-- 2. Mobile App Showcase Section (Direct App Screenshots) -->
+        <section id="showcase" class="showcase-section">
+            <div class="section-header">
+                <div class="section-tag">Direct App Capture</div>
+                <h2 class="section-heading">Engineered for Forza Horizon</h2>
+            </div>
+            <div class="showcase-grid">
+                <!-- Feature 1: Clean Dynamic Driving Cockpit -->
+                <article class="showcase-card">
+                    <div class="showcase-visual">
+                        <img src="assets/app_screenshot_driving.png" alt="Clean Dynamic Driving Cockpit in Android App" loading="lazy">
+                    </div>
+                    <div class="showcase-info">
+                        <div class="showcase-number">Feature Module 01</div>
+                        <h3 class="showcase-title">Dynamic Steering Cockpit</h3>
+                        <p class="showcase-body">
+                            The full left screen acts as a responsive touch steering canvas with progressive angle modulation and a 12 o'clock notch. Independent RT acceleration and LT brake meters with an instant Handbrake drift paddle.
+                        </p>
+                        <ul class="showcase-bullets">
+                            <li>Left-screen full touch steering with 12 o'clock center notch</li>
+                            <li>Independent RT acceleration and LT brake threshold meters</li>
+                            <li>Instant handbrake drift paddle for hairpin turns</li>
+                            <li>Minimalist cockpit layout with sub-millisecond UDP dispatch</li>
+                        </ul>
+                    </div>
+                </article>
+                <!-- Feature 2: Real-time Layout Editor & Resizing -->
+                <article class="showcase-card reverse">
+                    <div class="showcase-visual">
+                        <img src="assets/app_screenshot_editor.png" alt="Dynamic Touch Steering and Live Layout Customizer in Android App" loading="lazy">
+                    </div>
+                    <div class="showcase-info">
+                        <div class="showcase-number">Feature Module 02</div>
+                        <h3 class="showcase-title">Live Layout Customizer</h3>
+                        <p class="showcase-body">
+                            Tap the 3-dots quick menu anytime to reposition controls, adjust element sizes (- / +), remove buttons, or reset to default. Customize the cockpit to match your exact finger span and device size.
+                        </p>
+                        <ul class="showcase-bullets">
+                            <li>Live drag-and-drop element repositioning</li>
+                            <li>Element sizing stepper (- / +) for pedal and button scale</li>
+                            <li>One-tap element removal and reset to default</li>
+                            <li>Tactile volt-accented selection bounds</li>
+                        </ul>
+                    </div>
+                </article>
+                <!-- Feature 3: 18-Action Forza Catalog & Auto-Drive -->
+                <article class="showcase-card">
+                    <div class="showcase-visual">
+                        <img src="assets/app_screenshot_catalog.png" alt="18-Action Forza Control Catalog with Auto-Drive in Android App" loading="lazy">
+                    </div>
+                    <div class="showcase-info">
+                        <div class="showcase-number">Feature Module 03</div>
+                        <h3 class="showcase-title">18-Action Catalog &amp; Auto-Drive</h3>
+                        <p class="showcase-body">
+                            Choose from the complete Forza Horizon control matrix. Add steering wheels, pedals, shifting triggers, horn, telemetry, rewind, or the hardware Auto-Drive driving assist with a single tap.
+                        </p>
+                        <ul class="showcase-bullets">
+                            <li>Dedicated Forza bindings: Handbrake [SPACE], A/B/X/Y, Camera, Horn</li>
+                            <li>Auto-Drive assist button toggle for cruise and straightaways</li>
+                            <li>One-tap addition to layout with instant drag positioning</li>
+                            <li>Native touch-friendly interface with zero keyboard dependencies</li>
+                        </ul>
+                    </div>
+                </article>
+                <!-- Feature 4: 3-Dots Quick Menu & 6-Axis Gyroscope Steering -->
+                <article class="showcase-card reverse">
+                    <div class="showcase-visual">
+                        <img src="assets/app_screenshot_gyro_settings.png" alt="3-Dots Quick Menu and Gyroscope Settings in Android App" loading="lazy">
+                    </div>
+                    <div class="showcase-info">
+                        <div class="showcase-number">Feature Module 04</div>
+                        <h3 class="showcase-title">Quick Menu &amp; Gyro Steering</h3>
+                        <p class="showcase-body">
+                            Access the sleek Horizon Settings drawer directly from the 3-dots button. Toggle hardware 6-axis gyroscope motion steering, monitor live tilt degrees in real time, and adjust sensitivity multipliers on the fly.
+                        </p>
+                        <ul class="showcase-bullets">
+                            <li>Hardware IMU sensor fusion with live degree readout (0° to 90°)</li>
+                            <li>Instant sensitivity presets: 0.75x, 1.0x, 1.5x, 2.0x, with fine stepper</li>
+                            <li>Direct access to PC pairing status and layout repositioning</li>
+                            <li>Integrated in-game Menu (Pause) and View (Map) controls</li>
+                        </ul>
+                    </div>
+                </article>
+                <!-- Feature 5: Instant In-App QR Scanner & Direct PC Pairing -->
+                <article class="showcase-card">
+                    <div class="showcase-visual">
+                        <img src="assets/app_screenshot_pairing.png" alt="In-App QR Scanner and Pairing Hub in Android App" loading="lazy">
+                    </div>
+                    <div class="showcase-info">
+                        <div class="showcase-number">Feature Module 05</div>
+                        <h3 class="showcase-title">In-App QR Scanner &amp; 120Hz Pairing</h3>
+                        <p class="showcase-body">
+                            Connect your phone to your PC in under one second. Use the embedded Google Play Services camera scanner to read the companion QR code, or trigger automatic local network broadcast discovery.
+                        </p>
+                        <ul class="showcase-bullets">
+                            <li>In-app camera viewfinder with zero external app redirects</li>
+                            <li>Auto-Discovery via UDP local network broadcast beacons</li>
+                            <li>Manual IP fallback with 1-tap direct connect</li>
+                            <li>Zero cloud relay: direct peer-to-peer 120Hz binary UDP</li>
+                        </ul>
+                    </div>
+                </article>
+            </div>
+        </section>
+        <!-- 3. Technical Architecture Matrix -->
+        <section id="architecture" class="tech-section">
+            <div class="section-header">
+                <div class="section-tag">System Core</div>
+                <h2 class="section-heading">Direct ViGEmBus Telemetry</h2>
+            </div>
+            <div class="tech-grid">
+                <div class="tech-card">
+                    <div class="tech-card-header">Kernel Emulation</div>
+                    <h3 class="tech-card-title">Virtual Xbox 360 Controller</h3>
+                    <p class="tech-card-body">
+                        Direct communication with the Windows Virtual Gamepad Emulation Bus (`ViGEmBus`). Forza Horizon, Steam, and Windows recognize the device as an authentic Xbox 360 gamepad with zero configuration required.
+                    </p>
+                </div>
+                <div class="tech-card">
+                    <div class="tech-card-header">Telemetry Engine</div>
+                    <h3 class="tech-card-title">All Horizon Games Auto-Detect</h3>
+                    <p class="tech-card-body">
+                        The Windows Companion continuously monitors process execution for Forza Horizon 5, Forza Horizon 4, Forza Horizon 3, Forza Horizon 6, and Forza Motorsport, dynamically synchronizing telemetry profiles.
+                    </p>
+                </div>
+                <div class="tech-card">
+                    <div class="tech-card-header">FastStream Protocol</div>
+                    <h3 class="tech-card-title">120Hz Binary Datagrams</h3>
+                    <p class="tech-card-body">
+                        Low-overhead binary UDP stream transmitting analog steering, brake, throttle, and digital button states directly between phone and PC with sub-millisecond latency.
+                    </p>
+                </div>
+            </div>
+        </section>
+        <!-- 4. Setup Guide -->
+        <section id="setup" class="setup-section">
+            <div class="section-header">
+                <div class="section-tag">Quick Start</div>
+                <h2 class="section-heading">Three-Step Deployment</h2>
+            </div>
+            <div class="setup-grid">
+                <div class="setup-card">
+                    <div class="setup-step">Step 01</div>
+                    <h3 class="setup-title">Run Windows Companion</h3>
+                    <p class="setup-desc">
+                        Launch `fh6-controller-windows.exe` on your PC. It auto-verifies ViGEmBus, starts the 120Hz UDP listener on port 4242, and generates your local pairing QR code.
+                    </p>
+                </div>
+                <div class="setup-card">
+                    <div class="setup-step">Step 02</div>
+                    <h3 class="setup-title">Scan QR From Phone</h3>
+                    <p class="setup-desc">
+                        Open FH6 Controller on your Android phone and tap the scanner icon. Point your phone camera at the PC screen QR code to sync network parameters automatically.
+                    </p>
+                </div>
+                <div class="setup-card">
+                    <div class="setup-step">Step 03</div>
+                    <h3 class="setup-title">Drive in Forza Horizon</h3>
+                    <p class="setup-desc">
+                        Launch Forza Horizon. The virtual Xbox 360 controller is already active and mapped. Drive with dynamic thumb steering or 6-axis gyro tilt immediately.
+                    </p>
+                </div>
+            </div>
+        </section>
+    </main>
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div>
+                <strong>Horizon Mobile Controller Suite</strong> &bull; Open-source sim racing controller bridge for Forza Horizon.
+            </div>
+            <div class="footer-links">
+                <a href="https://apps.microsoft.com/detail/9PKKK7NB747K" target="_blank">Microsoft Store</a>
+                <a href="privacy.html">Privacy Policy</a>
+                <a href="terms.html">Terms &amp; License</a>
+                <a href="https://github.com/VarunKulkarni15/FH6-Mobile-Controller" target="_blank">GitHub</a>
+                <a href="https://horizoncontro.varunkulkarni.dpdns.org">Web Portal</a>
+                <a href="https://github.com/ViGEm/ViGEmBus" target="_blank">ViGEmBus Driver</a>
+            </div>
+        </div>
+        <div style="max-width: 1040px; margin: 18px auto 0; font-size: 11px; color: var(--text-muted); line-height: 1.5; border-top: 1px solid rgba(255, 255, 255, 0.05); padding-top: 14px; text-align: center;">
+            <strong>Legal Non-Affiliation Notice:</strong> <em>Forza, Forza Horizon, Xbox, Windows, and Microsoft</em> are registered trademarks of Microsoft Corporation. This software is an independent open-source virtual controller bridge and telemetry receiver. It is not affiliated with, endorsed by, or sponsored by Microsoft Corporation, Playground Games, or Turn 10 Studios.
+        </div>
+    </footer>
+    <!-- Directional SVG Motion Blur Filter for Cinematic Scroll -->
+    <!-- Background is rock-solid and stable -->
+</body>
+</html>

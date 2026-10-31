@@ -67,7 +67,7 @@ public static class AppRegistrationService
                     uninstallKey.SetValue("DisplayIcon", $"{currentExe},0");
                     uninstallKey.SetValue("InstallLocation", exeDir);
                     uninstallKey.SetValue("HelpLink", "https://github.com/VarunKulkarni15/FH6-Mobile-Controller");
-                    uninstallKey.SetValue("URLInfoAbout", "https://fh6controller.vercel.app");
+                    uninstallKey.SetValue("URLInfoAbout", "https://horizoncontro.varunkulkarni.dpdns.org");
                     uninstallKey.SetValue("NoModify", 1, RegistryValueKind.DWord);
                     uninstallKey.SetValue("NoRepair", 1, RegistryValueKind.DWord);
                 }
