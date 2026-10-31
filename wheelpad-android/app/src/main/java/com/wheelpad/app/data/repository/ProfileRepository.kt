@@ -47,39 +47,6 @@ class ProfileRepository(private val context: Context) {
                         modified = true
                     }
                 }
-                // Auto-upgrade layout: Ensure auto_drive and rewind exist on-screen
-                if (profile.layout.none { it.actionId == "auto_drive" }) {
-                    profile.layout.add(
-                        TouchControlElement(
-                            elementId = "auto_drive",
-                            actionId = "auto_drive",
-                            label = "AUTO DRIVE",
-                            shape = ControlShape.RoundedButton,
-                            normalizedX = 0.51f,
-                            normalizedY = 0.76f,
-                            normalizedWidth = 0.12f,
-                            normalizedHeight = 0.16f,
-                            accentColorHex = "#CCFF00"
-                        )
-                    )
-                    modified = true
-                }
-                if (profile.layout.none { it.actionId == "rewind" }) {
-                    profile.layout.add(
-                        TouchControlElement(
-                            elementId = "rewind",
-                            actionId = "rewind",
-                            label = "REWIND",
-                            shape = ControlShape.RoundedButton,
-                            normalizedX = 0.51f,
-                            normalizedY = 0.14f,
-                            normalizedWidth = 0.12f,
-                            normalizedHeight = 0.16f,
-                            accentColorHex = "#FFB300"
-                        )
-                    )
-                    modified = true
-                }
                 if (modified) {
                     saveProfile(profile)
                 }
@@ -105,6 +72,11 @@ class ProfileRepository(private val context: Context) {
     }
 
     fun saveProfile(profile: ControllerProfile) {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            profile.lastModifiedUtc = java.time.Instant.now().toString()
+        } else {
+            profile.lastModifiedUtc = System.currentTimeMillis().toString()
+        }
         val json = serializeProfileToJson(profile)
         val file = File(profilesDir, "${profile.profileId}.json")
         file.writeText(json)

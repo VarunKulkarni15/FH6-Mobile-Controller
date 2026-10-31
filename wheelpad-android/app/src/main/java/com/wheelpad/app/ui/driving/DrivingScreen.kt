@@ -230,6 +230,12 @@ fun DrivingScreen(
                                             val deltaNormX = dragAmount.x / screenWidthPx
                                             val deltaNormY = dragAmount.y / screenHeightPx
                                             viewModel.updateElementDeltaPosition(element.elementId, deltaNormX, deltaNormY)
+                                        },
+                                        onDragEnd = {
+                                            viewModel.saveAndSyncProfile()
+                                        },
+                                        onDragCancel = {
+                                            viewModel.saveAndSyncProfile()
                                         }
                                     )
                                 }
@@ -284,7 +290,7 @@ fun DrivingScreen(
                             "pause", "btn_start", "btn_menu" -> 1 shl 4
                             "btn_x" -> 1 shl 5
                             "btn_b" -> 1 shl 6
-                            "btn_lb" -> 1 shl 7
+                            "btn_lb", "clutch" -> 1 shl 7
                             "btn_ls", "horn" -> 1 shl 8
                             "btn_rs", "look_back" -> 1 shl 9
                             "dpad_up" -> 1 shl 10
@@ -303,14 +309,14 @@ fun DrivingScreen(
                             subLabel = when (element.actionId) {
                                 "rewind", "btn_y" -> "(Y)"
                                 "btn_a" -> "(A)"
-                                "btn_b" -> "(B)"
-                                "btn_x" -> "(X)"
+                                "btn_b" -> "+ (B)"
+                                "btn_x" -> "− (X)"
                                 "camera", "btn_rb" -> "(RB)"
-                                "btn_lb" -> "(LB)"
-                                "btn_ls" -> "(LS)"
-                                "btn_rs" -> "(RS)"
-                                "map", "btn_back" -> "(VIEW)"
-                                "pause", "btn_start" -> "(MENU)"
+                                "btn_lb", "clutch" -> "(LB)"
+                                "btn_ls", "horn" -> "(LS)"
+                                "btn_rs", "look_back" -> "(RS)"
+                                "map", "btn_back", "btn_view" -> "VIEW"
+                                "pause", "btn_start", "btn_menu" -> "MENU"
                                 "dpad_up" -> "UP"
                                 "dpad_down" -> "DOWN"
                                 "dpad_left" -> "LEFT"
@@ -533,51 +539,79 @@ fun DrivingScreen(
                                 Row(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .clip(RoundedCornerShape(3.dp))
-                                        .background(Color.White)
+                                        .clip(RoundedCornerShape(6.dp))
+                                        .background(Color(0xFF071816))
+                                        .border(1.dp, Color(0x35CCFF00), RoundedCornerShape(6.dp))
                                         .clickable { viewModel.addActionToLayout(action) }
-                                        .padding(horizontal = 14.dp, vertical = 8.dp),
+                                        .padding(horizontal = 10.dp, vertical = 7.dp),
                                     horizontalArrangement = Arrangement.SpaceBetween,
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    Text(
-                                        text = action.name,
-                                        color = Color.Black,
-                                        fontWeight = FontWeight.Black,
-                                        fontSize = 11.sp
-                                    )
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                                    ) {
+                                        // Miniature Scalable SVG Preview Box
+                                        Box(
+                                            modifier = Modifier
+                                                .size(36.dp)
+                                                .clip(RoundedCornerShape(6.dp))
+                                                .background(Color(0xFF030D0C))
+                                                .border(1.dp, Color(0x40FFFFFF), RoundedCornerShape(6.dp))
+                                                .padding(2.dp)
+                                        ) {
+                                            FH6MiniActionPreview(actionId = action.id)
+                                        }
+
+                                        Column {
+                                            Text(
+                                                text = action.name,
+                                                color = Color.White,
+                                                fontWeight = FontWeight.Black,
+                                                fontSize = 11.sp
+                                            )
+                                            Text(
+                                                text = action.description,
+                                                color = Color(0x99FFFFFF),
+                                                fontSize = 9.sp,
+                                                maxLines = 1
+                                            )
+                                        }
+                                    }
 
                                     val tagText = when (action.id) {
-                                        "rewind" -> "Y"
+                                        "rewind", "btn_y" -> "Y"
                                         "btn_a" -> "A"
                                         "btn_b" -> "B"
                                         "btn_x" -> "X"
-                                        "camera" -> "RB"
-                                        "btn_lb" -> "LB"
-                                        "btn_ls" -> "LS"
-                                        "btn_rs" -> "RS"
-                                        "map" -> "VIEW"
-                                        "pause" -> "MENU"
+                                        "camera", "btn_rb" -> "RB"
+                                        "btn_lb", "clutch" -> "LB"
+                                        "btn_ls", "horn" -> "LS"
+                                        "btn_rs", "look_back" -> "RS"
+                                        "map", "btn_back", "btn_view" -> "VIEW"
+                                        "pause", "btn_start", "btn_menu" -> "MENU"
                                         "dpad_up" -> "UP"
                                         "dpad_down" -> "DOWN"
                                         "dpad_left" -> "LEFT"
                                         "dpad_right" -> "RIGHT"
                                         "handbrake" -> "SPACE"
+                                        "auto_drive" -> "C+2"
                                         else -> "+ ADD"
                                     }
 
                                     Box(
                                         modifier = Modifier
-                                            .clip(RoundedCornerShape(3.dp))
-                                            .background(Color(0xFFE0E0E0))
-                                            .padding(horizontal = 8.dp, vertical = 2.dp)
+                                            .clip(RoundedCornerShape(4.dp))
+                                            .background(Color(0x20CCFF00))
+                                            .border(1.dp, Color(0xFFCCFF00), RoundedCornerShape(4.dp))
+                                            .padding(horizontal = 7.dp, vertical = 3.dp)
                                     ) {
                                         Text(
                                             text = tagText,
-                                            color = Color.Black,
+                                            color = Color(0xFFCCFF00),
                                             fontWeight = FontWeight.Black,
-                                            fontSize = 10.sp,
-                                            letterSpacing = 1.sp
+                                            fontSize = 9.sp,
+                                            letterSpacing = 0.5.sp
                                         )
                                     }
                                 }
@@ -1341,7 +1375,7 @@ fun FH6ExactSvgActionButton(
     isPressed: Boolean,
     onPressedChange: (Boolean) -> Unit
 ) {
-    Box(
+    BoxWithConstraints(
         modifier = Modifier
             .fillMaxSize()
             .pointerInput(isEditMode) {
@@ -1362,12 +1396,30 @@ fun FH6ExactSvgActionButton(
                 }
             }
     ) {
+        val w = maxWidth
+        val h = maxHeight
+        val minDim = minOf(w, h)
+        val density = androidx.compose.ui.platform.LocalDensity.current
+        val minDimPx = with(density) { minDim.toPx() }
+
+        // Scalable Proportional Dimensions (behaving strictly like a scalable vector graphic)
+        val strokeWidth = (minDimPx * 0.038f).coerceIn(1.2f, 4.5f)
+        val thinStroke = (minDimPx * 0.02f).coerceIn(0.8f, 2.5f)
+        val cornerRad = (minDimPx * 0.16f).coerceIn(4f, 22f)
+
+        // Scalable Proportional Typography
+        val isSingleLetter = when (actionId) {
+            "btn_a", "btn_b", "btn_x", "rewind", "btn_y" -> true
+            else -> false
+        }
+        val mainFontSize = (minDim.value * (if (isSingleLetter) 0.32f else 0.20f)).coerceIn(8f, 38f).sp
+        val subFontSize = (minDim.value * 0.11f).coerceIn(5.5f, 14f).sp
+        val letterSpacingVal = (minDim.value * 0.015f).coerceIn(0.5f, 2.5f).sp
+
         Canvas(modifier = Modifier.fillMaxSize()) {
-            val w = size.width
-            val h = size.height
-            val cx = w / 2f
-            val cy = h / 2f
-            val r = (minOf(w, h) / 2f) * 0.88f
+            val cx = size.width / 2f
+            val cy = size.height / 2f
+            val r = (minOf(size.width, size.height) / 2f) * 0.88f
 
             when (actionId) {
                 "auto_drive" -> {
@@ -1376,17 +1428,17 @@ fun FH6ExactSvgActionButton(
                     if (isPressed) {
                         drawRoundRect(
                             color = voltLime,
-                            cornerRadius = CornerRadius(12.dp.toPx(), 12.dp.toPx())
+                            cornerRadius = CornerRadius(cornerRad, cornerRad)
                         )
                     } else {
                         drawRoundRect(
                             color = Color(0xF2041A18),
-                            cornerRadius = CornerRadius(12.dp.toPx(), 12.dp.toPx())
+                            cornerRadius = CornerRadius(cornerRad, cornerRad)
                         )
                         drawRoundRect(
                             color = voltLime,
-                            cornerRadius = CornerRadius(12.dp.toPx(), 12.dp.toPx()),
-                            style = Stroke(width = 1.6f)
+                            cornerRadius = CornerRadius(cornerRad, cornerRad),
+                            style = Stroke(width = strokeWidth)
                         )
                     }
 
@@ -1399,7 +1451,7 @@ fun FH6ExactSvgActionButton(
                         useCenter = false,
                         topLeft = arcRect.topLeft,
                         size = arcRect.size,
-                        style = Stroke(width = 2.2f)
+                        style = Stroke(width = strokeWidth * 1.3f)
                     )
 
                     // Forward AI Guidance Triangle
@@ -1419,8 +1471,8 @@ fun FH6ExactSvgActionButton(
                         drawCircle(green, radius = r, center = Offset(cx, cy))
                     } else {
                         drawCircle(Color(0xE0061A12), radius = r, center = Offset(cx, cy))
-                        drawCircle(green, radius = r, center = Offset(cx, cy), style = Stroke(width = 2f))
-                        drawCircle(Color(0x6000E676), radius = r * 0.78f, center = Offset(cx, cy), style = Stroke(width = 1f))
+                        drawCircle(green, radius = r, center = Offset(cx, cy), style = Stroke(width = strokeWidth))
+                        drawCircle(Color(0x6000E676), radius = r * 0.78f, center = Offset(cx, cy), style = Stroke(width = thinStroke))
                     }
                 }
 
@@ -1430,9 +1482,13 @@ fun FH6ExactSvgActionButton(
                         drawCircle(red, radius = r, center = Offset(cx, cy))
                     } else {
                         drawCircle(Color(0xE01A060A), radius = r, center = Offset(cx, cy))
-                        drawCircle(red, radius = r, center = Offset(cx, cy), style = Stroke(width = 2f))
-                        drawCircle(Color(0x60FF1744), radius = r * 0.78f, center = Offset(cx, cy), style = Stroke(width = 1f))
+                        drawCircle(red, radius = r, center = Offset(cx, cy), style = Stroke(width = strokeWidth))
+                        drawCircle(Color(0x60FF1744), radius = r * 0.78f, center = Offset(cx, cy), style = Stroke(width = thinStroke))
                     }
+                    // Paddle Shift Up (+) Top Accent
+                    val plusColor = if (isPressed) Color.Black else red
+                    drawLine(plusColor, Offset(cx - r * 0.22f, cy - r * 0.50f), Offset(cx + r * 0.22f, cy - r * 0.50f), strokeWidth = strokeWidth * 1.2f, cap = androidx.compose.ui.graphics.StrokeCap.Round)
+                    drawLine(plusColor, Offset(cx, cy - r * 0.72f), Offset(cx, cy - r * 0.28f), strokeWidth = strokeWidth * 1.2f, cap = androidx.compose.ui.graphics.StrokeCap.Round)
                 }
 
                 "btn_x" -> {
@@ -1441,9 +1497,12 @@ fun FH6ExactSvgActionButton(
                         drawCircle(blue, radius = r, center = Offset(cx, cy))
                     } else {
                         drawCircle(Color(0xE006121A), radius = r, center = Offset(cx, cy))
-                        drawCircle(blue, radius = r, center = Offset(cx, cy), style = Stroke(width = 2f))
-                        drawCircle(Color(0x6000B0FF), radius = r * 0.78f, center = Offset(cx, cy), style = Stroke(width = 1f))
+                        drawCircle(blue, radius = r, center = Offset(cx, cy), style = Stroke(width = strokeWidth))
+                        drawCircle(Color(0x6000B0FF), radius = r * 0.78f, center = Offset(cx, cy), style = Stroke(width = thinStroke))
                     }
+                    // Paddle Shift Down (−) Top Accent
+                    val minusColor = if (isPressed) Color.Black else blue
+                    drawLine(minusColor, Offset(cx - r * 0.24f, cy - r * 0.50f), Offset(cx + r * 0.24f, cy - r * 0.50f), strokeWidth = strokeWidth * 1.2f, cap = androidx.compose.ui.graphics.StrokeCap.Round)
                 }
 
                 "rewind", "btn_y" -> {
@@ -1452,30 +1511,127 @@ fun FH6ExactSvgActionButton(
                         drawCircle(yellow, radius = r, center = Offset(cx, cy))
                     } else {
                         drawCircle(Color(0xE0161A06), radius = r, center = Offset(cx, cy))
-                        drawCircle(yellow, radius = r, center = Offset(cx, cy), style = Stroke(width = 2f))
-                        drawCircle(Color(0x60CCFF00), radius = r * 0.78f, center = Offset(cx, cy), style = Stroke(width = 1f))
+                        drawCircle(yellow, radius = r, center = Offset(cx, cy), style = Stroke(width = strokeWidth))
+                        drawCircle(Color(0x60CCFF00), radius = r * 0.78f, center = Offset(cx, cy), style = Stroke(width = thinStroke))
                     }
+                    // Signature Forza Horizon Counter-Clockwise Rewind Arc
+                    val arcColor = if (isPressed) Color.Black else yellow
+                    val rewindRect = Rect(cx - r * 0.55f, cy - r * 0.55f, cx + r * 0.55f, cy + r * 0.55f)
+                    drawArc(
+                        color = arcColor,
+                        startAngle = 210f,
+                        sweepAngle = 230f,
+                        useCenter = false,
+                        topLeft = rewindRect.topLeft,
+                        size = rewindRect.size,
+                        style = Stroke(width = strokeWidth * 1.1f, cap = androidx.compose.ui.graphics.StrokeCap.Round)
+                    )
+                    // Arrowhead pointing back counter-clockwise
+                    val arrowHead = Path().apply {
+                        moveTo(cx - r * 0.55f, cy - r * 0.10f)
+                        lineTo(cx - r * 0.70f, cy - r * 0.35f)
+                        lineTo(cx - r * 0.35f, cy - r * 0.30f)
+                        close()
+                    }
+                    drawPath(arrowHead, arcColor)
+                }
+
+                "btn_lb", "clutch" -> {
+                    // Precision Motorsport Clutch Pedal Plate with CNC Grip Slots
+                    val cyan = Color(0xFF00E5FF)
+                    if (isPressed) {
+                        drawRoundRect(Color.White, cornerRadius = CornerRadius(cornerRad, cornerRad))
+                    } else {
+                        drawRoundRect(Color(0xE0051720), cornerRadius = CornerRadius(cornerRad, cornerRad))
+                        drawRoundRect(cyan, cornerRadius = CornerRadius(cornerRad, cornerRad), style = Stroke(width = strokeWidth))
+                    }
+                    val slotColor = if (isPressed) Color.Black else cyan
+                    // 3 horizontal motorsport grip slits
+                    drawLine(slotColor, Offset(cx - r * 0.38f, cy - r * 0.38f), Offset(cx + r * 0.38f, cy - r * 0.38f), strokeWidth = strokeWidth * 1.1f, cap = androidx.compose.ui.graphics.StrokeCap.Round)
+                    drawLine(slotColor, Offset(cx - r * 0.38f, cy - r * 0.18f), Offset(cx + r * 0.38f, cy - r * 0.18f), strokeWidth = strokeWidth * 1.1f, cap = androidx.compose.ui.graphics.StrokeCap.Round)
+                    drawLine(slotColor, Offset(cx - r * 0.38f, cy + r * 0.02f), Offset(cx + r * 0.38f, cy + r * 0.02f), strokeWidth = strokeWidth * 1.1f, cap = androidx.compose.ui.graphics.StrokeCap.Round)
                 }
 
                 "camera", "btn_rb" -> {
                     val white = Color.White
                     if (isPressed) {
-                        drawRoundRect(white, cornerRadius = CornerRadius(10.dp.toPx(), 10.dp.toPx()))
+                        drawRoundRect(white, cornerRadius = CornerRadius(cornerRad, cornerRad))
                     } else {
-                        drawRoundRect(Color(0xE0081418), cornerRadius = CornerRadius(10.dp.toPx(), 10.dp.toPx()))
-                        drawRoundRect(white, cornerRadius = CornerRadius(10.dp.toPx(), 10.dp.toPx()), style = Stroke(width = 1.6f))
+                        drawRoundRect(Color(0xE0081418), cornerRadius = CornerRadius(cornerRad, cornerRad))
+                        drawRoundRect(white, cornerRadius = CornerRadius(cornerRad, cornerRad), style = Stroke(width = strokeWidth))
                     }
                     val strokeColor = if (isPressed) Color.Black else Color.White
-                    drawCircle(strokeColor, radius = r * 0.35f, center = Offset(cx, cy - r * 0.15f), style = Stroke(width = 1.8f))
+                    // Camera body & top prism notch
+                    val camBody = Path().apply {
+                        moveTo(cx - r * 0.42f, cy - r * 0.15f)
+                        lineTo(cx - r * 0.22f, cy - r * 0.15f)
+                        lineTo(cx - r * 0.14f, cy - r * 0.32f)
+                        lineTo(cx + r * 0.14f, cy - r * 0.32f)
+                        lineTo(cx + r * 0.22f, cy - r * 0.15f)
+                        lineTo(cx + r * 0.42f, cy - r * 0.15f)
+                        lineTo(cx + r * 0.42f, cy + r * 0.20f)
+                        lineTo(cx - r * 0.42f, cy + r * 0.20f)
+                        close()
+                    }
+                    drawPath(camBody, strokeColor, style = Stroke(width = strokeWidth * 0.9f))
+                    drawCircle(strokeColor, radius = r * 0.14f, center = Offset(cx, cy + r * 0.02f), style = Stroke(width = strokeWidth * 0.9f))
+                }
+
+                "btn_ls", "horn" -> {
+                    // Car Horn / Klaxon Trumpet with Dual Acoustic Waves
+                    val gold = Color(0xFFFFD600)
+                    if (isPressed) {
+                        drawRoundRect(gold, cornerRadius = CornerRadius(cornerRad, cornerRad))
+                    } else {
+                        drawRoundRect(Color(0xE01C1906), cornerRadius = CornerRadius(cornerRad, cornerRad))
+                        drawRoundRect(gold, cornerRadius = CornerRadius(cornerRad, cornerRad), style = Stroke(width = strokeWidth))
+                    }
+                    val hornColor = if (isPressed) Color.Black else gold
+                    // Horn body
+                    val hornPath = Path().apply {
+                        moveTo(cx - r * 0.42f, cy - r * 0.08f)
+                        lineTo(cx - r * 0.18f, cy - r * 0.08f)
+                        lineTo(cx + r * 0.12f, cy - r * 0.32f)
+                        lineTo(cx + r * 0.12f, cy + r * 0.16f)
+                        lineTo(cx - r * 0.18f, cy - r * 0.02f)
+                        lineTo(cx - r * 0.42f, cy - r * 0.02f)
+                        close()
+                    }
+                    drawPath(hornPath, hornColor)
+                    // Sound waves
+                    val waveRect1 = Rect(cx - r * 0.05f, cy - r * 0.32f, cx + r * 0.38f, cy + r * 0.16f)
+                    drawArc(hornColor, -45f, 90f, false, waveRect1.topLeft, waveRect1.size, style = Stroke(width = strokeWidth * 0.9f, cap = androidx.compose.ui.graphics.StrokeCap.Round))
+                    val waveRect2 = Rect(cx + r * 0.12f, cy - r * 0.42f, cx + r * 0.55f, cy + r * 0.26f)
+                    drawArc(hornColor, -45f, 90f, false, waveRect2.topLeft, waveRect2.size, style = Stroke(width = strokeWidth * 0.9f, cap = androidx.compose.ui.graphics.StrokeCap.Round))
+                }
+
+                "btn_rs", "look_back" -> {
+                    // Rearview Mirror Icon
+                    val white = Color.White
+                    if (isPressed) {
+                        drawRoundRect(white, cornerRadius = CornerRadius(cornerRad, cornerRad))
+                    } else {
+                        drawRoundRect(Color(0xE0081418), cornerRadius = CornerRadius(cornerRad, cornerRad))
+                        drawRoundRect(white, cornerRadius = CornerRadius(cornerRad, cornerRad), style = Stroke(width = strokeWidth))
+                    }
+                    val strokeColor = if (isPressed) Color.Black else white
+                    // Mirror outline
+                    val mirrorRect = Rect(cx - r * 0.48f, cy - r * 0.32f, cx + r * 0.48f, cy + r * 0.08f)
+                    drawRoundRect(strokeColor, mirrorRect.topLeft, mirrorRect.size, CornerRadius(6.dp.toPx(), 6.dp.toPx()), style = Stroke(width = strokeWidth * 0.9f))
+                    // Mirror mount stem
+                    drawLine(strokeColor, Offset(cx, cy - r * 0.32f), Offset(cx, cy - r * 0.50f), strokeWidth = strokeWidth * 0.9f)
+                    // Perspective road lines inside mirror
+                    drawLine(strokeColor.copy(alpha = 0.6f), Offset(cx - r * 0.25f, cy + r * 0.08f), Offset(cx - r * 0.05f, cy - r * 0.12f), strokeWidth = thinStroke)
+                    drawLine(strokeColor.copy(alpha = 0.6f), Offset(cx + r * 0.25f, cy + r * 0.08f), Offset(cx + r * 0.05f, cy - r * 0.12f), strokeWidth = thinStroke)
                 }
 
                 "map", "btn_back", "btn_view" -> {
                     val white = Color.White
                     if (isPressed) {
-                        drawRoundRect(white, cornerRadius = CornerRadius(10.dp.toPx(), 10.dp.toPx()))
+                        drawRoundRect(white, cornerRadius = CornerRadius(cornerRad, cornerRad))
                     } else {
-                        drawRoundRect(Color(0xE0081418), cornerRadius = CornerRadius(10.dp.toPx(), 10.dp.toPx()))
-                        drawRoundRect(white, cornerRadius = CornerRadius(10.dp.toPx(), 10.dp.toPx()), style = Stroke(width = 1.6f))
+                        drawRoundRect(Color(0xE0081418), cornerRadius = CornerRadius(cornerRad, cornerRad))
+                        drawRoundRect(white, cornerRadius = CornerRadius(cornerRad, cornerRad), style = Stroke(width = strokeWidth))
                     }
                     val strokeColor = if (isPressed) Color.Black else Color.White
                     val mapPath = Path().apply {
@@ -1489,35 +1645,35 @@ fun FH6ExactSvgActionButton(
                         lineTo(cx - r * 0.45f, cy + r * 0.2f)
                         close()
                     }
-                    drawPath(mapPath, strokeColor, style = Stroke(width = 1.5f))
+                    drawPath(mapPath, strokeColor, style = Stroke(width = strokeWidth * 0.9f))
                 }
 
                 "pause", "btn_start", "btn_menu" -> {
                     val white = Color.White
                     if (isPressed) {
-                        drawRoundRect(white, cornerRadius = CornerRadius(10.dp.toPx(), 10.dp.toPx()))
+                        drawRoundRect(white, cornerRadius = CornerRadius(cornerRad, cornerRad))
                     } else {
-                        drawRoundRect(Color(0xE0081418), cornerRadius = CornerRadius(10.dp.toPx(), 10.dp.toPx()))
-                        drawRoundRect(white, cornerRadius = CornerRadius(10.dp.toPx(), 10.dp.toPx()), style = Stroke(width = 1.6f))
+                        drawRoundRect(Color(0xE0081418), cornerRadius = CornerRadius(cornerRad, cornerRad))
+                        drawRoundRect(white, cornerRadius = CornerRadius(cornerRad, cornerRad), style = Stroke(width = strokeWidth))
                     }
                     val barColor = if (isPressed) Color.Black else Color.White
-                    drawRect(barColor, topLeft = Offset(cx - r * 0.22f, cy - r * 0.35f), size = Size(r * 0.14f, r * 0.45f))
-                    drawRect(barColor, topLeft = Offset(cx + r * 0.08f, cy - r * 0.35f), size = Size(r * 0.14f, r * 0.45f))
+                    drawRect(barColor, topLeft = Offset(cx - r * 0.24f, cy - r * 0.35f), size = Size(r * 0.15f, r * 0.45f))
+                    drawRect(barColor, topLeft = Offset(cx + r * 0.09f, cy - r * 0.35f), size = Size(r * 0.15f, r * 0.45f))
                 }
 
                 "dpad_up" -> {
                     val white = Color.White
                     if (isPressed) {
-                        drawRoundRect(white, cornerRadius = CornerRadius(10.dp.toPx(), 10.dp.toPx()))
+                        drawRoundRect(white, cornerRadius = CornerRadius(cornerRad, cornerRad))
                     } else {
-                        drawRoundRect(Color(0xE0081418), cornerRadius = CornerRadius(10.dp.toPx(), 10.dp.toPx()))
-                        drawRoundRect(white, cornerRadius = CornerRadius(10.dp.toPx(), 10.dp.toPx()), style = Stroke(width = 1.6f))
+                        drawRoundRect(Color(0xE0081418), cornerRadius = CornerRadius(cornerRad, cornerRad))
+                        drawRoundRect(white, cornerRadius = CornerRadius(cornerRad, cornerRad), style = Stroke(width = strokeWidth))
                     }
                     val arrowColor = if (isPressed) Color.Black else Color.White
                     val arrow = Path().apply {
-                        moveTo(cx, cy - r * 0.4f)
-                        lineTo(cx + r * 0.3f, cy - r * 0.05f)
-                        lineTo(cx - r * 0.3f, cy - r * 0.05f)
+                        moveTo(cx, cy - r * 0.42f)
+                        lineTo(cx + r * 0.32f, cy - r * 0.05f)
+                        lineTo(cx - r * 0.32f, cy - r * 0.05f)
                         close()
                     }
                     drawPath(arrow, arrowColor)
@@ -1526,16 +1682,16 @@ fun FH6ExactSvgActionButton(
                 "dpad_down" -> {
                     val white = Color.White
                     if (isPressed) {
-                        drawRoundRect(white, cornerRadius = CornerRadius(10.dp.toPx(), 10.dp.toPx()))
+                        drawRoundRect(white, cornerRadius = CornerRadius(cornerRad, cornerRad))
                     } else {
-                        drawRoundRect(Color(0xE0081418), cornerRadius = CornerRadius(10.dp.toPx(), 10.dp.toPx()))
-                        drawRoundRect(white, cornerRadius = CornerRadius(10.dp.toPx(), 10.dp.toPx()), style = Stroke(width = 1.6f))
+                        drawRoundRect(Color(0xE0081418), cornerRadius = CornerRadius(cornerRad, cornerRad))
+                        drawRoundRect(white, cornerRadius = CornerRadius(cornerRad, cornerRad), style = Stroke(width = strokeWidth))
                     }
                     val arrowColor = if (isPressed) Color.Black else Color.White
                     val arrow = Path().apply {
-                        moveTo(cx, cy + r * 0.15f)
-                        lineTo(cx + r * 0.3f, cy - r * 0.2f)
-                        lineTo(cx - r * 0.3f, cy - r * 0.2f)
+                        moveTo(cx, cy + r * 0.18f)
+                        lineTo(cx + r * 0.32f, cy - r * 0.18f)
+                        lineTo(cx - r * 0.32f, cy - r * 0.18f)
                         close()
                     }
                     drawPath(arrow, arrowColor)
@@ -1544,16 +1700,16 @@ fun FH6ExactSvgActionButton(
                 "dpad_left" -> {
                     val white = Color.White
                     if (isPressed) {
-                        drawRoundRect(white, cornerRadius = CornerRadius(10.dp.toPx(), 10.dp.toPx()))
+                        drawRoundRect(white, cornerRadius = CornerRadius(cornerRad, cornerRad))
                     } else {
-                        drawRoundRect(Color(0xE0081418), cornerRadius = CornerRadius(10.dp.toPx(), 10.dp.toPx()))
-                        drawRoundRect(white, cornerRadius = CornerRadius(10.dp.toPx(), 10.dp.toPx()), style = Stroke(width = 1.6f))
+                        drawRoundRect(Color(0xE0081418), cornerRadius = CornerRadius(cornerRad, cornerRad))
+                        drawRoundRect(white, cornerRadius = CornerRadius(cornerRad, cornerRad), style = Stroke(width = strokeWidth))
                     }
                     val arrowColor = if (isPressed) Color.Black else Color.White
                     val arrow = Path().apply {
-                        moveTo(cx - r * 0.3f, cy - r * 0.1f)
-                        lineTo(cx + r * 0.05f, cy - r * 0.35f)
-                        lineTo(cx + r * 0.05f, cy + r * 0.15f)
+                        moveTo(cx - r * 0.32f, cy - r * 0.10f)
+                        lineTo(cx + r * 0.06f, cy - r * 0.36f)
+                        lineTo(cx + r * 0.06f, cy + r * 0.16f)
                         close()
                     }
                     drawPath(arrow, arrowColor)
@@ -1562,16 +1718,16 @@ fun FH6ExactSvgActionButton(
                 "dpad_right" -> {
                     val white = Color.White
                     if (isPressed) {
-                        drawRoundRect(white, cornerRadius = CornerRadius(10.dp.toPx(), 10.dp.toPx()))
+                        drawRoundRect(white, cornerRadius = CornerRadius(cornerRad, cornerRad))
                     } else {
-                        drawRoundRect(Color(0xE0081418), cornerRadius = CornerRadius(10.dp.toPx(), 10.dp.toPx()))
-                        drawRoundRect(white, cornerRadius = CornerRadius(10.dp.toPx(), 10.dp.toPx()), style = Stroke(width = 1.6f))
+                        drawRoundRect(Color(0xE0081418), cornerRadius = CornerRadius(cornerRad, cornerRad))
+                        drawRoundRect(white, cornerRadius = CornerRadius(cornerRad, cornerRad), style = Stroke(width = strokeWidth))
                     }
                     val arrowColor = if (isPressed) Color.Black else Color.White
                     val arrow = Path().apply {
-                        moveTo(cx + r * 0.3f, cy - r * 0.1f)
-                        lineTo(cx - r * 0.05f, cy - r * 0.35f)
-                        lineTo(cx - r * 0.05f, cy + r * 0.15f)
+                        moveTo(cx + r * 0.32f, cy - r * 0.10f)
+                        lineTo(cx - r * 0.06f, cy - r * 0.36f)
+                        lineTo(cx - r * 0.06f, cy + r * 0.16f)
                         close()
                     }
                     drawPath(arrow, arrowColor)
@@ -1579,20 +1735,20 @@ fun FH6ExactSvgActionButton(
 
                 else -> {
                     if (isPressed) {
-                        drawRoundRect(Color.White, cornerRadius = CornerRadius(10.dp.toPx(), 10.dp.toPx()))
+                        drawRoundRect(Color.White, cornerRadius = CornerRadius(cornerRad, cornerRad))
                     } else {
-                        drawRoundRect(Color(0xE0081418), cornerRadius = CornerRadius(10.dp.toPx(), 10.dp.toPx()))
-                        drawRoundRect(Color(0x80FFFFFF), cornerRadius = CornerRadius(10.dp.toPx(), 10.dp.toPx()), style = Stroke(width = 1.4f))
+                        drawRoundRect(Color(0xE0081418), cornerRadius = CornerRadius(cornerRad, cornerRad))
+                        drawRoundRect(Color(0x80FFFFFF), cornerRadius = CornerRadius(cornerRad, cornerRad), style = Stroke(width = strokeWidth))
                     }
                 }
             }
         }
 
-        // Center / Bottom Typography
+        // Scalable, Proportional Typography at the bottom/center
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(bottom = 6.dp),
+                .padding(bottom = (minDim.value * 0.07f).coerceAtLeast(2f).dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Bottom
         ) {
@@ -1604,6 +1760,8 @@ fun FH6ExactSvgActionButton(
                     "btn_a" -> Color(0xFF00E676)
                     "btn_b" -> Color(0xFFFF1744)
                     "btn_x" -> Color(0xFF00B0FF)
+                    "btn_lb", "clutch" -> Color(0xFF00E5FF)
+                    "btn_ls", "horn" -> Color(0xFFFFD600)
                     else -> Color.White
                 }
             }
@@ -1615,25 +1773,43 @@ fun FH6ExactSvgActionButton(
                     "btn_x" -> "X"
                     "rewind", "btn_y" -> "Y"
                     "auto_drive" -> "AUTO"
+                    "btn_lb", "clutch" -> "CLUTCH"
+                    "btn_ls", "horn" -> "HORN"
+                    "btn_rs", "look_back" -> "REAR"
+                    "camera", "btn_rb" -> "CAM"
+                    "map", "btn_back", "btn_view" -> "MAP"
+                    "pause", "btn_start", "btn_menu" -> "MENU"
                     else -> label
                 },
                 color = textColor,
-                fontSize = when (actionId) {
-                    "btn_a", "btn_b", "btn_x", "rewind", "btn_y" -> 16.sp
-                    else -> 10.sp
-                },
+                fontSize = mainFontSize,
                 fontWeight = FontWeight.Black,
-                letterSpacing = 1.sp
+                letterSpacing = letterSpacingVal
             )
 
             if (subLabel.isNotEmpty()) {
                 Text(
                     text = subLabel,
                     color = if (isPressed) Color(0x99000000) else Color(0xB3FFFFFF),
-                    fontSize = 8.sp,
+                    fontSize = subFontSize,
                     fontWeight = FontWeight.Bold
                 )
             }
         }
     }
+}
+
+/**
+ * Miniature Scalable SVG Preview Box for the Action Catalog
+ */
+@Composable
+fun FH6MiniActionPreview(actionId: String) {
+    FH6ExactSvgActionButton(
+        actionId = actionId,
+        label = "",
+        subLabel = "",
+        isEditMode = true,
+        isPressed = false,
+        onPressedChange = {}
+    )
 }

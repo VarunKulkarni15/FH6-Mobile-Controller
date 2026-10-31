@@ -38,44 +38,23 @@ class ControlEditorViewModel(
             syncClient.syncedProfile.collect { remoteProfile ->
                 if (remoteProfile != null) {
                     val mergedActions = (remoteProfile.actions + ProfileRepository.ALL_FORZA_ACTIONS).distinctBy { it.id }
-                    // Ensure auto_drive and rewind exist in layout
-                    val layout = remoteProfile.layout.toMutableList()
-                    if (layout.none { it.actionId == "auto_drive" }) {
-                        layout.add(
-                            TouchControlElement(
-                                elementId = "auto_drive",
-                                actionId = "auto_drive",
-                                label = "AUTO DRIVE",
-                                shape = ControlShape.RoundedButton,
-                                normalizedX = 0.51f,
-                                normalizedY = 0.76f,
-                                normalizedWidth = 0.12f,
-                                normalizedHeight = 0.16f,
-                                accentColorHex = "#CCFF00"
-                            )
+                    val currentProf = _uiState.value.currentProfile
+
+                    // Only adopt remote profile if it is a different profile or strictly newer
+                    val shouldAdopt = remoteProfile.profileId != currentProf.profileId ||
+                            (remoteProfile.lastModifiedUtc.isNotBlank() && remoteProfile.lastModifiedUtc > currentProf.lastModifiedUtc)
+
+                    if (shouldAdopt) {
+                        _uiState.value = _uiState.value.copy(
+                            currentProfile = remoteProfile,
+                            availableActions = mergedActions,
+                            statusMessage = "Synced with Windows: ${remoteProfile.profileName}"
+                        )
+                    } else {
+                        _uiState.value = _uiState.value.copy(
+                            availableActions = mergedActions
                         )
                     }
-                    if (layout.none { it.actionId == "rewind" }) {
-                        layout.add(
-                            TouchControlElement(
-                                elementId = "rewind",
-                                actionId = "rewind",
-                                label = "REWIND",
-                                shape = ControlShape.RoundedButton,
-                                normalizedX = 0.51f,
-                                normalizedY = 0.14f,
-                                normalizedWidth = 0.12f,
-                                normalizedHeight = 0.16f,
-                                accentColorHex = "#FFB300"
-                            )
-                        )
-                    }
-                    remoteProfile.layout = layout
-                    _uiState.value = _uiState.value.copy(
-                        currentProfile = remoteProfile,
-                        availableActions = mergedActions,
-                        statusMessage = "Synced with Windows: ${remoteProfile.profileName}"
-                    )
                 }
             }
         }
@@ -121,6 +100,7 @@ class ControlEditorViewModel(
 
         val updatedProfile = profile.copy(layout = newLayout)
         _uiState.value = _uiState.value.copy(currentProfile = updatedProfile)
+        saveAndSyncProfile()
     }
 
     fun updateElementDeltaPosition(elementId: String, deltaNormX: Float, deltaNormY: Float) {
@@ -150,6 +130,7 @@ class ControlEditorViewModel(
 
         val updatedProfile = profile.copy(layout = newLayout)
         _uiState.value = _uiState.value.copy(currentProfile = updatedProfile)
+        saveAndSyncProfile()
     }
 
     fun updateElementSize(elementId: String, normWidth: Float, normHeight: Float) {
@@ -165,6 +146,7 @@ class ControlEditorViewModel(
 
         val updatedProfile = profile.copy(layout = newLayout)
         _uiState.value = _uiState.value.copy(currentProfile = updatedProfile)
+        saveAndSyncProfile()
     }
 
     fun updateElementLabel(elementId: String, newLabel: String) {
@@ -175,6 +157,7 @@ class ControlEditorViewModel(
 
         val updatedProfile = profile.copy(layout = newLayout)
         _uiState.value = _uiState.value.copy(currentProfile = updatedProfile)
+        saveAndSyncProfile()
     }
 
     fun removeElement(elementId: String) {

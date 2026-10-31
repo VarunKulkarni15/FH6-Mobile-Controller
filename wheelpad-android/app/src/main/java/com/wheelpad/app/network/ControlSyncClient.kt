@@ -84,11 +84,31 @@ class ControlSyncClient(
                 "HANDSHAKE_RESPONSE" -> {
                     val activeProfObj = root.optJSONObject("activeProfile")
                     if (activeProfObj != null) {
-                        val profile = repository.parseProfileFromJson(activeProfObj.toString())
-                        repository.saveProfile(profile)
-                        repository.setActiveProfileId(profile.profileId)
-                        _syncedProfile.value = profile
-                        _statusMessage.value = "Profile '${profile.profileName}' synced from Windows"
+                        val remoteProfile = repository.parseProfileFromJson(activeProfObj.toString())
+                        val localProfile = repository.loadActiveProfile()
+
+                        val localTime = localProfile.lastModifiedUtc
+                        val remoteTime = remoteProfile.lastModifiedUtc
+
+                        // Check if local profile is custom or newer than remote
+                        val localIsPreferred = when {
+                            localTime.isNotBlank() && remoteTime.isBlank() -> true
+                            localTime.isNotBlank() && remoteTime.isNotBlank() && localTime >= remoteTime -> true
+                            localProfile.layout.isNotEmpty() && remoteProfile.layout.isEmpty() -> true
+                            else -> false
+                        }
+
+                        if (localIsPreferred) {
+                            // Keep user's customized local layout and sync it up to Windows companion
+                            _syncedProfile.value = localProfile
+                            _statusMessage.value = "Active layout '${localProfile.profileName}' synced to Windows"
+                            syncProfileToWindows(localProfile)
+                        } else {
+                            repository.saveProfile(remoteProfile)
+                            repository.setActiveProfileId(remoteProfile.profileId)
+                            _syncedProfile.value = remoteProfile
+                            _statusMessage.value = "Profile '${remoteProfile.profileName}' synced from Windows"
+                        }
                     }
                 }
                 "SET_ACTIVE_PROFILE_ACK" -> {
