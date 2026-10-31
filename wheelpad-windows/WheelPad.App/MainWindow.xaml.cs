@@ -46,11 +46,30 @@ namespace WheelPad.App
             _radioService = new UniversalRadioService();
             _syncServer.Radio = _radioService;
 
-            // 2. Initialize System Tray NotifyIcon
+            // 2. Initialize System Tray NotifyIcon with custom Forza Horizon logo
+            Icon? trayIcon = null;
+            try
+            {
+                string iconPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "app_icon.ico");
+                if (System.IO.File.Exists(iconPath))
+                {
+                    trayIcon = new Icon(iconPath);
+                }
+                else
+                {
+                    var stream = System.Windows.Application.GetResourceStream(new Uri("pack://application:,,,/app_icon.ico"))?.Stream;
+                    if (stream != null)
+                    {
+                        trayIcon = new Icon(stream);
+                    }
+                }
+            }
+            catch { }
+
             _notifyIcon = new Forms.NotifyIcon
             {
-                Text = "WheelPad Companion — Forza Horizon 6",
-                Icon = SystemIcons.Application,
+                Text = "FH6 Controller // Forza Horizon 6",
+                Icon = trayIcon ?? SystemIcons.Application,
                 Visible = true
             };
 
@@ -60,6 +79,7 @@ namespace WheelPad.App
             trayMenu.Items.Add(new Forms.ToolStripSeparator());
             trayMenu.Items.Add("Exit WheelPad", null, (s, e) => ExitApplication());
             _notifyIcon.ContextMenuStrip = trayMenu;
+            _notifyIcon.Click += (s, e) => RestoreFromTray();
             _notifyIcon.DoubleClick += (s, e) => RestoreFromTray();
 
             // 3. Setup Telemetry & FastStream Listeners
@@ -79,7 +99,7 @@ namespace WheelPad.App
             try
             {
                 // Web deep-link payload: camera scanners open website with IP parameters which deep-links to app
-                string qrPayload = $"https://varunkulkarni15.github.io/FH6-Mobile-Controller/?ip={localIp}&tcp=4243&udp=4242";
+                string qrPayload = $"https://horizoncontro.varunkulkarni.dpdns.org/?ip={localIp}&tcp=4243&udp=4242";
                 ImgQrCode.Source = QrCodeHelper.GenerateQrCode(qrPayload);
             }
             catch { }
@@ -287,6 +307,9 @@ namespace WheelPad.App
             Show();
             WindowState = WindowState.Normal;
             Activate();
+            Topmost = true;
+            Topmost = false;
+            Focus();
         }
 
         private void MainWindow_Closing(object? sender, System.ComponentModel.CancelEventArgs e)

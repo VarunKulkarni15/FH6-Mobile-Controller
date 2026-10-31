@@ -37,6 +37,10 @@
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https" android:host="horizoncontro.varunkulkarni.dpdns.org" />
+                <data android:scheme="http" android:host="horizoncontro.varunkulkarni.dpdns.org" />
+                <data android:scheme="https" android:host="fh6controller.vercel.app" />
+                <data android:scheme="http" android:host="fh6controller.vercel.app" />
                 <data android:scheme="https" android:host="varunkulkarni15.github.io" android:pathPrefix="/FH6-Mobile-Controller" />
                 <data android:scheme="http" android:host="varunkulkarni15.github.io" android:pathPrefix="/FH6-Mobile-Controller" />
                 <data android:scheme="https" android:host="varunkulkarni15.github.io" android:pathPrefix="/fh6-mobile-controller" />
