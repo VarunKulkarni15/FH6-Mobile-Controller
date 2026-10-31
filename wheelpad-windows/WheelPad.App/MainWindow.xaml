@@ -176,9 +176,9 @@
                             <TextBlock Text="Monitored: FH5 · FH4 · FH3 · FH6 · Forza Motorsport" FontSize="10" Foreground="#7E94AD" FontWeight="SemiBold" Margin="0,0,0,10"/>
 
                             <!-- Live Game Status Display Panel -->
-                            <Border Background="#090E16" BorderBrush="#1C2738" BorderThickness="1.5" CornerRadius="4" Padding="14,12">
+                            <Border Background="#090E16" BorderBrush="#1C2738" BorderThickness="1.5" CornerRadius="4" Padding="14,10">
                                 <StackPanel>
-                                    <Grid Margin="0,0,0,8">
+                                    <Grid Margin="0,0,0,6">
                                         <TextBlock Text="DETECTED TITLE:" FontSize="10" Foreground="#7E94AD" FontWeight="Bold"/>
                                         <TextBlock x:Name="TxtGameStatus" Text="Scanning for game..." FontWeight="Black" FontSize="11" Foreground="#7E94AD" HorizontalAlignment="Right"/>
                                     </Grid>
@@ -186,6 +186,24 @@
                                         <TextBlock Text="PROCESS ID (PID):" FontSize="10" Foreground="#7E94AD" FontWeight="Bold"/>
                                         <TextBlock x:Name="TxtProcessId" Text="--" FontWeight="Bold" FontSize="11" Foreground="#95A7BC" HorizontalAlignment="Right"/>
                                     </Grid>
+                                </StackPanel>
+                            </Border>
+
+                            <!-- Gaming Platforms & Launchers Status -->
+                            <Border Background="#090E16" BorderBrush="#1C2738" BorderThickness="1.5" CornerRadius="4" Padding="10,8" Margin="0,10,0,0">
+                                <StackPanel>
+                                    <TextBlock Text="SUPPORTED LAUNCHERS &amp; PLATFORMS:" FontSize="9" FontWeight="Black" Foreground="#7E94AD" Margin="0,0,0,6"/>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock x:Name="TxtSteamStatus" Grid.Column="0" Text="STEAM: READY" FontSize="9" FontWeight="Bold" Foreground="#CCFF00"/>
+                                        <TextBlock x:Name="TxtXboxStatus" Grid.Column="1" Text="XBOX: READY" FontSize="9" FontWeight="Bold" Foreground="#CCFF00" TextAlignment="Center"/>
+                                        <TextBlock x:Name="TxtEpicStatus" Grid.Column="2" Text="EPIC: READY" FontSize="9" FontWeight="Bold" Foreground="#CCFF00" TextAlignment="Right"/>
+                                    </Grid>
+                                    <TextBlock x:Name="TxtLauncherNote" Text="Compatible across Steam, Xbox Game Pass, and Epic Games Store" FontSize="9" Foreground="#6C7F94" Margin="0,4,0,0"/>
                                 </StackPanel>
                             </Border>
                         </StackPanel>

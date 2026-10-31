@@ -80,29 +80,51 @@ class MainActivity : ComponentActivity() {
         // 6. Handle QR Code camera scanner / deep link URL if launched via link
         handleIntent(intent)
 
-        // 7. System Push Notifications Setup
+        // 7. System Push Notifications Setup & Permission Request (Android 13+)
         NotificationHelper.createNotificationChannel(this)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS) != android.content.pm.PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(arrayOf(android.Manifest.permission.POST_NOTIFICATIONS), 101)
+            }
+        }
 
         lifecycleScope.launch {
+            var wasConnected = false
             syncClient.isConnected.collect { connected ->
                 if (connected) {
+                    wasConnected = true
                     NotificationHelper.showStatusNotification(
                         this@MainActivity,
                         "FH6 Companion Connected",
-                        "Connected to Windows Rig • 120Hz Ultra-Low Latency Active"
+                        "Connected to PC • 120Hz Ultra-Low Latency Active"
+                    )
+                } else if (wasConnected) {
+                    NotificationHelper.showStatusNotification(
+                        this@MainActivity,
+                        "FH6 Companion Disconnected",
+                        "Controller connection lost • Standby mode"
                     )
                 }
             }
         }
 
         lifecycleScope.launch {
+            var lastGameName = ""
             syncClient.gameStatus.collect { game ->
-                if (game.isRunning && game.gameName.isNotBlank()) {
+                if (game.isRunning && game.gameName.isNotBlank() && game.gameName != lastGameName) {
+                    lastGameName = game.gameName
                     NotificationHelper.showStatusNotification(
                         this@MainActivity,
-                        "${game.gameName} Detected",
-                        "${game.gameName} running on PC (PID ${game.processId})! FastStream active."
+                        "${game.gameName} Active",
+                        "${game.gameName} detected (PID ${game.processId})! FastStream synchronized."
                     )
+                } else if (!game.isRunning && lastGameName.isNotBlank()) {
+                    NotificationHelper.showStatusNotification(
+                        this@MainActivity,
+                        "$lastGameName Exited",
+                        "Game closed. Controller in standby."
+                    )
+                    lastGameName = ""
                 }
             }
         }

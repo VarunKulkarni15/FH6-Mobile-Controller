@@ -162,6 +162,29 @@ namespace WheelPad.App
                 });
             }
 
+            // 6. Platform & Launcher Detection (Steam, Xbox Game Pass, Epic Games)
+            try
+            {
+                var platforms = PlatformDetector.CheckPlatforms();
+                TxtSteamStatus.Text = platforms.IsSteamInstalled ? "STEAM: READY" : "STEAM: -";
+                TxtSteamStatus.Foreground = platforms.IsSteamInstalled 
+                    ? new SolidColorBrush(System.Windows.Media.Color.FromRgb(0xCC, 0xFF, 0x00)) 
+                    : new SolidColorBrush(System.Windows.Media.Color.FromRgb(0x7E, 0x94, 0xAD));
+
+                TxtXboxStatus.Text = platforms.IsXboxAppInstalled ? "XBOX: READY" : "XBOX: -";
+                TxtXboxStatus.Foreground = platforms.IsXboxAppInstalled 
+                    ? new SolidColorBrush(System.Windows.Media.Color.FromRgb(0xCC, 0xFF, 0x00)) 
+                    : new SolidColorBrush(System.Windows.Media.Color.FromRgb(0x7E, 0x94, 0xAD));
+
+                TxtEpicStatus.Text = platforms.IsEpicGamesInstalled ? "EPIC: READY" : "EPIC: -";
+                TxtEpicStatus.Foreground = platforms.IsEpicGamesInstalled 
+                    ? new SolidColorBrush(System.Windows.Media.Color.FromRgb(0xCC, 0xFF, 0x00)) 
+                    : new SolidColorBrush(System.Windows.Media.Color.FromRgb(0x7E, 0x94, 0xAD));
+
+                TxtLauncherNote.Text = platforms.SummaryText;
+            }
+            catch { }
+
             // Window Close handler
             Closing += MainWindow_Closing;
         }

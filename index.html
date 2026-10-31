@@ -52,6 +52,8 @@
             left: -20px;
             width: calc(100vw + 40px);
             height: calc(100vh + 40px);
+            background-image: url('assets/forzahorizon1222.jpg');
+            background-image: -webkit-image-set(url('assets/forzahorizon1222.webp') 1x);
             background-image: image-set(
                 url('assets/forzahorizon1222.webp') type('image/webp'),
                 url('assets/forzahorizon1222.jpg') type('image/jpeg')
@@ -60,7 +62,7 @@
             background-position: center 38%;
             z-index: -2;
             transform: scale(1.02);
-            filter: brightness(0.24) contrast(1.15) saturate(1.1);
+            filter: brightness(0.50) contrast(1.08) saturate(1.18);
             pointer-events: none;
             will-change: transform, filter;
             transition: filter 0.05s ease-out, transform 0.05s ease-out;
@@ -73,8 +75,8 @@
             width: 100vw;
             height: 100vh;
             background: 
-                radial-gradient(ellipse at 50% 30%, rgba(8, 12, 18, 0.45) 0%, rgba(8, 12, 18, 0.85) 65%, var(--bg-base) 100%),
-                linear-gradient(180deg, rgba(8, 12, 18, 0.6) 0%, rgba(8, 12, 18, 0.95) 75%, var(--bg-base) 100%);
+                radial-gradient(ellipse at 50% 35%, rgba(8, 12, 18, 0.25) 0%, rgba(8, 12, 18, 0.72) 65%, var(--bg-base) 100%),
+                linear-gradient(180deg, rgba(8, 12, 18, 0.35) 0%, rgba(8, 12, 18, 0.85) 75%, var(--bg-base) 100%);
             z-index: -1;
             pointer-events: none;
         }
