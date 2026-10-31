@@ -10,7 +10,7 @@ android {
     buildToolsVersion "34.0.0"
 
     defaultConfig {
-        applicationId "com.wheelpad.app"
+        applicationId "com.varunkulkarni.horizoncontroller"
         minSdk 26
         targetSdk 34
         versionCode 1

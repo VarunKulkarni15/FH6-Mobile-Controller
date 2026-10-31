@@ -47,6 +47,39 @@ class ProfileRepository(private val context: Context) {
                         modified = true
                     }
                 }
+                // Auto-upgrade layout: Ensure auto_drive and rewind exist on-screen
+                if (profile.layout.none { it.actionId == "auto_drive" }) {
+                    profile.layout.add(
+                        TouchControlElement(
+                            elementId = "auto_drive",
+                            actionId = "auto_drive",
+                            label = "AUTO DRIVE",
+                            shape = ControlShape.RoundedButton,
+                            normalizedX = 0.51f,
+                            normalizedY = 0.76f,
+                            normalizedWidth = 0.12f,
+                            normalizedHeight = 0.16f,
+                            accentColorHex = "#CCFF00"
+                        )
+                    )
+                    modified = true
+                }
+                if (profile.layout.none { it.actionId == "rewind" }) {
+                    profile.layout.add(
+                        TouchControlElement(
+                            elementId = "rewind",
+                            actionId = "rewind",
+                            label = "REWIND",
+                            shape = ControlShape.RoundedButton,
+                            normalizedX = 0.51f,
+                            normalizedY = 0.14f,
+                            normalizedWidth = 0.12f,
+                            normalizedHeight = 0.16f,
+                            accentColorHex = "#FFB300"
+                        )
+                    )
+                    modified = true
+                }
                 if (modified) {
                     saveProfile(profile)
                 }
@@ -217,6 +250,8 @@ class ProfileRepository(private val context: Context) {
             layout.add(TouchControlElement(elementId = "brake", actionId = "brake", label = "BRAKE", shape = ControlShape.VerticalPedal, normalizedX = 0.68f, normalizedY = 0.12f, normalizedWidth = 0.13f, normalizedHeight = 0.58f, accentColorHex = "#FF1744"))
             layout.add(TouchControlElement(elementId = "gas", actionId = "throttle", label = "GAS", shape = ControlShape.VerticalPedal, normalizedX = 0.83f, normalizedY = 0.12f, normalizedWidth = 0.13f, normalizedHeight = 0.58f, accentColorHex = "#00E676"))
             layout.add(TouchControlElement(elementId = "handbrake", actionId = "handbrake", label = "HANDBRAKE", shape = ControlShape.WideBar, normalizedX = 0.66f, normalizedY = 0.74f, normalizedWidth = 0.30f, normalizedHeight = 0.18f, accentColorHex = "#FFFFFF"))
+            layout.add(TouchControlElement(elementId = "auto_drive", actionId = "auto_drive", label = "AUTO DRIVE", shape = ControlShape.RoundedButton, normalizedX = 0.51f, normalizedY = 0.76f, normalizedWidth = 0.12f, normalizedHeight = 0.16f, accentColorHex = "#CCFF00"))
+            layout.add(TouchControlElement(elementId = "rewind", actionId = "rewind", label = "REWIND", shape = ControlShape.RoundedButton, normalizedX = 0.51f, normalizedY = 0.14f, normalizedWidth = 0.12f, normalizedHeight = 0.16f, accentColorHex = "#FFB300"))
         }
 
         return listOf(standard)

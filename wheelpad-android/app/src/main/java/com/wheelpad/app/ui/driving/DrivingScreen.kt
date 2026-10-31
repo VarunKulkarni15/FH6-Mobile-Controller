@@ -120,13 +120,21 @@ fun DrivingScreen(
         val screenWidthPx = with(density) { screenWidth.toPx() }
         val screenHeightPx = with(density) { screenHeight.toPx() }
 
-        // PUBG-Style Dynamic Full-Left-Screen Steering (Thumb Dragging)
+        // Find wheel center for precision rotational steering calculations
+        val wheelElement = state.currentProfile.layout.find { it.shape == ControlShape.CircleWheel }
+        val wheelCenterX = if (wheelElement != null) (wheelElement.normalizedX + wheelElement.normalizedWidth / 2f) * screenWidthPx else screenWidthPx * 0.26f
+        val wheelCenterY = if (wheelElement != null) (wheelElement.normalizedY + wheelElement.normalizedHeight / 2f) * screenHeightPx else screenHeightPx * 0.51f
+
+        // High-Precision Hybrid Steering: Dual Rotational Angle Tracking (Atan2) + Linear Thumb Dragging
         var pubgTouchActive by remember { mutableStateOf(false) }
         var pubgTouchCurrent by remember { mutableStateOf(Offset.Zero) }
         var pubgAnchorX by remember { mutableStateOf(0f) }
+        var lastTouchAngle by remember { mutableStateOf(0.0) }
+        var accumulatedRotationDeg by remember { mutableStateOf(0.0) }
+        var isCircularSteerMode by remember { mutableStateOf(false) }
         val maxTravelPx = with(density) { 72.dp.toPx() }
 
-        // 0. PUBG-Style Dynamic Steering Touch Zone (Full Left 52% of Display)
+        // 0. Full Left 52% Steering Touch Zone (Rotational & Thumb Dragging, Works Past Bottom on Both Sides)
         if (!state.isEditMode && !isGyroEnabled) {
             Box(
                 modifier = Modifier
@@ -140,19 +148,43 @@ fun DrivingScreen(
                                 if (pressedChanges.isNotEmpty()) {
                                     val primary = pressedChanges.first()
                                     primary.consume()
+                                    val touchX = primary.position.x
+                                    val touchY = primary.position.y
+                                    val relX = (touchX - wheelCenterX).toDouble()
+                                    val relY = (touchY - wheelCenterY).toDouble()
+                                    val dist = Math.hypot(relX, relY)
+                                    val currentAngle = Math.atan2(relY, relX)
+
                                     if (!pubgTouchActive) {
                                         pubgTouchActive = true
-                                        pubgAnchorX = primary.position.x
+                                        pubgAnchorX = touchX
                                         pubgTouchCurrent = primary.position
+                                        lastTouchAngle = currentAngle
+                                        accumulatedRotationDeg = (steeringAngle * 270.0).toDouble()
+                                        // If touch is around wheel circumference, activate circular wheel tracking
+                                        isCircularSteerMode = dist > 25.0
                                     } else {
                                         pubgTouchCurrent = primary.position
-                                        val dx = primary.position.x - pubgAnchorX
-                                        val normSteer = (dx / maxTravelPx).coerceIn(-1.0f, 1.0f)
-                                        steeringAngle = normSteer
+                                        if (isCircularSteerMode || dist > 45.0) {
+                                            isCircularSteerMode = true
+                                            var deltaAngle = currentAngle - lastTouchAngle
+                                            while (deltaAngle > Math.PI) deltaAngle -= 2 * Math.PI
+                                            while (deltaAngle < -Math.PI) deltaAngle += 2 * Math.PI
+                                            lastTouchAngle = currentAngle
+                                            val deltaDeg = Math.toDegrees(deltaAngle)
+                                            accumulatedRotationDeg = (accumulatedRotationDeg + deltaDeg).coerceIn(-270.0, 270.0)
+                                            steeringAngle = (accumulatedRotationDeg / 270.0).toFloat()
+                                        } else {
+                                            val dx = touchX - pubgAnchorX
+                                            val normSteer = (dx / maxTravelPx).coerceIn(-1.0f, 1.0f)
+                                            steeringAngle = normSteer
+                                            accumulatedRotationDeg = (normSteer * 270.0).toDouble()
+                                        }
                                     }
                                 } else {
                                     if (pubgTouchActive) {
                                         pubgTouchActive = false
+                                        accumulatedRotationDeg = 0.0
                                         steeringAngle = 0f
                                     }
                                 }
@@ -842,7 +874,7 @@ fun FH6ExactSvgSteeringWheel(
     currentAngleNormalized: Float,
     onSteerChange: (Float) -> Unit
 ) {
-    val targetDegrees = currentAngleNormalized * 90f
+    val targetDegrees = currentAngleNormalized * 270f
 
     val visualRotation by animateFloatAsState(
         targetValue = targetDegrees,

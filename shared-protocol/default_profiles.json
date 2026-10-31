@@ -14,87 +14,185 @@
     "actions": [
       {
         "id": "steer",
-        "name": "Steering",
+        "name": "Steering Wheel",
         "category": "Driving",
         "inputType": "AnalogAxis",
         "bindingType": "XboxController",
         "xboxTarget": "LeftThumbX",
-        "keyboardKeyCode": 0,
-        "keyboardKeyName": "",
-        "behavior": "Instant",
-        "repeatIntervalMs": 0,
-        "isCustom": false,
-        "description": "Analog wheel angle."
+        "description": "Proportional analog steering"
       },
       {
         "id": "throttle",
-        "name": "Accelerator",
+        "name": "Accelerator (RT)",
         "category": "Driving",
         "inputType": "AnalogTrigger",
         "bindingType": "XboxController",
         "xboxTarget": "RightTrigger",
         "keyboardKeyCode": 87,
         "keyboardKeyName": "W",
-        "behavior": "Instant",
-        "repeatIntervalMs": 0,
-        "isCustom": false,
-        "description": "Analog accelerator pedal mapped to Xbox RT."
+        "description": "Analog accelerator pedal"
       },
       {
         "id": "brake",
-        "name": "Brake / Reverse",
+        "name": "Brake / Rev (LT)",
         "category": "Driving",
         "inputType": "AnalogTrigger",
         "bindingType": "XboxController",
         "xboxTarget": "LeftTrigger",
         "keyboardKeyCode": 83,
         "keyboardKeyName": "S",
-        "behavior": "Instant",
-        "repeatIntervalMs": 0,
-        "isCustom": false,
-        "description": "Analog brake pedal mapped to Xbox LT."
+        "description": "Analog brake pedal"
       },
       {
         "id": "handbrake",
-        "name": "Handbrake (E-Brake)",
+        "name": "Handbrake / E-Brake",
         "category": "Driving",
+        "inputType": "DigitalButton",
+        "bindingType": "Composite",
+        "xboxTarget": "A",
+        "keyboardKeyCode": 32,
+        "keyboardKeyName": "Space",
+        "description": "Instant drift handbrake"
+      },
+      {
+        "id": "auto_drive",
+        "name": "Auto-Drive (Assist)",
+        "category": "Driving",
+        "inputType": "DigitalButton",
+        "bindingType": "KeyboardKey",
+        "keyboardKeyCode": 67,
+        "keyboardKeyName": "C+2",
+        "description": "Autonomous cruise / assist toggle"
+      },
+      {
+        "id": "btn_a",
+        "name": "A Button (Select / OK)",
+        "category": "Buttons",
         "inputType": "DigitalButton",
         "bindingType": "XboxController",
         "xboxTarget": "A",
-        "keyboardKeyCode": 0,
-        "keyboardKeyName": "",
-        "behavior": "Hold",
-        "repeatIntervalMs": 0,
-        "isCustom": false,
-        "description": "Independent handbrake action."
+        "description": "Xbox A button"
+      },
+      {
+        "id": "btn_b",
+        "name": "B Button (Shift Up)",
+        "category": "Driving",
+        "inputType": "DigitalButton",
+        "bindingType": "XboxController",
+        "xboxTarget": "B",
+        "description": "Shift Up"
+      },
+      {
+        "id": "btn_x",
+        "name": "X Button (Shift Down)",
+        "category": "Driving",
+        "inputType": "DigitalButton",
+        "bindingType": "XboxController",
+        "xboxTarget": "X",
+        "description": "Shift Down"
       },
       {
         "id": "rewind",
-        "name": "Rewind",
+        "name": "Y Button (Rewind)",
         "category": "Gameplay",
         "inputType": "DigitalButton",
         "bindingType": "XboxController",
         "xboxTarget": "Y",
         "keyboardKeyCode": 82,
         "keyboardKeyName": "R",
-        "behavior": "Instant",
-        "repeatIntervalMs": 0,
-        "isCustom": false,
-        "description": "Rewind."
+        "description": "Rewind"
+      },
+      {
+        "id": "btn_lb",
+        "name": "LB (Clutch)",
+        "category": "Driving",
+        "inputType": "DigitalButton",
+        "bindingType": "XboxController",
+        "xboxTarget": "LeftBumper",
+        "description": "Manual Clutch"
       },
       {
         "id": "camera",
-        "name": "Camera",
+        "name": "RB (Switch Camera)",
         "category": "Camera",
         "inputType": "DigitalButton",
         "bindingType": "XboxController",
         "xboxTarget": "RightBumper",
         "keyboardKeyCode": 67,
         "keyboardKeyName": "C",
-        "behavior": "Instant",
-        "repeatIntervalMs": 0,
-        "isCustom": false,
-        "description": "Switch camera view."
+        "description": "Camera perspective"
+      },
+      {
+        "id": "btn_ls",
+        "name": "LS (Horn / Click)",
+        "category": "Controls",
+        "inputType": "DigitalButton",
+        "bindingType": "XboxController",
+        "xboxTarget": "LeftThumbClick",
+        "description": "Car Horn"
+      },
+      {
+        "id": "btn_rs",
+        "name": "RS (Look Back / Click)",
+        "category": "Controls",
+        "inputType": "DigitalButton",
+        "bindingType": "XboxController",
+        "xboxTarget": "RightThumbClick",
+        "description": "Look Back"
+      },
+      {
+        "id": "map",
+        "name": "View (World Map)",
+        "category": "Navigation",
+        "inputType": "DigitalButton",
+        "bindingType": "XboxController",
+        "xboxTarget": "Back",
+        "description": "World Map"
+      },
+      {
+        "id": "pause",
+        "name": "Menu (Pause Game)",
+        "category": "Navigation",
+        "inputType": "DigitalButton",
+        "bindingType": "XboxController",
+        "xboxTarget": "Start",
+        "description": "Pause Menu"
+      },
+      {
+        "id": "dpad_up",
+        "name": "D-Pad UP (Photo Mode)",
+        "category": "DPad",
+        "inputType": "DigitalButton",
+        "bindingType": "XboxController",
+        "xboxTarget": "DpadUp",
+        "description": "Photo Mode"
+      },
+      {
+        "id": "dpad_down",
+        "name": "D-Pad DOWN (ANNA / Chat)",
+        "category": "DPad",
+        "inputType": "DigitalButton",
+        "bindingType": "XboxController",
+        "xboxTarget": "DpadDown",
+        "description": "ANNA Link"
+      },
+      {
+        "id": "dpad_left",
+        "name": "D-Pad LEFT (Forza LINK)",
+        "category": "DPad",
+        "inputType": "DigitalButton",
+        "bindingType": "XboxController",
+        "xboxTarget": "DpadLeft",
+        "description": "Forza Link"
+      },
+      {
+        "id": "dpad_right",
+        "name": "D-Pad RIGHT (Radio Next)",
+        "category": "DPad",
+        "inputType": "DigitalButton",
+        "bindingType": "XboxController",
+        "xboxTarget": "DpadRight",
+        "description": "Next Radio Station"
       }
     ],
     "layout": [
@@ -121,7 +219,7 @@
         "normalizedY": 0.18,
         "normalizedWidth": 0.15,
         "normalizedHeight": 0.65,
-        "opacity": 0.90,
+        "opacity": 0.9,
         "accentColorHex": "#FFFFFF",
         "hapticFeedback": true,
         "isEnabled": true
@@ -135,7 +233,7 @@
         "normalizedY": 0.14,
         "normalizedWidth": 0.13,
         "normalizedHeight": 0.72,
-        "opacity": 0.90,
+        "opacity": 0.9,
         "accentColorHex": "#FFFFFF",
         "hapticFeedback": true,
         "isEnabled": true
@@ -148,7 +246,7 @@
         "normalizedX": 0.65,
         "normalizedY": 0.86,
         "normalizedWidth": 0.31,
-        "normalizedHeight": 0.10,
+        "normalizedHeight": 0.1,
         "opacity": 0.95,
         "accentColorHex": "#FFFFFF",
         "hapticFeedback": true,
@@ -159,7 +257,7 @@
         "actionId": "rewind",
         "label": "REWIND",
         "shape": "RoundedButton",
-        "normalizedX": 0.50,
+        "normalizedX": 0.5,
         "normalizedY": 0.42,
         "normalizedWidth": 0.09,
         "normalizedHeight": 0.12,
@@ -173,12 +271,26 @@
         "actionId": "camera",
         "label": "CAM",
         "shape": "RoundedButton",
-        "normalizedX": 0.50,
+        "normalizedX": 0.5,
         "normalizedY": 0.56,
         "normalizedWidth": 0.09,
         "normalizedHeight": 0.12,
         "opacity": 0.85,
         "accentColorHex": "#FFFFFF",
+        "hapticFeedback": true,
+        "isEnabled": true
+      },
+      {
+        "elementId": "auto_drive_btn",
+        "actionId": "auto_drive",
+        "label": "AUTO-DRIVE",
+        "shape": "RoundedButton",
+        "normalizedX": 0.52,
+        "normalizedY": 0.74,
+        "normalizedWidth": 0.12,
+        "normalizedHeight": 0.18,
+        "opacity": 0.9,
+        "accentColorHex": "#CCFF00",
         "hapticFeedback": true,
         "isEnabled": true
       }

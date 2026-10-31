@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privacy Policy // Horizon Mobile Controller</title>
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-base: #080C12;
+            --bg-panel: #0E141F;
+            --bg-card: #121A28;
+            --border-subtle: #1C2738;
+            --volt: #CCFF00;
+            --white: #FFFFFF;
+            --text-muted: #7E94AD;
+            --text-dim: #95A7BC;
+            --font-racing: 'Chakra Petch', -apple-system, sans-serif;
+            --font-body: 'Inter', -apple-system, sans-serif;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; scrollbar-width: none !important; -ms-overflow-style: none !important; }
+        *::-webkit-scrollbar { display: none !important; width: 0 !important; height: 0 !important; }
+        html, body {
+            background-color: var(--bg-base);
+            color: var(--white);
+            font-family: var(--font-body);
+            line-height: 1.6;
+            overflow-x: hidden;
+            scrollbar-width: none !important;
+            -ms-overflow-style: none !important;
+        }
+        header {
+            border-bottom: 1px solid var(--border-subtle);
+            padding: 16px 36px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(8, 12, 18, 0.95);
+        }
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: var(--white);
+            font-family: var(--font-racing);
+            font-size: 16px;
+            font-weight: 800;
+            letter-spacing: 1px;
+        }
+        .brand img { width: 32px; height: 32px; border-radius: 6px; }
+        .back-link {
+            color: var(--volt);
+            text-decoration: none;
+            font-family: var(--font-racing);
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+        .back-link:hover { text-decoration: underline; }
+        main {
+            max-width: 820px;
+            margin: 40px auto;
+            padding: 0 24px 80px;
+        }
+        h1 {
+            font-family: var(--font-racing);
+            font-size: 32px;
+            font-weight: 800;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+        .last-updated {
+            color: var(--text-muted);
+            font-size: 13px;
+            margin-bottom: 32px;
+        }
+        .policy-card {
+            background: var(--bg-panel);
+            border: 1px solid var(--border-subtle);
+            border-radius: 8px;
+            padding: 28px;
+            margin-bottom: 24px;
+        }
+        h2 {
+            font-family: var(--font-racing);
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--volt);
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        p { color: var(--text-dim); margin-bottom: 14px; font-size: 14.5px; }
+        p:last-child { margin-bottom: 0; }
+        ul { margin-left: 20px; margin-bottom: 14px; color: var(--text-dim); font-size: 14px; }
+        li { margin-bottom: 6px; }
+        .highlight-box {
+            background: rgba(204, 255, 0, 0.05);
+            border-left: 3px solid var(--volt);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 6px 6px 0;
+        }
+        footer {
+            border-top: 1px solid var(--border-subtle);
+            padding: 24px;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 13px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <a href="index.html" class="brand">
+            <img src="assets/fh6_logo.svg" alt="Horizon Controller Logo">
+            <span>HORIZON CONTROLLER</span>
+        </a>
+        <a href="index.html" class="back-link">&larr; Back to Home</a>
+    </header>
+
+    <main>
+        <h1>Privacy Policy</h1>
+        <div class="last-updated">Last Updated: October 31, 2026 Â· Effective Date: Immediate</div>
+
+        <div class="policy-card">
+            <h2>1. Zero Data Collection Architecture</h2>
+            <p>
+                <strong>Horizon Mobile Controller</strong> (including the Windows Companion application, the Android application, and related utilities) is architected with strict, privacy-by-design principles:
+            </p>
+            <div class="highlight-box">
+                <p><strong>We collect zero personal data.</strong> No tracking cookies, no device telemetry, no personal identifiers, no analytics beacons, and no diagnostic metrics are collected, logged, stored, or transmitted to any third-party server or cloud endpoint.</p>
+            </div>
+            <p>
+                The software functions entirely offline and directly between your devices over your private Local Area Network (LAN).
+            </p>
+        </div>
+
+        <div class="policy-card">
+            <h2>2. Network Communication &amp; Telemetry Stream</h2>
+            <p>
+                All data transmitted between the Android mobile client and the Windows host companion occurs exclusively over your local WiFi/Ethernet network:
+            </p>
+            <ul>
+                <li><strong>Protocol:</strong> Direct 120Hz binary UDP datagrams transmitted on local port 4242.</li>
+                <li><strong>Payload:</strong> Real-time controller axis inputs (steering thumb position, accelerator pressure, brake pressure, and controller button states).</li>
+                <li><strong>Scope:</strong> Datagrams never leave your local subnet and are never relayed through intermediate servers, proxies, or cloud routers.</li>
+            </ul>
+        </div>
+
+        <div class="policy-card">
+            <h2>3. Device Permissions &amp; Hardware Access</h2>
+            <p>
+                The mobile and Windows applications request only permissions strictly required for real-time gamepad emulation:
+            </p>
+            <ul>
+                <li><strong>Camera Access (Mobile):</strong> Used strictly by the Google Play Services Code Scanner to scan the local pairing QR code displayed on your PC screen. Camera frames are processed strictly in-memory on the device and are never saved, recorded, or transmitted.</li>
+                <li><strong>Local Network / Wi-Fi State:</strong> Required to establish the peer-to-peer UDP connection between the phone and PC.</li>
+                <li><strong>Motion Sensors / Gyroscope:</strong> Processed in real time for tilt-based steering angle calculation. Sensor readings are processed immediately and discarded with zero persistence.</li>
+                <li><strong>Vibration / Haptics:</strong> Provides tactile feedback during button presses and simulated pedal resistance.</li>
+            </ul>
+        </div>
+
+        <div class="policy-card">
+            <h2>4. Third-Party Services &amp; Disclaimers</h2>
+            <p>
+                This software does not integrate with any commercial ad networks, third-party analytics providers, or telemetry aggregators.
+            </p>
+            <p>
+                <strong>Trademark Disclaimer:</strong> <em>Forza, Forza Horizon, Xbox, Windows, and Microsoft</em> are registered trademarks of Microsoft Corporation. <em>Horizon Mobile Controller</em> is an independent, open-source sim-racing hardware controller and telemetry bridge. It is not affiliated with, endorsed by, or sponsored by Microsoft Corporation, Playground Games, or Turn 10 Studios.
+            </p>
+        </div>
+
+        <div class="policy-card">
+            <h2>5. Contact &amp; Open Source Inquiries</h2>
+            <p>
+                For security audits, privacy questions, or feature contributions, please visit the official GitHub repository:
+            </p>
+            <p>
+                <a href="https://github.com/VarunKulkarni15/FH6-Mobile-Controller" target="_blank" style="color: var(--volt); text-decoration: none;">github.com/VarunKulkarni15/FH6-Mobile-Controller</a>
+            </p>
+            <p>Developer: <strong>Varun Kulkarni</strong></p>
+        </div>
+    </main>
+
+    <footer>
+        &copy; 2026 Varun Kulkarni Â· Horizon Mobile Controller Suite. Released under open-source license.
+    </footer>
+</body>
+</html>

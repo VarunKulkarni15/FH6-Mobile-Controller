@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Package
+  xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
+  xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
+  xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities"
+  xmlns:desktop="http://schemas.microsoft.com/appx/manifest/desktop/windows10"
+  IgnorableNamespaces="uap rescap desktop">
+
+  <Identity
+    Name="VarunKulkarni.HorizonMobileController"
+    Publisher="CN=84738989-BF6A-4895-918A-6D43BEF02ECF"
+    Version="1.0.0.0"
+    ProcessorArchitecture="x64" />
+
+  <Properties>
+    <DisplayName>Horizon Mobile Controller</DisplayName>
+    <PublisherDisplayName>VarunKulkarni</PublisherDisplayName>
+    <Logo>Assets\StoreLogo.png</Logo>
+    <Description>Turn your mobile device into a precision steering wheel and telemetry bridge for Forza Horizon.</Description>
+  </Properties>
+
+  <Dependencies>
+    <TargetDeviceFamily Name="Windows.Desktop" MinVersion="10.0.17763.0" MaxVersionTested="10.0.26100.0" />
+  </Dependencies>
+
+  <Resources>
+    <Resource Language="en-us" />
+  </Resources>
+
+  <Applications>
+    <Application Id="HorizonMobileController"
+      Executable="fh6-controller-windows.exe"
+      EntryPoint="Windows.FullTrustApplication">
+      <uap:VisualElements
+        DisplayName="Horizon Mobile Controller"
+        Description="Sim-racing steering controller and telemetry bridge for Forza Horizon"
+        BackgroundColor="#080C12"
+        Square150x150Logo="Assets\Square150x150Logo.png"
+        Square44x44Logo="Assets\Square44x44Logo.png">
+        <uap:DefaultTile Wide310x150Logo="Assets\Wide310x150Logo.png" />
+        <uap:SplashScreen Image="Assets\SplashScreen.png" />
+      </uap:VisualElements>
+      <Extensions>
+        <desktop:Extension Category="windows.startupTask" Executable="fh6-controller-windows.exe" EntryPoint="Windows.FullTrustApplication">
+          <desktop:StartupTask TaskId="HorizonMobileControllerStartup" Enabled="true" DisplayName="Horizon Mobile Controller" />
+        </desktop:Extension>
+      </Extensions>
+    </Application>
+  </Applications>
+
+  <Capabilities>
+    <Capability Name="internetClient" />
+    <Capability Name="privateNetworkClientServer" />
+    <rescap:Capability Name="runFullTrust" />
+  </Capabilities>
+
+</Package>

@@ -37,9 +37,43 @@ class ControlEditorViewModel(
         viewModelScope.launch {
             syncClient.syncedProfile.collect { remoteProfile ->
                 if (remoteProfile != null) {
+                    val mergedActions = (remoteProfile.actions + ProfileRepository.ALL_FORZA_ACTIONS).distinctBy { it.id }
+                    // Ensure auto_drive and rewind exist in layout
+                    val layout = remoteProfile.layout.toMutableList()
+                    if (layout.none { it.actionId == "auto_drive" }) {
+                        layout.add(
+                            TouchControlElement(
+                                elementId = "auto_drive",
+                                actionId = "auto_drive",
+                                label = "AUTO DRIVE",
+                                shape = ControlShape.RoundedButton,
+                                normalizedX = 0.51f,
+                                normalizedY = 0.76f,
+                                normalizedWidth = 0.12f,
+                                normalizedHeight = 0.16f,
+                                accentColorHex = "#CCFF00"
+                            )
+                        )
+                    }
+                    if (layout.none { it.actionId == "rewind" }) {
+                        layout.add(
+                            TouchControlElement(
+                                elementId = "rewind",
+                                actionId = "rewind",
+                                label = "REWIND",
+                                shape = ControlShape.RoundedButton,
+                                normalizedX = 0.51f,
+                                normalizedY = 0.14f,
+                                normalizedWidth = 0.12f,
+                                normalizedHeight = 0.16f,
+                                accentColorHex = "#FFB300"
+                            )
+                        )
+                    }
+                    remoteProfile.layout = layout
                     _uiState.value = _uiState.value.copy(
                         currentProfile = remoteProfile,
-                        availableActions = remoteProfile.actions,
+                        availableActions = mergedActions,
                         statusMessage = "Synced with Windows: ${remoteProfile.profileName}"
                     )
                 }
