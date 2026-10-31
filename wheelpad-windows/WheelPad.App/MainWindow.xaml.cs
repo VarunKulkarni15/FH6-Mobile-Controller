@@ -66,7 +66,6 @@ namespace WheelPad.App
             _dispatcher.InputDispatched += OnInputDispatched;
             _syncServer.ClientConnectionChanged += OnClientConnectionChanged;
             _gameDetector.GameStatusChanged += OnGameStatusChanged;
-            _spotifyManager.TrackStateUpdated += OnTrackStateUpdated;
             _radioService.StatusUpdated += OnRadioStatusUpdated;
             _udpReceiver.PacketsPerSecondUpdated += OnPacketsPerSecondUpdated;
 
@@ -121,31 +120,15 @@ namespace WheelPad.App
                 string steerDir = steerPercent < 0 ? "LEFT" : steerPercent > 0 ? "RIGHT" : "CENTER";
                 TxtSteerVal.Text = $"STEERING: {steerDir} ({Math.Abs(steerPercent)}%)";
 
-                // 2. Throttle RT (0 to 164 px vertical fill)
+                // 2. Throttle RT (0 to 214 px vertical fill)
                 float throttleClamped = Math.Clamp(e.Throttle, 0.0f, 1.0f);
-                BarThrottleFill.Height = throttleClamped * 164.0;
+                BarThrottleFill.Height = throttleClamped * 214.0;
                 TxtThrottleVal.Text = $"{(int)(throttleClamped * 100)}%";
 
-                // 3. Brake LT (0 to 164 px vertical fill)
+                // 3. Brake LT (0 to 214 px vertical fill)
                 float brakeClamped = Math.Clamp(e.Brake, 0.0f, 1.0f);
-                BarBrakeFill.Height = brakeClamped * 164.0;
+                BarBrakeFill.Height = brakeClamped * 214.0;
                 TxtBrakeVal.Text = $"{(int)(brakeClamped * 100)}%";
-
-                // 4. Handbrake Neon State
-                if (e.Handbrake)
-                {
-                    BadgeHandbrake.Background = new SolidColorBrush(System.Windows.Media.Color.FromRgb(0x3B, 0x0D, 0x1A));
-                    BadgeHandbrake.BorderBrush = new SolidColorBrush(System.Windows.Media.Color.FromRgb(0xFF, 0x00, 0x55));
-                    TxtHandbrakeState.Text = "ACTIVE (PULLED)";
-                    TxtHandbrakeState.Foreground = new SolidColorBrush(System.Windows.Media.Color.FromRgb(0xFF, 0x00, 0x55));
-                }
-                else
-                {
-                    BadgeHandbrake.Background = new SolidColorBrush(System.Windows.Media.Color.FromRgb(0x14, 0x19, 0x26));
-                    BadgeHandbrake.BorderBrush = new SolidColorBrush(System.Windows.Media.Color.FromRgb(0x26, 0x33, 0x4A));
-                    TxtHandbrakeState.Text = "RELEASED";
-                    TxtHandbrakeState.Foreground = new SolidColorBrush(System.Windows.Media.Color.FromRgb(0x6C, 0x7D, 0x93));
-                }
             });
         }
 
@@ -215,15 +198,6 @@ namespace WheelPad.App
             });
         }
 
-        private void OnTrackStateUpdated(object? sender, SpotifyTrackState track)
-        {
-            Dispatcher.InvokeAsync(() =>
-            {
-                TxtMediaTitle.Text = string.IsNullOrEmpty(track.TrackName) ? "No Track Playing" : track.TrackName;
-                TxtMediaArtist.Text = string.IsNullOrEmpty(track.ArtistName) ? "YouTube Music / Spotify / Windows Media" : track.ArtistName;
-            });
-        }
-
         private void OnRadioStatusUpdated(object? sender, UniversalRadioStatus radio)
         {
             Dispatcher.InvokeAsync(() =>
@@ -262,38 +236,13 @@ namespace WheelPad.App
             );
         }
 
-        private void BtnTestHandbrake_Click(object sender, RoutedEventArgs e)
-        {
-            _ = Task.Run(async () =>
-            {
-                _dispatcher.DispatchDigitalInput("handbrake", true);
-                await Task.Delay(250);
-                _dispatcher.DispatchDigitalInput("handbrake", false);
-            });
-        }
-
-        private void BtnMediaPrev_Click(object sender, RoutedEventArgs e)
-        {
-            _spotifyManager.SendWindowsMediaKey("previous");
-        }
-
-        private void BtnMediaPlayPause_Click(object sender, RoutedEventArgs e)
-        {
-            _spotifyManager.SendWindowsMediaKey("toggle");
-        }
-
-        private void BtnMediaNext_Click(object sender, RoutedEventArgs e)
-        {
-            _spotifyManager.SendWindowsMediaKey("next");
-        }
-
         private void BtnMinimizeTray_Click(object sender, RoutedEventArgs e)
         {
             Hide();
             _notifyIcon.ShowBalloonTip(
                 2000,
-                "WheelPad Companion",
-                "Minimized to system tray. WheelPad is active in the background.",
+                "FH6 Controller Companion",
+                "Minimized to system tray. FH6 Controller is active in the background.",
                 Forms.ToolTipIcon.Info
             );
         }

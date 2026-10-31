@@ -2,7 +2,7 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="FH6 CONTROLLER // WINDOWS COMPANION" 
-        Height="660" Width="960"
+        Height="640" Width="960"
         WindowStartupLocation="CenterScreen"
         Background="#062220"
         Foreground="#FFFFFF"
@@ -16,14 +16,15 @@
             <Setter Property="BorderBrush" Value="#144C47"/>
             <Setter Property="BorderThickness" Value="1.5"/>
             <Setter Property="CornerRadius" Value="10"/>
-            <Setter Property="Padding" Value="16"/>
+            <Setter Property="Padding" Value="18"/>
         </Style>
 
         <!-- Metric Header Label -->
         <Style x:Key="ForzaHeaderLabel" TargetType="TextBlock">
             <Setter Property="Foreground" Value="#7EE6D8"/>
-            <Setter Property="FontSize" Value="10"/>
+            <Setter Property="FontSize" Value="11"/>
             <Setter Property="FontWeight" Value="Black"/>
+            <Setter Property="Margin" Value="0,0,0,12"/>
         </Style>
 
         <!-- Forza Volt Button -->
@@ -34,7 +35,7 @@
             <Setter Property="BorderThickness" Value="1.5"/>
             <Setter Property="FontWeight" Value="Black"/>
             <Setter Property="FontSize" Value="11"/>
-            <Setter Property="Padding" Value="14,7"/>
+            <Setter Property="Padding" Value="16,8"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Template">
                 <Setter.Value>
@@ -69,7 +70,7 @@
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="FontWeight" Value="Black"/>
             <Setter Property="FontSize" Value="11"/>
-            <Setter Property="Padding" Value="14,7"/>
+            <Setter Property="Padding" Value="16,8"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Template">
                 <Setter.Value>
@@ -85,37 +86,6 @@
                             <Trigger Property="IsMouseOver" Value="True">
                                 <Setter TargetName="btnBorder" Property="Background" Value="#CCFF00"/>
                                 <Setter Property="Foreground" Value="#0A0A0A"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
-        <!-- Forza Dark Button -->
-        <Style x:Key="ForzaButton" TargetType="Button">
-            <Setter Property="Background" Value="#0E3D38"/>
-            <Setter Property="Foreground" Value="#FFFFFF"/>
-            <Setter Property="BorderBrush" Value="#1C665F"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="FontWeight" Value="Bold"/>
-            <Setter Property="FontSize" Value="11"/>
-            <Setter Property="Padding" Value="12,6"/>
-            <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border x:Name="btnBorder" Background="{TemplateBinding Background}" 
-                                BorderBrush="{TemplateBinding BorderBrush}" 
-                                BorderThickness="{TemplateBinding BorderThickness}" 
-                                CornerRadius="6" 
-                                Padding="{TemplateBinding Padding}">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="btnBorder" Property="Background" Value="#155750"/>
-                                <Setter TargetName="btnBorder" Property="BorderBrush" Value="#CCFF00"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -140,7 +110,6 @@
 
             <StackPanel Grid.Column="0" VerticalAlignment="Center">
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                    <!-- Slanted Forza Volt Banner -->
                     <Border Background="#CCFF00" CornerRadius="4" Padding="10,4" Margin="0,0,10,0" VerticalAlignment="Center">
                         <TextBlock Text="HORIZON COMPANION" FontSize="12" FontWeight="Black" Foreground="#062220"/>
                     </Border>
@@ -149,10 +118,10 @@
                         <TextBlock Text="FASTSTREAM 120Hz" FontSize="10" FontWeight="Black" Foreground="#FFFFFF"/>
                     </Border>
                 </StackPanel>
-                <TextBlock Text="Native Zero-Delay Xbox 360 Controller Emulation via ViGEmBus | Pure C# / Zero Web CMD" FontSize="11" Foreground="#7EE6D8" Margin="0,4,0,0"/>
+                <TextBlock Text="Native Hardware Xbox 360 Controller Emulation via ViGEmBus | Pure C# / Zero Web CMD" FontSize="11" Foreground="#7EE6D8" Margin="0,4,0,0"/>
             </StackPanel>
 
-            <!-- Controller Connected Status Pill (Solid Black with Volt Lime Border) -->
+            <!-- Controller Connected Status Pill -->
             <Border Grid.Column="1" x:Name="PillViGEm" Background="#0A0A0A" BorderBrush="#CCFF00" BorderThickness="2" CornerRadius="20" Padding="16,8" VerticalAlignment="Center">
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                     <Ellipse x:Name="StatusDot" Width="9" Height="9" Fill="#CCFF00" Margin="0,0,8,0"/>
@@ -168,11 +137,15 @@
                 <ColumnDefinition Width="1.4*"/>
             </Grid.ColumnDefinitions>
 
-            <!-- Left Column: Auto-Connect QR & Integration -->
-            <StackPanel Grid.Column="0" Margin="0,0,12,0">
+            <!-- Left Column: Pairing & Auto-Drive Assist -->
+            <Grid Grid.Column="0" Margin="0,0,12,0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
 
                 <!-- Card 1: Instant QR Connect & LAN Auto-Discovery -->
-                <Border Style="{StaticResource ForzaCard}" Margin="0,0,0,14">
+                <Border Grid.Row="0" Style="{StaticResource ForzaCard}" Margin="0,0,0,14">
                     <StackPanel>
                         <Grid Margin="0,0,0,10">
                             <TextBlock Text="PHONE PAIRING // DEEP-LINK" Style="{StaticResource ForzaHeaderLabel}"/>
@@ -185,7 +158,7 @@
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
 
-                            <!-- QR Code Box (Black with Volt Lime Border) -->
+                            <!-- QR Code Box (Crisp White with Volt Lime Border) -->
                             <Border Grid.Column="0" Background="#FFFFFF" BorderBrush="#CCFF00" BorderThickness="2" CornerRadius="8" Padding="6" Margin="0,0,14,0">
                                 <Image x:Name="ImgQrCode" Width="108" Height="108" RenderOptions.BitmapScalingMode="NearestNeighbor"/>
                             </Border>
@@ -210,152 +183,131 @@
                 </Border>
 
                 <!-- Card 2: Forza Horizon 6 Game Process & Auto-Drive Assist -->
-                <Border Style="{StaticResource ForzaCard}">
-                    <StackPanel>
-                        <TextBlock Text="FORZA HORIZON 6 &amp; ASSIST SYSTEM" Style="{StaticResource ForzaHeaderLabel}" Margin="0,0,0,10"/>
+                <Border Grid.Row="1" Style="{StaticResource ForzaCard}">
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="FORZA HORIZON 6 &amp; ASSIST SYSTEM" Style="{StaticResource ForzaHeaderLabel}"/>
 
-                        <Grid Margin="0,0,0,8">
+                        <Grid Margin="0,0,0,10">
                             <TextBlock Text="FORZA HORIZON 6:" FontSize="11" Foreground="#7EE6D8" FontWeight="SemiBold"/>
                             <TextBlock x:Name="TxtGameStatus" Text="Scanning for game..." FontWeight="Bold" FontSize="11" Foreground="#FFFFFF" HorizontalAlignment="Right"/>
                         </Grid>
 
-                        <Grid Margin="0,0,0,12">
+                        <Grid Margin="0,0,0,14">
                             <TextBlock Text="RADIO MOD BRIDGE:" FontSize="11" Foreground="#7EE6D8" FontWeight="SemiBold"/>
                             <TextBlock x:Name="TxtRadioStatus" Text="http://localhost:8420" FontWeight="SemiBold" FontSize="11" Foreground="#A0D0CC" HorizontalAlignment="Right"/>
                         </Grid>
 
                         <!-- Auto-Drive 1-Click Trigger Button -->
-                        <Border Background="#0A0A0A" BorderBrush="#CCFF00" BorderThickness="1.5" CornerRadius="6" Padding="12,10" Margin="0,0,0,12">
+                        <Border Background="#0A0A0A" BorderBrush="#CCFF00" BorderThickness="1.5" CornerRadius="8" Padding="14,12">
                             <Grid>
                                 <StackPanel VerticalAlignment="Center">
-                                    <TextBlock Text="AUTO-DRIVING ASSIST" FontSize="11" FontWeight="Black" Foreground="#CCFF00"/>
-                                    <TextBlock Text="Sends C then NumPad 2 to activate AI drive" FontSize="9" Foreground="#A0D0CC"/>
+                                    <TextBlock Text="AUTO-DRIVING ASSIST" FontSize="12" FontWeight="Black" Foreground="#CCFF00"/>
+                                    <TextBlock Text="Hardware Win32 SendInput (C then NumPad 2)" FontSize="10" Foreground="#A0D0CC" Margin="0,2,0,0"/>
                                 </StackPanel>
-                                <Button HorizontalAlignment="Right" Style="{StaticResource ForzaVoltButton}" Content="TRIGGER NOW" Click="BtnAutoDrive_Click" Padding="12,5"/>
+                                <Button HorizontalAlignment="Right" Style="{StaticResource ForzaVoltButton}" Content="TRIGGER NOW" Click="BtnAutoDrive_Click"/>
                             </Grid>
                         </Border>
-
-                        <Border Height="1" Background="#144C47" Margin="0,0,0,10"/>
-
-                        <!-- Universal Media Player Control -->
-                        <TextBlock x:Name="TxtMediaTitle" Text="No Track Playing" FontSize="13" FontWeight="Black" Foreground="#FFFFFF" TextTrimming="CharacterEllipsis"/>
-                        <TextBlock x:Name="TxtMediaArtist" Text="YouTube Music / Spotify / Windows Media" FontSize="10" Foreground="#7EE6D8" Margin="0,2,0,10"/>
-
-                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                            <Button Style="{StaticResource ForzaButton}" Content="PREV" Click="BtnMediaPrev_Click" Margin="0,0,6,0"/>
-                            <Button Style="{StaticResource ForzaButton}" Content="PLAY / PAUSE" Click="BtnMediaPlayPause_Click" Margin="0,0,6,0"/>
-                            <Button Style="{StaticResource ForzaButton}" Content="NEXT" Click="BtnMediaNext_Click"/>
-                        </StackPanel>
                     </StackPanel>
                 </Border>
-            </StackPanel>
+            </Grid>
 
-            <!-- Right Column: Interactive Forza Horizon Telemetry Dashboard -->
-            <StackPanel Grid.Column="1" Margin="12,0,0,0">
+            <!-- Right Column: Interactive Forza Horizon Rig Preview (Steering + Accel + Reverse/Brake ONLY) -->
+            <Border Grid.Column="1" Style="{StaticResource ForzaCard}" Margin="12,0,0,0">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
 
-                <Border Style="{StaticResource ForzaCard}">
-                    <StackPanel>
-                        <Grid Margin="0,0,0,14">
-                            <TextBlock Text="LIVE TELEMETRY &amp; RIG SENSORS" Style="{StaticResource ForzaHeaderLabel}"/>
-                            <TextBlock x:Name="TxtPacketRate" Text="0 PACKETS/SEC" Foreground="#CCFF00" FontSize="10" FontWeight="Black" HorizontalAlignment="Right"/>
+                    <Grid Grid.Row="0" Margin="0,0,0,16">
+                        <TextBlock Text="LIVE RIG PREVIEW // STEERING &amp; PEDALS" Style="{StaticResource ForzaHeaderLabel}" Margin="0"/>
+                        <TextBlock x:Name="TxtPacketRate" Text="0 PACKETS/SEC" Foreground="#CCFF00" FontSize="10" FontWeight="Black" HorizontalAlignment="Right"/>
+                    </Grid>
+
+                    <Grid Grid.Row="1">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="1.2*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- 1. Live Rotating Steering Wheel Display -->
+                        <Grid Grid.Column="0" VerticalAlignment="Center">
+                            <Canvas x:Name="CanvasWheel" Width="190" Height="190" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                <!-- Rotating Wheel Container -->
+                                <Grid x:Name="WheelContainer" Width="190" Height="190" RenderTransformOrigin="0.5,0.5">
+                                    <Grid.RenderTransform>
+                                        <RotateTransform x:Name="WheelRotation" Angle="0"/>
+                                    </Grid.RenderTransform>
+
+                                    <!-- Outer Hairline Rim -->
+                                    <Ellipse Stroke="#FFFFFF" StrokeThickness="2.8" Width="184" Height="184" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    <!-- Inner Chamfer Rim -->
+                                    <Ellipse Stroke="#40FFFFFF" StrokeThickness="1.2" Width="154" Height="154" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    
+                                    <!-- 12 O'Clock Volt Lime Center Alignment Notch -->
+                                    <Rectangle Fill="#CCFF00" Width="6" Height="18" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,3,0,0"/>
+
+                                    <!-- 9 o'clock spoke -->
+                                    <Rectangle Fill="#80FFFFFF" Width="62" Height="16" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="16,0,0,0"/>
+                                    <!-- 3 o'clock spoke -->
+                                    <Rectangle Fill="#80FFFFFF" Width="62" Height="16" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,16,0"/>
+                                    <!-- 6 o'clock spoke -->
+                                    <Rectangle Fill="#80FFFFFF" Width="16" Height="58" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,0,16"/>
+
+                                    <!-- Central Hub with FH Badge -->
+                                    <Ellipse Fill="#062220" Stroke="#CCFF00" StrokeThickness="2" Width="48" Height="48" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    <TextBlock Text="FH6" FontSize="13" FontWeight="Black" Foreground="#CCFF00" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Grid>
+                            </Canvas>
+
+                            <TextBlock x:Name="TxtSteerVal" Text="STEERING: CENTER (0%)" FontSize="12" FontWeight="Black" Foreground="#FFFFFF" HorizontalAlignment="Center" Margin="0,220,0,0"/>
                         </Grid>
 
-                        <Grid Height="240" Margin="0,0,0,14">
+                        <!-- 2. Vertical RT Accel & LT Brake LED Bars -->
+                        <Grid Grid.Column="1" VerticalAlignment="Center" Margin="8,0,0,0">
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="1.2*"/>
+                                <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
 
-                            <!-- Live Rotating Steering Wheel Display -->
-                            <Grid Grid.Column="0">
-                                <Canvas x:Name="CanvasWheel" Width="170" Height="170" HorizontalAlignment="Center" VerticalAlignment="Center">
-                                    <!-- Rotating Wheel Container -->
-                                    <Grid x:Name="WheelContainer" Width="170" Height="170" RenderTransformOrigin="0.5,0.5">
-                                        <Grid.RenderTransform>
-                                            <RotateTransform x:Name="WheelRotation" Angle="0"/>
-                                        </Grid.RenderTransform>
-
-                                        <!-- Outer Hairline Rim -->
-                                        <Ellipse Stroke="#FFFFFF" StrokeThickness="2.5" Width="164" Height="164" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                        <!-- Inner Chamfer Rim -->
-                                        <Ellipse Stroke="#40FFFFFF" StrokeThickness="1" Width="138" Height="138" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                        
-                                        <!-- 12 O'Clock Volt Lime Center Alignment Notch -->
-                                        <Rectangle Fill="#CCFF00" Width="6" Height="16" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,3,0,0"/>
-
-                                        <!-- 9 o'clock spoke -->
-                                        <Rectangle Fill="#80FFFFFF" Width="54" Height="14" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="16,0,0,0"/>
-                                        <!-- 3 o'clock spoke -->
-                                        <Rectangle Fill="#80FFFFFF" Width="54" Height="14" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,16,0"/>
-                                        <!-- 6 o'clock spoke -->
-                                        <Rectangle Fill="#80FFFFFF" Width="14" Height="50" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,0,16"/>
-
-                                        <!-- Central Hub with FH Badge -->
-                                        <Ellipse Fill="#062220" Stroke="#CCFF00" StrokeThickness="2" Width="44" Height="44" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                        <TextBlock Text="FH6" FontSize="12" FontWeight="Black" Foreground="#CCFF00" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            <!-- Reverse / Brake LT Column -->
+                            <StackPanel Grid.Column="0" HorizontalAlignment="Center">
+                                <TextBlock Text="REVERSE / BRAKE" FontSize="10" FontWeight="Black" Foreground="#FF007F" HorizontalAlignment="Center" Margin="0,0,0,8"/>
+                                
+                                <!-- Brake Meter Container (Height: 220px) -->
+                                <Border Width="48" Height="220" Background="#0A0A0A" BorderBrush="#FF007F" BorderThickness="1.8" CornerRadius="8" Padding="3">
+                                    <Grid VerticalAlignment="Bottom">
+                                        <Border x:Name="BarBrakeFill" Height="0" Background="#FF007F" CornerRadius="5"/>
                                     </Grid>
-                                </Canvas>
+                                </Border>
 
-                                <TextBlock x:Name="TxtSteerVal" Text="STEERING: CENTER (0%)" FontSize="11" FontWeight="Black" Foreground="#FFFFFF" HorizontalAlignment="Center" VerticalAlignment="Bottom"/>
-                            </Grid>
+                                <TextBlock x:Name="TxtBrakeVal" Text="0%" FontSize="13" FontWeight="Black" Foreground="#FF007F" HorizontalAlignment="Center" Margin="0,8,0,0"/>
+                            </StackPanel>
 
-                            <!-- Vertical RT Accel & LT Brake LED Bars -->
-                            <Grid Grid.Column="1" Margin="8,0,0,0">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
+                            <!-- Throttle RT Column -->
+                            <StackPanel Grid.Column="1" HorizontalAlignment="Center">
+                                <TextBlock Text="ACCEL (RT)" FontSize="10" FontWeight="Black" Foreground="#CCFF00" HorizontalAlignment="Center" Margin="0,0,0,8"/>
+                                
+                                <!-- Throttle Meter Container (Height: 220px) -->
+                                <Border Width="48" Height="220" Background="#0A0A0A" BorderBrush="#CCFF00" BorderThickness="1.8" CornerRadius="8" Padding="3">
+                                    <Grid VerticalAlignment="Bottom">
+                                        <Border x:Name="BarThrottleFill" Height="0" Background="#CCFF00" CornerRadius="5"/>
+                                    </Grid>
+                                </Border>
 
-                                <!-- Brake LT Column -->
-                                <StackPanel Grid.Column="0" HorizontalAlignment="Center">
-                                    <TextBlock Text="BRAKE" FontSize="10" FontWeight="Black" Foreground="#FF007F" HorizontalAlignment="Center" Margin="0,0,0,6"/>
-                                    
-                                    <!-- Brake Meter Container -->
-                                    <Border Width="40" Height="170" Background="#0A0A0A" BorderBrush="#FF007F" BorderThickness="1.5" CornerRadius="8" Padding="3">
-                                        <Grid VerticalAlignment="Bottom">
-                                            <Border x:Name="BarBrakeFill" Height="0" Background="#FF007F" CornerRadius="5"/>
-                                        </Grid>
-                                    </Border>
-
-                                    <TextBlock x:Name="TxtBrakeVal" Text="0%" FontSize="12" FontWeight="Black" Foreground="#FF007F" HorizontalAlignment="Center" Margin="0,6,0,0"/>
-                                </StackPanel>
-
-                                <!-- Throttle RT Column -->
-                                <StackPanel Grid.Column="1" HorizontalAlignment="Center">
-                                    <TextBlock Text="ACCEL" FontSize="10" FontWeight="Black" Foreground="#CCFF00" HorizontalAlignment="Center" Margin="0,0,0,6"/>
-                                    
-                                    <!-- Throttle Meter Container -->
-                                    <Border Width="40" Height="170" Background="#0A0A0A" BorderBrush="#CCFF00" BorderThickness="1.5" CornerRadius="8" Padding="3">
-                                        <Grid VerticalAlignment="Bottom">
-                                            <Border x:Name="BarThrottleFill" Height="0" Background="#CCFF00" CornerRadius="5"/>
-                                        </Grid>
-                                    </Border>
-
-                                    <TextBlock x:Name="TxtThrottleVal" Text="0%" FontSize="12" FontWeight="Black" Foreground="#CCFF00" HorizontalAlignment="Center" Margin="0,6,0,0"/>
-                                </StackPanel>
-                            </Grid>
+                                <TextBlock x:Name="TxtThrottleVal" Text="0%" FontSize="13" FontWeight="Black" Foreground="#CCFF00" HorizontalAlignment="Center" Margin="0,8,0,0"/>
+                            </StackPanel>
                         </Grid>
-
-                        <!-- Handbrake Indicator -->
-                        <Border x:Name="BadgeHandbrake" Background="#0A0A0A" BorderBrush="#1C665F" BorderThickness="1.5" CornerRadius="8" Padding="14,10">
-                            <Grid>
-                                <TextBlock Text="HANDBRAKE [SPACE / (A)]" FontSize="11" FontWeight="Black" Foreground="#7EE6D8" VerticalAlignment="Center"/>
-                                <TextBlock x:Name="TxtHandbrakeState" Text="RELEASED" FontWeight="Black" FontSize="12" Foreground="#A0D0CC" HorizontalAlignment="Right" VerticalAlignment="Center"/>
-                            </Grid>
-                        </Border>
-                    </StackPanel>
-                </Border>
-            </StackPanel>
+                    </Grid>
+                </Grid>
+            </Border>
         </Grid>
 
-        <!-- 3. Bottom Status Bar & Action Pills (Matching Forza Horizon In-Game Footer) -->
+        <!-- 3. Bottom Status Bar -->
         <Border Grid.Row="2" Background="#0A2C29" BorderBrush="#144C47" BorderThickness="1.5" CornerRadius="10" Padding="14,10" Margin="0,14,0,0">
             <Grid>
                 <TextBlock x:Name="TxtFooter" Text="FH6 Companion running. Virtual Xbox 360 controller is connected and ready." FontSize="11" Foreground="#7EE6D8" VerticalAlignment="Center"/>
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                    <Button Style="{StaticResource ForzaWhiteButton}" Content="TEST HANDBRAKE" Click="BtnTestHandbrake_Click" Margin="0,0,8,0"/>
-                    <Button Style="{StaticResource ForzaVoltButton}" Content="MINIMIZE TO TRAY" Click="BtnMinimizeTray_Click"/>
-                </StackPanel>
+                <Button HorizontalAlignment="Right" Style="{StaticResource ForzaVoltButton}" Content="MINIMIZE TO TRAY" Click="BtnMinimizeTray_Click"/>
             </Grid>
         </Border>
     </Grid>
