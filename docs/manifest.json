@@ -1,0 +1,23 @@
+{
+  "name": "Horizon Controller — Sim Racing Emulation",
+  "short_name": "HorizonController",
+  "description": "Virtual Xbox 360 controller emulation and 120Hz UDP telemetry companion for Forza Horizon.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#080C12",
+  "theme_color": "#080C12",
+  "orientation": "landscape",
+  "icons": [
+    {
+      "src": "assets/fh6_logo.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "assets/fh6_logo.png",
+      "sizes": "128x128",
+      "type": "image/png"
+    }
+  ]
+}
