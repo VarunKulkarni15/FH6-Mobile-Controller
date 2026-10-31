@@ -59,6 +59,7 @@ fun DrivingScreen(
     udpClient: UdpFastStreamClient,
     syncClient: ControlSyncClient? = null,
     onOpenConnectDialog: (() -> Unit)? = null,
+    onOpenDiagnosticsDialog: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     val state by viewModel.uiState.collectAsState()
@@ -713,6 +714,27 @@ fun DrivingScreen(
                                 Text("Pair with Windows Laptop", color = Color(0xFF555555), fontSize = 9.sp)
                             }
                             Text("PAIR >", color = Color.Black, fontSize = 10.sp, fontWeight = FontWeight.Black)
+                        }
+
+                        // Option 1b: App Requirements & Network Health Diagnostics
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(6.dp))
+                                .background(Color.White)
+                                .clickable {
+                                    isMenuOpen = false
+                                    onOpenDiagnosticsDialog?.invoke()
+                                }
+                                .padding(horizontal = 14.dp, vertical = 10.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Column {
+                                Text("REQUIREMENTS & HEALTH", color = Color.Black, fontSize = 11.sp, fontWeight = FontWeight.Black)
+                                Text("Check Wi-Fi, VPN & Windows Firewall", color = Color(0xFF555555), fontSize = 9.sp)
+                            }
+                            Text("HEALTH >", color = Color.Black, fontSize = 10.sp, fontWeight = FontWeight.Black)
                         }
 
                         // Option 2: Gyroscope Tilt Steering Toggle

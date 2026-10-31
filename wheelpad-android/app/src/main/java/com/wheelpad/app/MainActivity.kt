@@ -6,6 +6,8 @@ import android.os.Bundle
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -33,6 +35,7 @@ import com.wheelpad.app.network.UdpFastStreamClient
 import com.wheelpad.app.sensor.GyroSteeringManager
 import com.wheelpad.app.ui.controls.ControlEditorViewModel
 import com.wheelpad.app.ui.driving.DrivingScreen
+import com.wheelpad.app.util.NetworkDiagnosticsHelper
 import com.wheelpad.app.util.NotificationHelper
 import kotlinx.coroutines.launch
 
@@ -63,7 +66,7 @@ class MainActivity : ComponentActivity() {
         // 4. Retrieve auto-detected USB/LAN IP or saved IP
         val prefs = getSharedPreferences("wheelpad_prefs", Context.MODE_PRIVATE)
         val savedHost = prefs.getString("last_host_ip", null)
-        val detectedHost = getAutoDetectedHost()
+        val detectedHost = getAutoDetectedHost(this)
         val targetHost = detectedHost ?: savedHost
 
         if (!targetHost.isNullOrEmpty()) {
@@ -132,6 +135,7 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             var showConnectDialog by remember { mutableStateOf(false) }
+            var showDiagnosticsDialog by remember { mutableStateOf(false) }
 
             Box(
                 modifier = Modifier
@@ -143,7 +147,8 @@ class MainActivity : ComponentActivity() {
                     viewModel = controlEditorViewModel,
                     udpClient = udpClient,
                     syncClient = syncClient,
-                    onOpenConnectDialog = { showConnectDialog = true }
+                    onOpenConnectDialog = { showConnectDialog = true },
+                    onOpenDiagnosticsDialog = { showDiagnosticsDialog = true }
                 )
 
                 // Quick Connect / Pairing Modal
@@ -153,10 +158,25 @@ class MainActivity : ComponentActivity() {
                         syncClient = syncClient,
                         udpClient = udpClient,
                         onDismiss = { showConnectDialog = false },
+                        onOpenDiagnostics = { showDiagnosticsDialog = true },
                         onSaveHost = { newHost ->
                             prefs.edit().putString("last_host_ip", newHost).apply()
                             syncClient.connect(newHost)
                             udpClient.initialize(newHost)
+                            showConnectDialog = false
+                        }
+                    )
+                }
+
+                // App Requirements & Network Health Diagnostics Modal
+                if (showDiagnosticsDialog) {
+                    RequirementsDiagnosticsDialog(
+                        onDismiss = { showDiagnosticsDialog = false },
+                        onConnectToIp = { ip ->
+                            prefs.edit().putString("last_host_ip", ip).apply()
+                            syncClient.connect(ip)
+                            udpClient.initialize(ip)
+                            showDiagnosticsDialog = false
                             showConnectDialog = false
                         }
                     )
@@ -215,7 +235,16 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-fun getAutoDetectedHost(): String? {
+fun getAutoDetectedHost(context: Context? = null): String? {
+    // 1. Try default gateway from ConnectivityManager (100% reliable for USB tethering & Wi-Fi routers)
+    if (context != null) {
+        val report = NetworkDiagnosticsHelper.runDiagnostics(context)
+        if (!report.gatewayIp.isNullOrBlank()) {
+            return report.gatewayIp
+        }
+    }
+
+    // 2. Try /proc/net/arp (fallback on devices with readable /proc)
     try {
         val file = java.io.File("/proc/net/arp")
         if (file.exists()) {
@@ -226,7 +255,7 @@ fun getAutoDetectedHost(): String? {
                         val ip = tokens[0]
                         val flags = tokens[2]
                         val device = tokens[5]
-                        if (flags == "0x2" && (device.contains("rndis") || device.contains("usb") || device.contains("wlan"))) {
+                        if (flags == "0x2" && (device.contains("rndis") || device.contains("usb") || device.contains("wlan") || device.contains("eth"))) {
                             return ip
                         }
                     }
@@ -234,6 +263,7 @@ fun getAutoDetectedHost(): String? {
             }
         }
     } catch (e: Exception) { }
+
     return null
 }
 
@@ -243,13 +273,15 @@ fun PairingDialog(
     syncClient: ControlSyncClient,
     udpClient: UdpFastStreamClient,
     onDismiss: () -> Unit,
+    onOpenDiagnostics: () -> Unit,
     onSaveHost: (String) -> Unit
 ) {
-    val initialHost = remember { getAutoDetectedHost() ?: currentHost }
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val diagReport = remember { NetworkDiagnosticsHelper.runDiagnostics(context) }
+    val initialHost = remember { getAutoDetectedHost(context) ?: currentHost }
     var hostText by remember { mutableStateOf(initialHost) }
     val isConnected by syncClient.isConnected.collectAsState()
     val statusMsg by syncClient.statusMessage.collectAsState()
-    val context = androidx.compose.ui.platform.LocalContext.current
 
     Box(
         modifier = Modifier
@@ -260,11 +292,11 @@ fun PairingDialog(
     ) {
         Column(
             modifier = Modifier
-                .fillMaxWidth(0.62f)
-                .widthIn(min = 460.dp, max = 540.dp)
-                .clip(RoundedCornerShape(4.dp))
+                .fillMaxWidth(0.68f)
+                .widthIn(min = 460.dp, max = 560.dp)
+                .clip(RoundedCornerShape(6.dp))
                 .background(Color(0xF8051E1C))
-                .border(1.5.dp, Color(0xFFCCFF00), RoundedCornerShape(4.dp))
+                .border(1.5.dp, Color(0xFFCCFF00), RoundedCornerShape(6.dp))
                 .clickable(enabled = false) {}
         ) {
             // Full-Bleed Solid Volt Lime Header
@@ -300,7 +332,8 @@ fun PairingDialog(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(16.dp),
+                    .padding(16.dp)
+                    .verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 // Connection Status
@@ -311,6 +344,45 @@ fun PairingDialog(
                     fontWeight = FontWeight.Black,
                     letterSpacing = 1.sp
                 )
+
+                // Live Warning Banners for VPN / Cellular
+                if (diagReport.isVpnActive) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(4.dp))
+                            .background(Color(0x35FFB300))
+                            .border(1.dp, Color(0xFFFFB300), RoundedCornerShape(4.dp))
+                            .padding(horizontal = 10.dp, vertical = 8.dp)
+                    ) {
+                        Text(
+                            text = "⚠️ VPN DETECTED: Disconnect your VPN or enable Local LAN Bypass in your VPN app so your phone can reach your PC.",
+                            color = Color(0xFFFFD54F),
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Bold,
+                            lineHeight = 14.sp
+                        )
+                    }
+                }
+
+                if (diagReport.isCellularOnly) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(4.dp))
+                            .background(Color(0x35FF5252))
+                            .border(1.dp, Color(0xFFFF5252), RoundedCornerShape(4.dp))
+                            .padding(horizontal = 10.dp, vertical = 8.dp)
+                    ) {
+                        Text(
+                            text = "⚠️ CELLULAR DATA ONLY: Wi-Fi is disconnected. Connect to the same Wi-Fi router as your PC, or enable USB Tethering.",
+                            color = Color(0xFFFF8A80),
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Bold,
+                            lineHeight = 14.sp
+                        )
+                    }
+                }
 
                 // Option A: Auto-Discovery Button
                 Box(
@@ -383,13 +455,58 @@ fun PairingDialog(
                     )
                 }
 
-                Text(
-                    "// OR ENTER IP MANUALLY",
-                    color = Color(0x80FFFFFF),
-                    fontSize = 9.sp,
-                    fontWeight = FontWeight.Bold,
-                    letterSpacing = 1.sp
-                )
+                // Detected Host Quick-Chip (if available)
+                if (!diagReport.gatewayIp.isNullOrBlank()) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(4.dp))
+                            .background(Color(0x3000E676))
+                            .border(1.dp, Color(0xFF00E676), RoundedCornerShape(4.dp))
+                            .clickable {
+                                hostText = diagReport.gatewayIp
+                                onSaveHost(diagReport.gatewayIp)
+                            }
+                            .padding(horizontal = 12.dp, vertical = 7.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "DETECTED PC HOST: ${diagReport.gatewayIp}",
+                            color = Color(0xFF00E676),
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Black
+                        )
+                        Text(
+                            text = "USE & CONNECT >",
+                            color = Color.White,
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Black
+                        )
+                    }
+                }
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        "// OR ENTER IP MANUALLY",
+                        color = Color(0x80FFFFFF),
+                        fontSize = 9.sp,
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 1.sp
+                    )
+
+                    Text(
+                        "[?] REQUIREMENTS & HEALTH",
+                        color = Color(0xFFCCFF00),
+                        fontSize = 9.sp,
+                        fontWeight = FontWeight.Black,
+                        modifier = Modifier.clickable(onClick = onOpenDiagnostics)
+                    )
+                }
 
                 OutlinedTextField(
                     value = hostText,
@@ -431,6 +548,232 @@ fun PairingDialog(
                         contentAlignment = Alignment.Center
                     ) {
                         Text("CANCEL", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 11.sp, letterSpacing = 1.sp)
+                    }
+                }
+            }
+        }
+    }
+}
+
+/**
+ * App Requirements & Network Health Diagnostics Modal Dialog
+ */
+@Composable
+fun RequirementsDiagnosticsDialog(
+    onDismiss: () -> Unit,
+    onConnectToIp: (String) -> Unit
+) {
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val report = remember { NetworkDiagnosticsHelper.runDiagnostics(context) }
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color(0xD8020B0A))
+            .clickable(onClick = onDismiss),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth(0.72f)
+                .widthIn(min = 480.dp, max = 580.dp)
+                .heightIn(max = 380.dp)
+                .clip(RoundedCornerShape(6.dp))
+                .background(Color(0xF8061F1D))
+                .border(1.5.dp, Color(0xFFCCFF00), RoundedCornerShape(6.dp))
+                .clickable(enabled = false) {}
+        ) {
+            // Header
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Color(0xFFCCFF00))
+                    .padding(horizontal = 16.dp, vertical = 9.dp)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "APP REQUIREMENTS // NETWORK HEALTH",
+                        color = Color.Black,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Black,
+                        letterSpacing = 1.5.sp
+                    )
+                    Text(
+                        text = "CLOSE",
+                        color = Color.Black,
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Black,
+                        modifier = Modifier.clickable(onClick = onDismiss)
+                    )
+                }
+            }
+
+            // Scrollable Content
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+                    .padding(14.dp)
+                    .verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                // Warning Banners (if any)
+                report.warnings.forEach { warning ->
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(4.dp))
+                            .background(Color(0x30FF5252))
+                            .border(1.dp, Color(0xFFFF5252), RoundedCornerShape(4.dp))
+                            .padding(10.dp)
+                    ) {
+                        Text(
+                            text = warning,
+                            color = Color(0xFFFF8A80),
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Bold,
+                            lineHeight = 14.sp
+                        )
+                    }
+                }
+
+                // Live Diagnostic Status Cards
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    // Card 1: Network Mode
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .clip(RoundedCornerShape(4.dp))
+                            .background(Color(0x40000000))
+                            .border(1.dp, if (report.isWifiConnected || report.isEthernetOrUsbConnected) Color(0xFF00E676) else Color(0xFFFF5252), RoundedCornerShape(4.dp))
+                            .padding(8.dp)
+                    ) {
+                        Column {
+                            Text("NETWORK", color = Color(0x99FFFFFF), fontSize = 8.sp, fontWeight = FontWeight.Bold)
+                            Text(
+                                text = when {
+                                    report.isEthernetOrUsbConnected -> "USB / ETH"
+                                    report.isWifiConnected -> "WI-FI"
+                                    report.isCellularOnly -> "CELLULAR"
+                                    else -> "OFFLINE"
+                                },
+                                color = if (report.isWifiConnected || report.isEthernetOrUsbConnected) Color(0xFF00E676) else Color(0xFFFF5252),
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Black
+                            )
+                            Text(report.localIp ?: "No local IP", color = Color(0xCCFFFFFF), fontSize = 9.sp)
+                        }
+                    }
+
+                    // Card 2: VPN Status
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .clip(RoundedCornerShape(4.dp))
+                            .background(Color(0x40000000))
+                            .border(1.dp, if (!report.isVpnActive) Color(0xFF00E676) else Color(0xFFFFB300), RoundedCornerShape(4.dp))
+                            .padding(8.dp)
+                    ) {
+                        Column {
+                            Text("VPN SHIELD", color = Color(0x99FFFFFF), fontSize = 8.sp, fontWeight = FontWeight.Bold)
+                            Text(
+                                text = if (!report.isVpnActive) "CLEAN (OFF)" else "ACTIVE (WARN)",
+                                color = if (!report.isVpnActive) Color(0xFF00E676) else Color(0xFFFFB300),
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Black
+                            )
+                            Text(if (!report.isVpnActive) "LAN unblocked" else "Blocks LAN discovery", color = Color(0xCCFFFFFF), fontSize = 9.sp)
+                        }
+                    }
+
+                    // Card 3: Detected Host / Gateway
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .clip(RoundedCornerShape(4.dp))
+                            .background(Color(0x40000000))
+                            .border(1.dp, if (report.gatewayIp != null) Color(0xFFCCFF00) else Color(0x60FFFFFF), RoundedCornerShape(4.dp))
+                            .padding(8.dp)
+                    ) {
+                        Column {
+                            Text("GATEWAY / PC", color = Color(0x99FFFFFF), fontSize = 8.sp, fontWeight = FontWeight.Bold)
+                            Text(
+                                text = report.gatewayIp ?: "Scanning...",
+                                color = if (report.gatewayIp != null) Color(0xFFCCFF00) else Color.White,
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Black
+                            )
+                            if (report.gatewayIp != null) {
+                                Text("Click Connect below", color = Color(0xCCFFFFFF), fontSize = 9.sp)
+                            }
+                        }
+                    }
+                }
+
+                // App Requirements Checklist
+                Text("// 4 CORE CONNECTION REQUIREMENTS", color = Color(0xFFCCFF00), fontSize = 10.sp, fontWeight = FontWeight.Black, letterSpacing = 1.sp)
+
+                listOf(
+                    "1. WINDOWS COMPANION RUNNING" to "Start 'fh6-controller-windows.exe' on your PC. It will display a green QR code and listen on ports 4243 TCP & 4242 UDP.",
+                    "2. SAME LOCAL NETWORK (OR USB CABLE)" to "Both phone and PC must be on the same Wi-Fi. (Recommended: Connect USB cable and turn on 'USB Tethering' in Android Settings for zero-latency, 100% stable connection!)",
+                    "3. TURN OFF VPN ON PHONE & PC" to "VPNs (Nord, Express, Proton, WARP) route packets away from your local subnet. Disable VPN while playing.",
+                    "4. WINDOWS DEFENDER FIREWALL" to "Ensure Windows Firewall allowed the companion on Private & Public networks."
+                ).forEach { (title, desc) ->
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(4.dp))
+                            .background(Color(0x20000000))
+                            .padding(horizontal = 10.dp, vertical = 6.dp)
+                    ) {
+                        Text(title, color = Color.White, fontSize = 10.sp, fontWeight = FontWeight.Black)
+                        Text(desc, color = Color(0xB3FFFFFF), fontSize = 9.sp, lineHeight = 13.sp)
+                    }
+                }
+
+                // Action Buttons
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    if (report.gatewayIp != null) {
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .clip(RoundedCornerShape(4.dp))
+                                .background(Color(0xFFCCFF00))
+                                .clickable {
+                                    onConnectToIp(report.gatewayIp)
+                                    onDismiss()
+                                }
+                                .padding(vertical = 9.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text("CONNECT TO DETECTED PC (${report.gatewayIp})", color = Color.Black, fontSize = 10.sp, fontWeight = FontWeight.Black)
+                        }
+                    }
+
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .clip(RoundedCornerShape(4.dp))
+                            .background(Color(0x30FFFFFF))
+                            .clickable {
+                                try {
+                                    context.startActivity(android.content.Intent(android.provider.Settings.ACTION_WIRELESS_SETTINGS))
+                                } catch (e: Exception) { }
+                            }
+                            .padding(vertical = 9.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text("OPEN PHONE NETWORK SETTINGS", color = Color.White, fontSize = 10.sp, fontWeight = FontWeight.Bold)
                     }
                 }
             }
