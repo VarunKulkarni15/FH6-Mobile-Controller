@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- 12 O'Clock Racing Centering Notch (Solid Volt Lime) -->
+    <path
+        android:fillColor="#CCFF00"
+        android:pathData="M52,22 L56,22 L55.5,27 L52.5,27 Z" />
+
+    <!-- Left Paddle Shifter (-) -->
+    <path
+        android:fillColor="#121C1D"
+        android:strokeColor="#25373A"
+        android:strokeWidth="0.8"
+        android:pathData="M27,47 L30,48 L28.5,63 L25,61 Z" />
+    <path
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="0.8"
+        android:pathData="M26.5,54 L28.5,54.5" />
+
+    <!-- Right Paddle Shifter (+) -->
+    <path
+        android:fillColor="#121C1D"
+        android:strokeColor="#CCFF00"
+        android:strokeWidth="0.8"
+        android:pathData="M81,47 L78,48 L79.5,63 L83,61 Z" />
+    <path
+        android:strokeColor="#CCFF00"
+        android:strokeWidth="0.8"
+        android:pathData="M80,54 L82,54 M81,53 L81,55" />
+
+    <!-- Outer Racing Wheel Rim (GT3 Flat Bottom) -->
+    <path
+        android:strokeColor="#223033"
+        android:strokeWidth="6.5"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M39,75 C31,71 27,62 27,53 C27,39 39,28 54,28 C69,28 81,39 81,53 C81,62 77,71 69,75 L39,75 Z" />
+
+    <!-- Flat-Bottom Apex Volt Bar -->
+    <path
+        android:strokeColor="#CCFF00"
+        android:strokeWidth="1.6"
+        android:strokeLineCap="round"
+        android:pathData="M39,75 L69,75" />
+
+    <!-- Grip Accents (Solid Volt Lime) -->
+    <path
+        android:strokeColor="#CCFF00"
+        android:strokeWidth="0.8"
+        android:pathData="M24,47 L29,48 M23.5,53 L29,53.5 M24.5,59 L29.5,58.5" />
+    <path
+        android:strokeColor="#CCFF00"
+        android:strokeWidth="0.8"
+        android:pathData="M84,47 L79,48 M84.5,53 L79,53.5 M83.5,59 L78.5,58.5" />
+
+    <!-- ======================================================== -->
+    <!-- THE SIGNATURE "6" SPEED SWOOP (Solid Volt Lime)          -->
+    <!-- ======================================================== -->
+    <path
+        android:strokeColor="#CCFF00"
+        android:strokeWidth="4.2"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M76,23 L58,23 C43,23 32,35 32,50 C32,64 43,74 56,74 C69,74 78,64 78,50 C78,39 69,33 57,33 C46,33 39,41 39,50 C39,58 45,64 54,64 C60,64 65,60 66,54" />
+
+    <!-- Top Aero Spoiler Tip (Solid White) -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M57,21 L80,21 L77,25 L54,25 Z" />
+    <!-- 3 Speed Vent Cuts -->
+    <path
+        android:strokeColor="#081414"
+        android:strokeWidth="0.8"
+        android:pathData="M69,21.5 L68,24.5 M72.5,21.5 L71.5,24.5 M76,21.5 L75,24.5" />
+
+    <!-- ======================================================== -->
+    <!-- MOTORSPORT 3-SPOKE HUB                                   -->
+    <!-- ======================================================== -->
+    <!-- Left Spoke -->
+    <path
+        android:fillColor="#152123"
+        android:strokeColor="#25373A"
+        android:strokeWidth="0.5"
+        android:pathData="M31,52 L47,53 L47,56 L31,55 Z" />
+    <path
+        android:strokeColor="#CCFF00"
+        android:strokeWidth="0.7"
+        android:pathData="M33,54 L45,54.5" />
+
+    <!-- Right Spoke -->
+    <path
+        android:fillColor="#152123"
+        android:strokeColor="#25373A"
+        android:strokeWidth="0.5"
+        android:pathData="M77,52 L61,53 L61,56 L77,55 Z" />
+    <path
+        android:strokeColor="#CCFF00"
+        android:strokeWidth="0.7"
+        android:pathData="M63,54.5 L75,54" />
+
+    <!-- Bottom Spoke -->
+    <path
+        android:fillColor="#152123"
+        android:strokeColor="#25373A"
+        android:strokeWidth="0.5"
+        android:pathData="M52.5,59 L55.5,59 L55,73 L53,73 Z" />
+    <path
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="0.7"
+        android:pathData="M54,61 L54,71" />
+
+    <!-- Center Hub Boss -->
+    <path
+        android:fillColor="#0B1315"
+        android:strokeColor="#25373A"
+        android:strokeWidth="1.2"
+        android:pathData="M54,44 A8.5,8.5 0 1 1 53.9,44 Z" />
+
+    <!-- Machined Horizon Hex Badge -->
+    <path
+        android:fillColor="#081414"
+        android:strokeColor="#CCFF00"
+        android:strokeWidth="0.8"
+        android:pathData="M54,49.5 L56.5,51 L56.5,54 L54,55.5 L51.5,54 L51.5,51 Z" />
+
+    <!-- Horizon 'H' Monogram in Center -->
+    <path
+        android:strokeColor="#CCFF00"
+        android:strokeWidth="0.6"
+        android:strokeLineCap="round"
+        android:pathData="M52.5,51.8 L52.5,53.8 M55.5,51.8 L55.5,53.8 M52.5,52.8 L55.5,52.8" />
+
+    <!-- Footer 'FH6' Subtitle Pill -->
+    <path
+        android:fillColor="#CCFF00"
+        android:pathData="M46,84 L62,84 L61,86 L45,86 Z" />
+</vector>

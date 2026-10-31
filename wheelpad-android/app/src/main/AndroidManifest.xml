@@ -16,9 +16,9 @@
 
     <application
         android:allowBackup="true"
-        android:icon="@android:drawable/sym_def_app_icon"
-        android:label="fh6-controller-android"
-        android:roundIcon="@android:drawable/sym_def_app_icon"
+        android:icon="@mipmap/ic_launcher"
+        android:label="FH6 Controller"
+        android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@android:style/Theme.Material.NoActionBar">
 
@@ -37,6 +37,10 @@
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https" android:host="varunkulkarni15.github.io" android:pathPrefix="/FH6-Mobile-Controller" />
+                <data android:scheme="http" android:host="varunkulkarni15.github.io" android:pathPrefix="/FH6-Mobile-Controller" />
+                <data android:scheme="https" android:host="varunkulkarni15.github.io" android:pathPrefix="/fh6-mobile-controller" />
+                <data android:scheme="http" android:host="varunkulkarni15.github.io" android:pathPrefix="/fh6-mobile-controller" />
                 <data android:scheme="https" android:host="varuncoder777.github.io" android:pathPrefix="/fh6-controller" />
                 <data android:scheme="http" android:host="varuncoder777.github.io" android:pathPrefix="/fh6-controller" />
                 <data android:scheme="https" android:host="fh6-controller.github.io" />

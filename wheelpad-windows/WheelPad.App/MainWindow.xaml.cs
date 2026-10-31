@@ -79,7 +79,7 @@ namespace WheelPad.App
             try
             {
                 // Web deep-link payload: camera scanners open website with IP parameters which deep-links to app
-                string qrPayload = $"https://varuncoder777.github.io/fh6-controller/?ip={localIp}&tcp=4243&udp=4242";
+                string qrPayload = $"https://varunkulkarni15.github.io/FH6-Mobile-Controller/?ip={localIp}&tcp=4243&udp=4242";
                 ImgQrCode.Source = QrCodeHelper.GenerateQrCode(qrPayload);
             }
             catch { }
@@ -92,9 +92,44 @@ namespace WheelPad.App
             }
             else
             {
-                TxtControllerStatus.Text = "FALLBACK KEYBOARD MODE";
+                TxtControllerStatus.Text = "CHECKING VIGEMBUS DRIVER...";
                 StatusDot.Fill = new SolidColorBrush(System.Windows.Media.Color.FromRgb(0xFF, 0xCC, 0x00));
                 PillViGEm.BorderBrush = new SolidColorBrush(System.Windows.Media.Color.FromRgb(0xFF, 0xCC, 0x00));
+
+                // Auto-download and install ViGEmBus driver seamlessly
+                Task.Run(async () =>
+                {
+                    if (!ViGEmInstallerService.IsDriverInstalled())
+                    {
+                        await Dispatcher.InvokeAsync(() =>
+                        {
+                            TxtControllerStatus.Text = "AUTO-DOWNLOADING VIGEMBUS...";
+                            PillViGEm.BorderBrush = new SolidColorBrush(System.Windows.Media.Color.FromRgb(0x00, 0xF2, 0xFE));
+                        });
+
+                        bool success = await ViGEmInstallerService.DownloadAndInstallDriverAsync(msg =>
+                        {
+                            Dispatcher.InvokeAsync(() =>
+                            {
+                                TxtControllerStatus.Text = msg.ToUpperInvariant();
+                            });
+                        });
+
+                        if (success)
+                        {
+                            _xbox.Connect();
+                            await Dispatcher.InvokeAsync(() =>
+                            {
+                                if (_xbox.IsConnected)
+                                {
+                                    TxtControllerStatus.Text = "STEAM / ViGEmBUS ACTIVE";
+                                    StatusDot.Fill = new SolidColorBrush(System.Windows.Media.Color.FromRgb(0xCC, 0xFF, 0x00));
+                                    PillViGEm.BorderBrush = new SolidColorBrush(System.Windows.Media.Color.FromRgb(0xCC, 0xFF, 0x00));
+                                }
+                            });
+                        }
+                    }
+                });
             }
 
             // Window Close handler

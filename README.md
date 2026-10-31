@@ -89,8 +89,8 @@ Ultra-low latency virtual Xbox 360 controller emulation suite designed specifica
 
 ## System Requirements
 
-- **Windows PC:** Windows 10 or 11 (64-bit), .NET 8 Runtime, [ViGEmBus Driver](https://github.com/nefarius/ViGEmBus/releases).
-- **Mobile Phone:** Android 9.0 (Pie) or higher with Touchscreen and Gyroscope/Accelerometer (Optimized for Samsung Galaxy M16 5G 120Hz displays).
+- **Windows PC:** Windows 10 or 11 (64-bit), .NET 8 Runtime. *(The required ViGEmBus virtual controller driver is automatically downloaded and installed by the companion executable on first launch if not already present — zero manual downloads needed).*
+- **Mobile Phone:** Android 9.0 (Pie) or higher with Touchscreen and Gyroscope/Accelerometer (Optimized for 60Hz - 120Hz displays).
 
 ---
 
