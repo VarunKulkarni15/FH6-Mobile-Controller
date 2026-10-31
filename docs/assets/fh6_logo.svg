@@ -1,0 +1,183 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <!-- Dark Festival Teal / Carbon Foundation (Matches in-game Forza Horizon theme) -->
+    <linearGradient id="fhPlate" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0E1A1B" />
+      <stop offset="45%" stop-color="#081414" />
+      <stop offset="100%" stop-color="#040809" />
+    </linearGradient>
+
+    <!-- Matte Carbon Wheel Rim -->
+    <linearGradient id="wheelRim" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#283538" />
+      <stop offset="50%" stop-color="#172224" />
+      <stop offset="100%" stop-color="#0E1719" />
+    </linearGradient>
+
+    <!-- Spoke Metal -->
+    <linearGradient id="spokeDark" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#1E2B2E" />
+      <stop offset="100%" stop-color="#10191B" />
+    </linearGradient>
+  </defs>
+
+  <!-- ======================================================== -->
+  <!-- BACKGROUND RACING EMBLEM BADGE                           -->
+  <!-- ======================================================== -->
+  <!-- Crisp Rounded Motorsport Hex Shield with Solid Volt Border -->
+  <rect x="24" y="24" width="464" height="464" rx="84" ry="84" 
+        fill="url(#fhPlate)" 
+        stroke="#CCFF00" 
+        stroke-width="5" />
+
+  <!-- Inner High-Contrast Racing Border -->
+  <rect x="38" y="38" width="436" height="436" rx="70" ry="70" 
+        fill="none" 
+        stroke="#162928" 
+        stroke-width="2" />
+
+  <!-- Diagonal Speed Slashes (Forza Horizon Signature Track Graphics) -->
+  <g transform="skewX(-16) translate(50, 0)">
+    <!-- Top-Right Motorsport Chevrons -->
+    <polygon points="260,40 284,40 224,472 200,472" fill="#CCFF00" opacity="0.07" />
+    <polygon points="300,40 336,40 276,472 240,472" fill="#CCFF00" opacity="0.05" />
+    <polygon points="350,40 362,40 302,472 290,472" fill="#CCFF00" opacity="0.03" />
+  </g>
+
+  <!-- 12 O'CLOCK RACING CENTERING NOTCH (SOLID VOLT LIME) -->
+  <rect x="248" y="48" width="16" height="28" rx="2" fill="#CCFF00" />
+
+  <!-- ======================================================== -->
+  <!-- HERO: GT3 RACING WHEEL + INTEGRATED NUMERAL "6"          -->
+  <!-- ======================================================== -->
+  <g transform="translate(256, 235)">
+
+    <!-- PADDLE SHIFTERS (Behind Rim) -->
+    <!-- Downshift Paddle (-) -->
+    <polygon points="-142,-20 -124,-24 -116,55 -136,48" fill="#121C1D" stroke="#283C3E" stroke-width="2" />
+    <rect x="-135" y="10" width="8" height="3" fill="#FFFFFF" opacity="0.8" />
+
+    <!-- Upshift Paddle (+) -->
+    <polygon points="142,-20 124,-24 116,55 136,48" fill="#121C1D" stroke="#CCFF00" stroke-width="2" />
+    <path d="M 127 10 L 133 10 M 130 7 L 130 13" stroke="#CCFF00" stroke-width="2" stroke-linecap="round" />
+
+    <!-- RACING WHEEL OUTER RIM (Flat-Bottom GT3 Profile) -->
+    <path d="M -80 135
+             C -125 110, -155 60, -155 0
+             C -155 -85, -85 -155, 0 -155
+             C 85 -155, 155 -85, 155 0
+             C 155 60, 125 110, 80 135
+             L -80 135 Z" 
+          fill="none" 
+          stroke="url(#wheelRim)" 
+          stroke-width="38" 
+          stroke-linejoin="round"
+          stroke-linecap="round" />
+
+    <!-- INNER RIM HIGH-CONTRAST ACCENT -->
+    <path d="M -70 115
+             C -105 95, -128 50, -128 0
+             C -128 -70, -70 -128, 0 -128
+             C 70 -128, 128 -70, 128 0
+             C 128 50, 105 95, 70 115" 
+          fill="none" 
+          stroke="#1F3033" 
+          stroke-width="4" />
+
+    <!-- FLAT-BOTTOM VOLT APEX STRIPE -->
+    <line x1="-80" y1="135" x2="80" y2="135" stroke="#CCFF00" stroke-width="6" stroke-linecap="round" />
+
+    <!-- ALCANTARA GRIP TEXTURE BLOCKS -->
+    <!-- Left Grip -->
+    <path d="M -152 -45 C -158 -15, -158 15, -152 45" fill="none" stroke="#CCFF00" stroke-width="4" stroke-linecap="round" />
+    <!-- Right Grip -->
+    <path d="M 152 -45 C 158 -15, 158 15, 152 45" fill="none" stroke="#CCFF00" stroke-width="4" stroke-linecap="round" />
+
+    <!-- ======================================================== -->
+    <!-- THE "6" SPEED SWOOP (Bold, Crisp Motorsport Cut)         -->
+    <!-- ======================================================== -->
+    <!-- Sweeps powerfully into the numeral 6 loop -->
+    <path d="M 105 -152
+             L 20 -152
+             C -65 -152, -122 -85, -122 0
+             C -122 75, -60 132, 15 132
+             C 85 132, 138 75, 138 -5
+             C 138 -75, 85 -118, 15 -118
+             C -45 -118, -82 -75, -82 -5
+             C -82 45, -45 80, 5 80
+             C 45 80, 78 50, 80 10" 
+          fill="none" 
+          stroke="#CCFF00" 
+          stroke-width="22" 
+          stroke-linecap="round" 
+          stroke-linejoin="round" />
+
+    <!-- Top Aero Spoiler End for the "6" -->
+    <polygon points="15,-163 125,-163 108,-141 0,-141" fill="#FFFFFF" />
+
+    <!-- 3 Crisp Speed Vent Cuts in the Spoiler Tip -->
+    <line x1="68" y1="-161" x2="62" y2="-143" stroke="#081414" stroke-width="3" />
+    <line x1="84" y1="-161" x2="78" y2="-143" stroke="#081414" stroke-width="3" />
+    <line x1="100" y1="-161" x2="94" y2="-143" stroke="#081414" stroke-width="3" />
+
+    <!-- ======================================================== -->
+    <!-- MOTORSPORT 3-SPOKE HUB                                   -->
+    <!-- ======================================================== -->
+    <!-- Left Spoke -->
+    <polygon points="-128,-8 -38,-10 -38,10 -128,8" fill="url(#spokeDark)" stroke="#162928" stroke-width="1.5" />
+    <line x1="-120" y1="0" x2="-44" y2="0" stroke="#CCFF00" stroke-width="3" stroke-linecap="round" />
+
+    <!-- Right Spoke -->
+    <polygon points="128,-8 38,-10 38,10 128,8" fill="url(#spokeDark)" stroke="#162928" stroke-width="1.5" />
+    <line x1="44" y1="0" x2="120" y2="0" stroke="#CCFF00" stroke-width="3" stroke-linecap="round" />
+
+    <!-- Bottom Spoke -->
+    <polygon points="-10,38 10,38 8,124 -8,124" fill="url(#spokeDark)" stroke="#162928" stroke-width="1.5" />
+    <line x1="0" y1="44" x2="0" y2="120" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" />
+
+    <!-- Center Horn Boss (Solid Matte Hub with Machined Bezel) -->
+    <circle cx="0" cy="0" r="44" fill="#0A1012" stroke="#253538" stroke-width="4" />
+    <circle cx="0" cy="0" r="35" fill="#111B1D" stroke="#CCFF00" stroke-width="2" />
+
+    <!-- Center Horizon "H" Monogram in Machined Hexagon -->
+    <polygon points="0,-16 14,-8 14,8 0,16 -14,8 -14,-8" fill="#070E0F" stroke="#CCFF00" stroke-width="1.5" />
+    <path d="M -7 -8 L -4 -8 L -4 8 L -7 8 Z 
+             M 4 -8 L 7 -8 L 7 8 L 4 8 Z 
+             M -4 0 L 4 0 Z" 
+          stroke="#CCFF00" stroke-width="1.5" stroke-linecap="round" />
+
+    <!-- Precision Telemetry Degree Ticks Around Hub -->
+    <line x1="0" y1="-28" x2="0" y2="-34" stroke="#CCFF00" stroke-width="2.5" />
+    <line x1="0" y1="28" x2="0" y2="34" stroke="#FFFFFF" stroke-width="2" />
+    <line x1="-28" y1="0" x2="-34" y2="0" stroke="#CCFF00" stroke-width="2" />
+    <line x1="28" y1="0" x2="34" y2="0" stroke="#CCFF00" stroke-width="2" />
+  </g>
+
+  <!-- ======================================================== -->
+  <!-- FOOTER BADGE: CRISP FORZA MOTORSPORT TYPOGRAPHY          -->
+  <!-- ======================================================== -->
+  <g transform="translate(256, 440) skewX(-12)">
+    <!-- High-Impact Bold Racing Monogram -->
+    <text x="0" y="0" 
+          font-family="'Montserrat', 'Arial Black', -apple-system, sans-serif" 
+          font-size="30" 
+          font-weight="900" 
+          font-style="italic" 
+          letter-spacing="6" 
+          text-anchor="middle" 
+          fill="#FFFFFF">
+      FORZA <tspan fill="#CCFF00">H6</tspan>
+    </text>
+    
+    <text x="0" y="18" 
+          font-family="'Montserrat', 'Arial Black', sans-serif" 
+          font-size="10" 
+          font-weight="800" 
+          letter-spacing="8" 
+          text-anchor="middle" 
+          fill="#CCFF00" 
+          opacity="0.9">
+      CONTROLLER SUITE
+    </text>
+  </g>
+</svg>

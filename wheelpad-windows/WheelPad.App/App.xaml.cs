@@ -52,6 +52,9 @@ public partial class App : System.Windows.Application
         // 3. Start Named Pipe IPC Server to listen for future double-clicks/restores
         StartIpcServer();
 
+        // 4. Ensure registered as native Windows App in Start Menu & Windows Search
+        WheelPad.Core.Services.AppRegistrationService.EnsureRegistered();
+
         base.OnStartup(e);
     }
 

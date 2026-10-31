@@ -1,117 +1,82 @@
-# FH6 CONTROLLER // FORZA HORIZON MOBILE HUD & PC COMPANION SUITE
+<div align="center">
 
-Ultra-low latency virtual Xbox 360 controller emulation suite designed specifically for **Forza Horizon 6**. Turns your Android phone into an authentic, edge-to-edge motorsport HUD with gyroscope tilt steering, precision pedal modulation, and 1-click auto-driving assist.
+<img src="shared-protocol/svg/fh6_logo.svg" width="128" height="128" alt="Forza Horizon Controller Logo" />
+
+# FORZA HORIZON CONTROLLER SUITE
+### Low-Latency Virtual Xbox 360 Controller Emulation & Telemetry Companion for PC
+
+[![Platform](https://img.shields.io/badge/Platform-Windows%2011%20%7C%2010%20%7C%20Android-0078D4.svg?style=flat-square)](#system-requirements)
+[![Protocol](https://img.shields.io/badge/FastStream-120Hz%20UDP-CCFF00.svg?style=flat-square&labelColor=0E1A1B)](#key-features)
+[![Driver](https://img.shields.io/badge/Driver-Kernel%20ViGEmBus-107C41.svg?style=flat-square)](#virtual-controller-driver)
+[![License](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](LICENSE)
+
+[**Live Web Portal**](https://fh6controller.vercel.app) &nbsp;&bull;&nbsp; [**Download Windows Companion**](releases/fh6-controller-windows.exe) &nbsp;&bull;&nbsp; [**Download Android App**](releases/fh6-controller-android.apk)
+
+</div>
 
 ---
 
-## Architecture Overview
+## Direct Mobile App Screenshots
 
-```
- +---------------------------------------------------------------+
- |                 ANDROID PHONE (fh6-controller-android)         |
- |  - 120Hz Touch HUD & Gyroscope Sensor (0.4x - 3.0x Sens)      |
- |  - Pure Vector SVGs (Steering Wheel, RT Accel, LT Brake, A)   |
- |  - 1-Click Auto-Drive Assist Button (C + Num 2 macro)         |
- |  - Dynamic Reposition Drag & Fine Pixel Resizing Engine       |
- +-------------------------------+-------------------------------+
-                                 |
-                 UDP FastStream  |  TCP Profile Sync & Media
-                    (Port 4242)  |  (Port 4243)
-                                 v
- +---------------------------------------------------------------+
- |              WINDOWS COMPANION (fh6-controller-windows.exe)   |
- |  - Native C# .NET 8 WPF Dashboard (Zero Electron / Zero CMD)  |
- |  - ViGEmBus Hardware Xbox 360 Controller Emulation Engine      |
- |  - Universal SMTC / Spotify / YouTube Music Media Bridge      |
- |  - Win32 SendInput Assist Sequencer (VK_C -> VK_NUMPAD2)      |
- +-------------------------------+-------------------------------+
-                                 |
-                                 v
- +---------------------------------------------------------------+
- |             STEAM & FORZA HORIZON 6 (WINDOWS PC)              |
- |  - Official Xbox 360 Controller Detected Plug-and-Play        |
- |  - 0-Input Lag Analog Steering & Progressive Triggers         |
- +---------------------------------------------------------------+
-```
+Authentic captures running directly on hardware (Android 14 on Google Pixel & Samsung Galaxy):
+
+| Driving Cockpit | Live Layout Editor | Forza Action Catalog |
+|:---:|:---:|:---:|
+| <img src="assets/app_screenshot_driving.png" width="280" alt="Driving Cockpit" /> | <img src="assets/app_screenshot_editor.png" width="280" alt="Layout Customizer" /> | <img src="assets/app_screenshot_catalog.png" width="280" alt="Action Catalog" /> |
+| **Edge-to-Edge Sim Cockpit**<br>Touch wheel, progressive pedals & handbrake | **Live Layout Customizer**<br>Drag, resize & remove controls on the fly | **18-Action Catalog**<br>All Forza actions & hardware Auto-Drive assist |
+
+| 3-Dot Quick Menu & Gyro Readout | Instant QR Scanner & LAN Pairing |
+|:---:|:---:|
+| <img src="assets/app_screenshot_gyro_settings.png" width="280" alt="Gyro & Sensitivity Settings" /> | <img src="assets/app_screenshot_pairing.png" width="280" alt="QR Code LAN Pairing" /> |
+| **Precision Gyro Tuning**<br>Adjust sensitivity, rotation degrees & live readout | **Zero-Config LAN Pairing**<br>Scan QR code or auto-discover PC in <50ms |
 
 ---
 
 ## Key Features
 
-1. **0-Delay FastStream 120Hz UDP Protocol**
-   - High-performance binary 24-byte packet stream with sequence numbering, CRC16 error checking, and a 500ms safety watchdog that zeroes inputs if a connection drop occurs.
-2. **Native ViGEmBus Xbox 360 Controller Emulation**
-   - Recognized natively by Windows, Steam, and Forza Horizon as an official Microsoft Xbox 360 Controller without requiring third-party remappers.
-3. **Progressive Analog Reverse & Brake Modulation**
-   - Smooth, linear braking and reverse pressure from 0% to 100%, perfectly matched with responsive visual feedback and mobile touch ergonomics.
-4. **1-Click Auto-Drive Assist Sequencer**
-   - A dedicated assist action on Android and Windows that dispatches `C` (`VK_C = 0x43`) followed by `NumPad 2` (`VK_NUMPAD2 = 0x62`) with precise 100ms hardware-level timing.
-5. **Physical Gyroscope Tilt Steering**
-   - Uses device hardware sensors to provide analog steering rotation with adjustable sensitivity (0.4x to 3.0x) and real-time visual feedback on both phone and PC.
-6. **In-HUD Custom Layout & Repositioning Engine**
-   - Interactive Edit Mode with live dragging and fine-grained pixel delta scaling (+/- 1.5% increments) for every steering wheel, pedal, and button.
-7. **Instant Deep-Link QR Pairing & LAN Auto-Discovery**
-   - Instant UDP discovery finds your PC automatically. Camera scanning opens a deep-link URL (`https://fh6-controller.github.io/?ip=...`) that automatically opens the app or provides the direct installer.
-8. **Universal Media Hub Bridge**
-   - Media controls synced with Spotify, YouTube Music, and Windows System Media Transport Controls (SMTC).
-9. **Zero Popups / Zero Emojis / Native Lightweight Binaries**
-   - Windows companion is a self-contained ~150 KB executable with no batch files (`.bat`), command prompt windows, or heavy Electron frameworks. Zero emojis across all UI, toast notifications, and source code.
+- **Direct Kernel-Level Emulation**: Emulates an authentic Xbox 360 controller via the Windows Virtual Gamepad Emulation Bus (`ViGEmBus`). Plug-and-play compatibility across Steam, PC Game Pass, and Microsoft Store releases.
+- **120Hz UDP FastStream Engine**: 24-byte binary telemetry and control packets running at up to 120 packets per second with CRC16 error validation and a 500ms zero-input safety watchdog.
+- **Hardware Gyroscope Steering**: 6-axis device sensor fusion maps tilt directly to the analog Left Stick with configurable rotation limits (90° - 900°) and progressive centering.
+- **Progressive Throttle & Braking**: Linear analog modulation for accelerator and brake/reverse with visual pressure readouts.
+- **Live In-App Cockpit Editor**: Move, resize, add, or delete buttons in real time while maintaining full landscape driving ergonomics.
+- **Launcher Auto-Detection**: Companion status monitors Steam, Xbox / Microsoft Store, and Epic Games launchers with driver-readiness badges.
+- **Start Menu & Windows Search Integration**: Registers natively into the Windows Start Menu, Windows Search indexing, and Settings Installed Apps.
 
 ---
 
-## Connection Options
-
-- **Automatic LAN Discovery (Recommended):** Ensure your phone and PC are connected to the same Wi-Fi router. Open the Windows companion and launch the Android app; pairing happens automatically in milliseconds.
-- **Deep-Link QR Scanner:** Point your phone camera at the QR code displayed on the Windows companion dashboard. Your phone will open the deep link and pair automatically.
-- **Zero-Jitter USB Tethering:** Enable USB Tethering on your Android phone and connect via USB cable for competitive esports gameplay with 0ms network jitter.
-
----
-
-## Controls & Mapping Matrix
-
-| Mobile HUD Element | Input Type | Windows / Xbox 360 Output | Function in FH6 |
-|---|---|---|---|
-| **Steering Wheel** | Analog Axis | Left Stick X (`-32768` to `+32767`) | Progressive Analog Steering |
-| **Accelerator Pedal** | Analog Trigger | Right Trigger (`0` to `255`) | Throttle (RT) |
-| **Brake / Reverse Pedal** | Analog Trigger | Left Trigger (`0` to `255`) | Brake & Reverse (LT) |
-| **Handbrake Capsule** | Digital Button | Xbox Button `A` / Keyboard `Space` | E-Brake / Drift Handbrake |
-| **Auto-Drive Assist** | Digital Macro | Win32 `VK_C` -> 100ms -> `VK_NUMPAD2` | 1-Click Autonomous Drive |
-| **Rewind** | Digital Button | Xbox Button `Y` / Keyboard `R` | Horizon Rewind |
-| **Camera Switch** | Digital Button | Xbox Button `RB` / Keyboard `C` | Change Camera Perspective |
-| **Clutch** | Digital Button | Xbox Button `LB` | Manual Clutch |
-| **Horn / LS** | Digital Button | Xbox Button `LS` (Thumb Click) | Horn |
-| **Look Back / RS** | Digital Button | Xbox Button `RS` (Thumb Click) | Look Back |
-| **View / Map** | Digital Button | Xbox Button `Back` (View) | World Map |
-| **Menu / Pause** | Digital Button | Xbox Button `Start` (Menu) | Pause Menu |
-| **D-Pad Up/Down/Left/Right**| Digital Buttons | Xbox D-Pad Matrix | Radio / Anna / Link / Telemetry |
-
----
-
-## System Requirements
-
-- **Windows PC:** Windows 10 or 11 (64-bit), .NET 8 Runtime. *(The required ViGEmBus virtual controller driver is automatically downloaded and installed by the companion executable on first launch if not already present — zero manual downloads needed).*
-- **Mobile Phone:** Android 9.0 (Pie) or higher with Touchscreen and Gyroscope/Accelerometer (Optimized for 60Hz - 120Hz displays).
-
----
-
-## Building from Source
+## Quick Start & Installation
 
 ### Windows Companion (`fh6-controller-windows.exe`)
-```powershell
-cd wheelpad-windows
-dotnet restore
-dotnet publish WheelPad.App\WheelPad.App.csproj -c Release -o ..\dist-windows
-```
+1. Download [**fh6-controller-windows.exe**](releases/fh6-controller-windows.exe) (or run [Install-Windows-App.bat](releases/Install-Windows-App.bat) for 1-click install).
+2. Launch the companion. On first run, it automatically:
+   - Registers into the Windows Start Menu and Windows Search (`Forza Horizon Controller`).
+   - Checks for the kernel `ViGEmBus` driver and installs it silently if missing.
+3. Open your racing title (Forza Horizon 5, FH4, FH3, Motorsport). The virtual controller is automatically active on Xbox Slot 1.
 
-### Android App (`fh6-controller-android.apk`)
-```powershell
-cd wheelpad-android
-.\gradlew.bat assembleDebug
-```
+> **Windows SmartScreen Note**: Because this is an open-source community release without a commercial EV certificate, Windows SmartScreen may show a security prompt. Click **More info** &rarr; **Run anyway**.
+
+### Android Mobile App (`fh6-controller-android.apk`)
+1. Download [**fh6-controller-android.apk**](releases/fh6-controller-android.apk).
+2. Open the APK on your device to install.
+3. Ensure your phone and PC are connected to the same Wi-Fi network, or connect via USB Tethering for 0ms jitter.
+4. Launch the app and tap **Scan QR** on the PC companion screen to pair instantly.
+
+> **Android Sideloading Note**: Chrome or your browser may display *"File might be harmful"* when downloading any APK outside Google Play. Tap **Download anyway** &rarr; **Install**. The release APK is cryptographically signed with V1+V2 signatures and zero debug flags.
+
+---
+
+## Legal & Trademark Disclaimer
+
+> **IMPORTANT TRADEMARK & NON-AFFILIATION NOTICE**
+> 
+> **Forza Horizon Controller Suite** is an independent, open-source sim-racing software utility created by independent developers for input emulation and telemetry synchronization.
+> 
+> - This project is **NOT** affiliated with, endorsed by, sponsored by, maintained by, or associated with **Microsoft Corporation**, **Xbox Game Studios**, **Playground Games**, **Turn 10 Studios**, or any of their respective subsidiaries or affiliates.
+> - **"Forza"**, **"Forza Horizon"**, **"Turn 10"**, **"Playground Games"**, **"Xbox"**, **"Xbox 360"**, and **"Windows"** are registered trademarks of Microsoft Corporation.
+> - All product names, registered trademarks, logos, and brand images displayed or mentioned in this repository belong strictly to their respective owners. Their reference in this project is strictly for software compatibility identification, configuration mapping, and descriptive interoperability under standard fair-use doctrines.
 
 ---
 
 ## License
 
-MIT License. Designed with authentic Forza Horizon festival styling for PC driving enthusiasts.
-
+This project is licensed under the [MIT License](LICENSE) &copy; 2026 Varun Kulkarni. All rights reserved.
