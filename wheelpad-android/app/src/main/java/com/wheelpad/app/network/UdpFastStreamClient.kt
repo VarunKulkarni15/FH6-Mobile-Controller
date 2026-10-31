@@ -5,6 +5,7 @@ import org.json.JSONObject
 import java.net.DatagramPacket
 import java.net.DatagramSocket
 import java.net.InetAddress
+import java.net.InetSocketAddress
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
@@ -132,7 +133,7 @@ class UdpFastStreamClient {
     }
 
     /**
-     * Automatic LAN Discovery: Listens for PC beacon broadcasts and pings network.
+     * Automatic LAN & USB Tether Discovery: Probes ARP neighbors, interfaces, and beacons.
      */
     fun startAutoDiscovery(onHostFound: (ip: String, tcpPort: Int, udpPort: Int) -> Unit) {
         discoveryJob?.cancel()
@@ -141,20 +142,78 @@ class UdpFastStreamClient {
             try {
                 discoverySocket = DatagramSocket(4240).apply {
                     broadcast = true
-                    soTimeout = 2500
+                    soTimeout = 2000
                 }
             } catch (e: Exception) {
-                // If 4240 in use, use random port
                 try {
                     discoverySocket = DatagramSocket().apply {
                         broadcast = true
-                        soTimeout = 2500
+                        soTimeout = 2000
                     }
                 } catch (ex: Exception) { }
             }
 
-            // Send discovery ping to broadcast
+            // Active ARP + TCP Probing for Instant USB Tethering & LAN Discovery
             launch {
+                val candidateIps = mutableSetOf<String>()
+
+                // 1. Check /proc/net/arp for connected PC (USB tethering rndis0 / wlan)
+                try {
+                    java.io.File("/proc/net/arp").forEachLine { line ->
+                        val tokens = line.trim().split(Regex("\\s+"))
+                        if (tokens.size >= 4 && tokens[0] != "IP") {
+                            val ip = tokens[0]
+                            val flags = tokens[2]
+                            if (flags != "0x0" && ip != "0.0.0.0") {
+                                candidateIps.add(ip)
+                            }
+                        }
+                    }
+                } catch (e: Exception) { }
+
+                // 2. Also check standard tethering gateway / reverse ADB
+                candidateIps.add("127.0.0.1")
+
+                // Probe candidate IPs directly via UDP and TCP
+                for (candIp in candidateIps) {
+                    launch {
+                        try {
+                            val pingBytes = "WHEELPAD_DISCOVER".toByteArray()
+                            val candAddr = InetAddress.getByName(candIp)
+                            val pingPacket = DatagramPacket(pingBytes, pingBytes.size, candAddr, 4240)
+                            discoverySocket?.send(pingPacket)
+                        } catch (e: Exception) { }
+
+                        // Rapid TCP port 4243 probe
+                        try {
+                            java.net.Socket().use { probeSock ->
+                                probeSock.connect(InetSocketAddress(candIp, 4243), 600)
+                                withContext(Dispatchers.Main) {
+                                    onHostFound(candIp, 4243, 4242)
+                                }
+                            }
+                        } catch (e: Exception) { }
+                    }
+                }
+
+                // 3. Broadcast to all active network interfaces
+                try {
+                    val interfaces = java.net.NetworkInterface.getNetworkInterfaces()
+                    while (interfaces.hasMoreElements()) {
+                        val networkInterface = interfaces.nextElement()
+                        if (networkInterface.isLoopback || !networkInterface.isUp) continue
+                        for (interfaceAddress in networkInterface.interfaceAddresses) {
+                            val broadcast = interfaceAddress.broadcast ?: continue
+                            try {
+                                val pingBytes = "WHEELPAD_DISCOVER".toByteArray()
+                                val pingPacket = DatagramPacket(pingBytes, pingBytes.size, broadcast, 4240)
+                                discoverySocket?.send(pingPacket)
+                            } catch (e: Exception) { }
+                        }
+                    }
+                } catch (e: Exception) { }
+
+                // 4. Standard 255.255.255.255 broadcast fallback
                 try {
                     val pingBytes = "WHEELPAD_DISCOVER".toByteArray()
                     val bcastAddr = InetAddress.getByName("255.255.255.255")

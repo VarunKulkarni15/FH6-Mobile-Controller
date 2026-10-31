@@ -55,8 +55,7 @@ fun FloatingMiniMusicBar(
                 text = "ACCT ${track.activeAccountIndex}",
                 color = Color.White,
                 fontSize = 9.sp,
-                fontWeight = FontWeight.Bold,
-                fontFamily = FontFamily.Monospace
+                fontWeight = FontWeight.Bold
             )
         }
 
@@ -199,8 +198,7 @@ fun MusicCenterScreen(
                     Text(
                         text = "PLAYING ON: ${devName.uppercase()}",
                         color = Color(0x66FFFFFF),
-                        fontSize = 10.sp,
-                        fontFamily = FontFamily.Monospace
+                        fontSize = 10.sp
                     )
                 }
 

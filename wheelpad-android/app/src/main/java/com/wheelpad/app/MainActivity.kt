@@ -33,7 +33,6 @@ import com.wheelpad.app.network.UdpFastStreamClient
 import com.wheelpad.app.sensor.GyroSteeringManager
 import com.wheelpad.app.ui.controls.ControlEditorViewModel
 import com.wheelpad.app.ui.driving.DrivingScreen
-import com.wheelpad.app.ui.theme.ChakraPetchFontFamily
 import com.wheelpad.app.util.NotificationHelper
 import kotlinx.coroutines.launch
 
@@ -61,16 +60,18 @@ class MainActivity : ComponentActivity() {
         gyroManager = GyroSteeringManager(this)
         controlEditorViewModel = ControlEditorViewModel(profileRepository, syncClient)
 
-        // 4. Retrieve last connected IP or start auto-discovery
+        // 4. Retrieve auto-detected USB/LAN IP or saved IP
         val prefs = getSharedPreferences("wheelpad_prefs", Context.MODE_PRIVATE)
         val savedHost = prefs.getString("last_host_ip", null)
+        val detectedHost = getAutoDetectedHost()
+        val targetHost = detectedHost ?: savedHost
 
-        if (!savedHost.isNullOrEmpty()) {
-            syncClient.connect(savedHost)
-            udpClient.initialize(savedHost)
+        if (!targetHost.isNullOrEmpty()) {
+            syncClient.connect(targetHost)
+            udpClient.initialize(targetHost)
         }
 
-        // 5. Automatic UDP LAN Auto-Discovery (Connects phone to PC with zero typing!)
+        // 5. Automatic UDP LAN & USB Auto-Discovery (Connects phone to PC with zero typing!)
         udpClient.startAutoDiscovery { discoveredIp, tcpPort, udpPort ->
             prefs.edit().putString("last_host_ip", discoveredIp).apply()
             syncClient.connect(discoveredIp, tcpPort)
@@ -214,6 +215,28 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+fun getAutoDetectedHost(): String? {
+    try {
+        val file = java.io.File("/proc/net/arp")
+        if (file.exists()) {
+            file.bufferedReader().useLines { lines ->
+                for (line in lines) {
+                    val tokens = line.trim().split(Regex("\\s+"))
+                    if (tokens.size >= 6 && tokens[0] != "IP") {
+                        val ip = tokens[0]
+                        val flags = tokens[2]
+                        val device = tokens[5]
+                        if (flags == "0x2" && (device.contains("rndis") || device.contains("usb") || device.contains("wlan"))) {
+                            return ip
+                        }
+                    }
+                }
+            }
+        }
+    } catch (e: Exception) { }
+    return null
+}
+
 @Composable
 fun PairingDialog(
     currentHost: String,
@@ -222,7 +245,8 @@ fun PairingDialog(
     onDismiss: () -> Unit,
     onSaveHost: (String) -> Unit
 ) {
-    var hostText by remember { mutableStateOf(currentHost) }
+    val initialHost = remember { getAutoDetectedHost() ?: currentHost }
+    var hostText by remember { mutableStateOf(initialHost) }
     val isConnected by syncClient.isConnected.collectAsState()
     val statusMsg by syncClient.statusMessage.collectAsState()
     val context = androidx.compose.ui.platform.LocalContext.current
@@ -353,7 +377,6 @@ fun PairingDialog(
                     Text(
                         "IN-APP SCAN PC QR CODE",
                         color = Color.Black,
-                        fontFamily = ChakraPetchFontFamily,
                         fontWeight = FontWeight.Black,
                         fontSize = 11.sp,
                         letterSpacing = 1.5.sp

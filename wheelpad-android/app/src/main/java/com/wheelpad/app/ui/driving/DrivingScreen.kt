@@ -47,7 +47,6 @@ import com.wheelpad.app.data.repository.ProfileRepository
 import com.wheelpad.app.network.ControlSyncClient
 import com.wheelpad.app.network.UdpFastStreamClient
 import com.wheelpad.app.ui.controls.ControlEditorViewModel
-import com.wheelpad.app.ui.theme.ChakraPetchFontFamily
 import kotlin.math.atan2
 
 /**
@@ -736,7 +735,6 @@ fun DrivingScreen(
                                         text = "${(gyroSensitivity * 100).toInt()}%",
                                         color = Color(0xFFCCFF00),
                                         fontSize = 11.sp,
-                                        fontFamily = FontFamily.Monospace,
                                         fontWeight = FontWeight.Black
                                     )
                                 }
@@ -1073,7 +1071,6 @@ fun FH6ExactSvgAccelPedal(
             text = "${(pressure * 100).toInt()}%",
             color = Color(0xFF00F0FF),
             fontSize = 11.sp,
-            fontFamily = FontFamily.Monospace,
             fontWeight = FontWeight.Bold
         )
         Text(
@@ -1208,7 +1205,6 @@ fun FH6ExactSvgBrakePedal(
             text = "${(pressure * 100).toInt()}%",
             color = Color(0xFFFF0055),
             fontSize = 11.sp,
-            fontFamily = FontFamily.Monospace,
             fontWeight = FontWeight.Bold
         )
         Text(
@@ -1326,7 +1322,6 @@ fun FH6ExactSvgHandbrake(
                 text = subLabel,
                 color = if (isPressed) Color(0x99000000) else Color(0xB3FFFFFF),
                 fontSize = 10.sp,
-                fontFamily = FontFamily.Monospace,
                 fontWeight = FontWeight.SemiBold,
                 letterSpacing = 2.sp
             )
@@ -1636,7 +1631,6 @@ fun FH6ExactSvgActionButton(
                     text = subLabel,
                     color = if (isPressed) Color(0x99000000) else Color(0xB3FFFFFF),
                     fontSize = 8.sp,
-                    fontFamily = FontFamily.Monospace,
                     fontWeight = FontWeight.Bold
                 )
             }
