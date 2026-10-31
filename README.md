@@ -10,7 +10,7 @@
 [![Driver](https://img.shields.io/badge/Driver-Kernel%20ViGEmBus-107C41.svg?style=flat-square)](#virtual-controller-driver)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](LICENSE)
 
-[**Live Web Portal**](https://horizoncontro.varunkulkarni.dpdns.org/)) &nbsp;&bull;&nbsp; [**Microsoft Store**](https://apps.microsoft.com/detail/9PKKK7NB747K) &nbsp;&bull;&nbsp; [**Windows (.exe)**](releases/fh6-controller-windows.exe) &nbsp;&bull;&nbsp; [**Android (.apk)**](HorizonController.apk)
+[**Live Web Portal**](https://horizoncontro.varunkulkarni.dpdns.org/) &nbsp;&bull;&nbsp; [**Microsoft Store**](https://apps.microsoft.com/detail/9PKKK7NB747K) &nbsp;&bull;&nbsp; [**Windows (.exe)**](releases/fh6-controller-windows.exe) &nbsp;&bull;&nbsp; [**Android (.apk)**](HorizonController.apk)
 
 </div>
 
