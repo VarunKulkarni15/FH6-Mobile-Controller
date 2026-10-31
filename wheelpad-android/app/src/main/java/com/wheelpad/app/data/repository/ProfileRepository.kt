@@ -47,10 +47,6 @@ class ProfileRepository(private val context: Context) {
                         modified = true
                     }
                 }
-                // Strip removed auto_drive if present
-                if (profile.actions.removeIf { it.id == "auto_drive" }) {
-                    modified = true
-                }
                 if (modified) {
                     saveProfile(profile)
                 }
@@ -245,7 +241,8 @@ class ProfileRepository(private val context: Context) {
             GameAction(id = "dpad_up", name = "D-Pad UP (Photo Mode)", inputType = InputType.DigitalButton, bindingType = BindingType.XboxController, xboxTarget = XboxButton.DpadUp, description = "Photo Mode / Telemetry"),
             GameAction(id = "dpad_down", name = "D-Pad DOWN (ANNA / Chat)", inputType = InputType.DigitalButton, bindingType = BindingType.XboxController, xboxTarget = XboxButton.DpadDown, description = "ANNA Navigation / Link Chat"),
             GameAction(id = "dpad_left", name = "D-Pad LEFT (Forza LINK)", inputType = InputType.DigitalButton, bindingType = BindingType.XboxController, xboxTarget = XboxButton.DpadLeft, description = "Forza LINK / Previous Station"),
-            GameAction(id = "dpad_right", name = "D-Pad RIGHT (Radio Next)", inputType = InputType.DigitalButton, bindingType = BindingType.XboxController, xboxTarget = XboxButton.DpadRight, description = "Next Radio Station / Telemetry")
+            GameAction(id = "dpad_right", name = "D-Pad RIGHT (Radio Next)", inputType = InputType.DigitalButton, bindingType = BindingType.XboxController, xboxTarget = XboxButton.DpadRight, description = "Next Radio Station / Telemetry"),
+            GameAction(id = "auto_drive", name = "Auto-Drive (Assist)", inputType = InputType.DigitalButton, bindingType = BindingType.KeyboardKey, keyboardKeyCode = 67, keyboardKeyName = "C+2", description = "Hardware driving assist sequence toggle")
         )
     }
 }

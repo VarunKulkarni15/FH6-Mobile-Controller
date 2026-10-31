@@ -339,7 +339,7 @@ namespace WheelPad.App
         {
             try
             {
-                string path = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "Images", "forza_bg.jpg");
+                string path = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "Images", "forzahorizon1222.jpg");
                 BitmapImage bmp = new BitmapImage();
                 bmp.BeginInit();
                 if (System.IO.File.Exists(path))
@@ -348,7 +348,7 @@ namespace WheelPad.App
                 }
                 else
                 {
-                    bmp.UriSource = new Uri("pack://application:,,,/Assets/Images/forza_bg.jpg", UriKind.Absolute);
+                    bmp.UriSource = new Uri("pack://application:,,,/Assets/Images/forzahorizon1222.jpg", UriKind.Absolute);
                 }
                 bmp.CacheOption = BitmapCacheOption.OnLoad;
                 bmp.EndInit();

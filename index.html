@@ -45,20 +45,25 @@
             background-color: var(--bg-base);
         }
 
-        /* Fixed Single Ambient Background */
+        /* Fixed Single Ambient Background: forzahorizon1222 */
         .ambient-fixed-bg {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background-image: url('assets/forza_bg.jpg');
+            top: -20px;
+            left: -20px;
+            width: calc(100vw + 40px);
+            height: calc(100vh + 40px);
+            background-image: image-set(
+                url('assets/forzahorizon1222.webp') type('image/webp'),
+                url('assets/forzahorizon1222.jpg') type('image/jpeg')
+            );
             background-size: cover;
-            background-position: center 35%;
+            background-position: center 38%;
             z-index: -2;
             transform: scale(1.02);
-            filter: brightness(0.22) contrast(1.15) saturate(1.1);
+            filter: brightness(0.24) contrast(1.15) saturate(1.1);
             pointer-events: none;
+            will-change: transform, filter;
+            transition: filter 0.05s ease-out, transform 0.05s ease-out;
         }
 
         .ambient-vignette {
@@ -808,23 +813,42 @@
         </div>
     </footer>
 
-    <!-- Velocity-Decayed Scroll Motion Blur Script -->
+    <!-- Directional SVG Motion Blur Filter for Cinematic Scroll -->
+    <svg width="0" height="0" style="position: absolute; pointer-events: none;">
+        <defs>
+            <filter id="scroll-motion-blur">
+                <feGaussianBlur id="blur-node" in="SourceGraphic" stdDeviation="0 0" />
+            </filter>
+        </defs>
+    </svg>
+
+    <!-- Velocity-Decayed Scroll Motion Blur Script (Applied to Background Only) -->
     <script>
         (function() {
             let lastScrollY = window.scrollY;
             let lastTime = performance.now();
-            let currentBlur = 0;
+            let currentVelocity = 0;
             let isRafActive = false;
-            const stage = document.getElementById('motion-blur-stage');
+            const bg = document.querySelector('.ambient-fixed-bg');
+            const blurNode = document.getElementById('blur-node');
 
             function applyMotionBlur() {
-                if (currentBlur > 0.08) {
-                    stage.style.filter = `blur(${currentBlur.toFixed(2)}px)`;
-                    currentBlur *= 0.82; // Exponential dampening
+                if (currentVelocity > 0.05) {
+                    const yBlur = Math.min(currentVelocity * 1.8, 6.0);
+                    // Vertical directional motion blur streak on the ambient background
+                    if (blurNode) {
+                        blurNode.setAttribute('stdDeviation', `0 ${yBlur.toFixed(2)}`);
+                    }
+                    bg.style.filter = `url(#scroll-motion-blur) brightness(0.24) contrast(1.15) saturate(1.1)`;
+                    bg.style.transform = `scale(${1.02 + yBlur * 0.003})`;
+
+                    currentVelocity *= 0.82; // Exponential decay
                     requestAnimationFrame(applyMotionBlur);
                 } else {
-                    stage.style.filter = 'none';
-                    currentBlur = 0;
+                    if (blurNode) blurNode.setAttribute('stdDeviation', '0 0');
+                    bg.style.filter = 'brightness(0.24) contrast(1.15) saturate(1.1)';
+                    bg.style.transform = 'scale(1.02)';
+                    currentVelocity = 0;
                     isRafActive = false;
                 }
             }
@@ -834,14 +858,13 @@
                 const currentScrollY = window.scrollY;
                 const deltaY = Math.abs(currentScrollY - lastScrollY);
                 const deltaTime = Math.max(now - lastTime, 10);
-                const velocity = deltaY / deltaTime; // pixels per ms
+                const v = deltaY / deltaTime; // pixels/ms
 
-                // Subtle directional blur (clamped to 4.2px for smooth realism)
-                currentBlur = Math.min(velocity * 1.6, 4.2);
+                currentVelocity = Math.max(currentVelocity, v);
                 lastScrollY = currentScrollY;
                 lastTime = now;
 
-                if (!isRafActive && currentBlur > 0.15) {
+                if (!isRafActive && currentVelocity > 0.1) {
                     isRafActive = true;
                     requestAnimationFrame(applyMotionBlur);
                 }
