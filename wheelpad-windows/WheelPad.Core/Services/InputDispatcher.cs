@@ -116,12 +116,14 @@ namespace WheelPad.Core.Services
             {
                 _xboxController.SetButton(action.XboxTarget, shouldActuate);
             }
-
-            // 2. Dispatch Keyboard target if mapped (e.g. Handbrake -> Space)
-            if ((action.BindingType == BindingType.KeyboardKey || action.BindingType == BindingType.Composite)
-                && action.KeyboardKeyCode > 0)
+            // 2. Dispatch Keyboard target ONLY if Xbox Controller is not handling this or if strictly mapped as KeyboardKey
+            else if (action.BindingType == BindingType.KeyboardKey
+                || (_xboxController == null || !_xboxController.IsConnected))
             {
-                SendWindowsKey(action.KeyboardKeyCode, shouldActuate);
+                if (action.KeyboardKeyCode > 0)
+                {
+                    SendWindowsKey(action.KeyboardKeyCode, shouldActuate);
+                }
             }
         }
 
@@ -150,22 +152,22 @@ namespace WheelPad.Core.Services
             return actionId switch
             {
                 "steer" => new GameAction { Id = "steer", InputType = InputType.AnalogAxis, XboxTarget = XboxButton.LeftThumbX },
-                "throttle" => new GameAction { Id = "throttle", InputType = InputType.AnalogTrigger, XboxTarget = XboxButton.RightTrigger, BindingType = BindingType.Composite, KeyboardKeyCode = 0x57 }, // W
-                "brake" => new GameAction { Id = "brake", InputType = InputType.AnalogTrigger, XboxTarget = XboxButton.LeftTrigger, BindingType = BindingType.Composite, KeyboardKeyCode = 0x53 }, // S
-                "handbrake" or "btn_a" => new GameAction { Id = actionId, InputType = InputType.DigitalButton, BindingType = BindingType.Composite, XboxTarget = XboxButton.A, KeyboardKeyCode = 0x20 }, // Space (E-Brake)
-                "btn_b" => new GameAction { Id = "btn_b", InputType = InputType.DigitalButton, BindingType = BindingType.Composite, XboxTarget = XboxButton.B, KeyboardKeyCode = 0x45 }, // E (Shift Up)
-                "btn_x" => new GameAction { Id = "btn_x", InputType = InputType.DigitalButton, BindingType = BindingType.Composite, XboxTarget = XboxButton.X, KeyboardKeyCode = 0x0D }, // Enter (Activate)
-                "rewind" or "btn_y" => new GameAction { Id = actionId, InputType = InputType.DigitalButton, BindingType = BindingType.Composite, XboxTarget = XboxButton.Y, KeyboardKeyCode = 0x52 }, // R (Rewind)
-                "btn_lb" => new GameAction { Id = "btn_lb", InputType = InputType.DigitalButton, BindingType = BindingType.Composite, XboxTarget = XboxButton.LeftBumper, KeyboardKeyCode = 0x10 }, // Shift (Clutch)
-                "camera" or "btn_rb" => new GameAction { Id = actionId, InputType = InputType.DigitalButton, BindingType = BindingType.Composite, XboxTarget = XboxButton.RightBumper, KeyboardKeyCode = 0x09 }, // Tab (Switch Camera)
-                "btn_ls" => new GameAction { Id = actionId, InputType = InputType.DigitalButton, BindingType = BindingType.Composite, XboxTarget = XboxButton.LeftThumbClick, KeyboardKeyCode = 0x47 }, // G (Toggle Convertible)
-                "btn_rs" or "horn" => new GameAction { Id = actionId, InputType = InputType.DigitalButton, BindingType = BindingType.Composite, XboxTarget = XboxButton.RightThumbClick, KeyboardKeyCode = 0x48 }, // H (Horn)
-                "map" or "btn_back" or "btn_view" => new GameAction { Id = actionId, InputType = InputType.DigitalButton, BindingType = BindingType.Composite, XboxTarget = XboxButton.Back, KeyboardKeyCode = 0x4D }, // M (Map)
-                "pause" or "btn_start" or "btn_menu" => new GameAction { Id = actionId, InputType = InputType.DigitalButton, BindingType = BindingType.Composite, XboxTarget = XboxButton.Start, KeyboardKeyCode = 0x1B }, // Esc (Pause)
-                "dpad_up" => new GameAction { Id = "dpad_up", InputType = InputType.DigitalButton, BindingType = BindingType.Composite, XboxTarget = XboxButton.DpadUp, KeyboardKeyCode = 0x50 }, // P (Photo Mode)
-                "dpad_down" => new GameAction { Id = "dpad_down", InputType = InputType.DigitalButton, BindingType = BindingType.Composite, XboxTarget = XboxButton.DpadDown, KeyboardKeyCode = 0x43 }, // C (Activate ANNA)
-                "dpad_left" => new GameAction { Id = "dpad_left", InputType = InputType.DigitalButton, BindingType = BindingType.Composite, XboxTarget = XboxButton.DpadLeft, KeyboardKeyCode = 0x56 }, // V (Forza LINK)
-                "dpad_right" => new GameAction { Id = "dpad_right", InputType = InputType.DigitalButton, BindingType = BindingType.Composite, XboxTarget = XboxButton.DpadRight, KeyboardKeyCode = 0xBB }, // = (Radio Next)
+                "throttle" => new GameAction { Id = "throttle", InputType = InputType.AnalogTrigger, XboxTarget = XboxButton.RightTrigger },
+                "brake" => new GameAction { Id = "brake", InputType = InputType.AnalogTrigger, XboxTarget = XboxButton.LeftTrigger },
+                "handbrake" or "btn_a" => new GameAction { Id = actionId, InputType = InputType.DigitalButton, XboxTarget = XboxButton.A },
+                "btn_b" => new GameAction { Id = "btn_b", InputType = InputType.DigitalButton, XboxTarget = XboxButton.B },
+                "btn_x" => new GameAction { Id = "btn_x", InputType = InputType.DigitalButton, XboxTarget = XboxButton.X },
+                "rewind" or "btn_y" => new GameAction { Id = actionId, InputType = InputType.DigitalButton, XboxTarget = XboxButton.Y },
+                "btn_lb" => new GameAction { Id = "btn_lb", InputType = InputType.DigitalButton, XboxTarget = XboxButton.LeftBumper },
+                "camera" or "btn_rb" => new GameAction { Id = actionId, InputType = InputType.DigitalButton, XboxTarget = XboxButton.RightBumper },
+                "btn_ls" => new GameAction { Id = actionId, InputType = InputType.DigitalButton, XboxTarget = XboxButton.LeftThumbClick },
+                "btn_rs" or "horn" => new GameAction { Id = actionId, InputType = InputType.DigitalButton, XboxTarget = XboxButton.RightThumbClick },
+                "map" or "btn_back" or "btn_view" => new GameAction { Id = actionId, InputType = InputType.DigitalButton, XboxTarget = XboxButton.Back },
+                "pause" or "btn_start" or "btn_menu" => new GameAction { Id = actionId, InputType = InputType.DigitalButton, XboxTarget = XboxButton.Start },
+                "dpad_up" => new GameAction { Id = "dpad_up", InputType = InputType.DigitalButton, XboxTarget = XboxButton.DpadUp },
+                "dpad_down" => new GameAction { Id = "dpad_down", InputType = InputType.DigitalButton, XboxTarget = XboxButton.DpadDown },
+                "dpad_left" => new GameAction { Id = "dpad_left", InputType = InputType.DigitalButton, XboxTarget = XboxButton.DpadLeft },
+                "dpad_right" => new GameAction { Id = "dpad_right", InputType = InputType.DigitalButton, XboxTarget = XboxButton.DpadRight },
                 "guide" => new GameAction { Id = "guide", InputType = InputType.DigitalButton, XboxTarget = XboxButton.Guide },
                 "auto_drive" => new GameAction { Id = "auto_drive", Name = "Auto Drive", InputType = InputType.DigitalButton },
                 _ => null
@@ -185,27 +187,31 @@ namespace WheelPad.Core.Services
             {
                 try
                 {
-                    // 1. Activate ANNA:
-                    // Keyboard: C (0x43)
-                    // Controller: D-Pad Down
-                    SendWindowsKey(0x43, isDown: true);
-                    _xboxController?.SetButton(XboxButton.DpadDown, true);
-                    await Task.Delay(100);
-                    SendWindowsKey(0x43, isDown: false);
-                    _xboxController?.SetButton(XboxButton.DpadDown, false);
+                    // 1. Activate ANNA via virtual Xbox controller D-pad Down
+                    if (_xboxController != null && _xboxController.IsConnected)
+                    {
+                        _xboxController.SetButton(XboxButton.DpadDown, true);
+                        await Task.Delay(120);
+                        _xboxController.SetButton(XboxButton.DpadDown, false);
 
-                    await Task.Delay(150);
+                        await Task.Delay(200);
 
-                    // 2. Select Option 2 (AutoDrive):
-                    // Keyboard: '2' (0x32) & NumPad 2 (0x62)
-                    // Controller: D-Pad Left (ANNA Option 2 in Forza Horizon)
-                    SendWindowsKey(0x62, isDown: true);
-                    SendWindowsKey(0x32, isDown: true);
-                    _xboxController?.SetButton(XboxButton.DpadLeft, true);
-                    await Task.Delay(100);
-                    SendWindowsKey(0x62, isDown: false);
-                    SendWindowsKey(0x32, isDown: false);
-                    _xboxController?.SetButton(XboxButton.DpadLeft, false);
+                        // 2. Select Option 2 via virtual Xbox controller D-pad Left
+                        _xboxController.SetButton(XboxButton.DpadLeft, true);
+                        await Task.Delay(120);
+                        _xboxController.SetButton(XboxButton.DpadLeft, false);
+                    }
+                    else
+                    {
+                        // Fallback only if virtual Xbox controller is not connected
+                        SendWindowsKey(0x43, isDown: true);
+                        await Task.Delay(100);
+                        SendWindowsKey(0x43, isDown: false);
+                        await Task.Delay(200);
+                        SendWindowsKey(0x32, isDown: true);
+                        await Task.Delay(100);
+                        SendWindowsKey(0x32, isDown: false);
+                    }
                 }
                 catch { }
                 finally
@@ -271,6 +277,12 @@ namespace WheelPad.Core.Services
         {
             if (virtualKeyCode <= 0) return;
 
+            // Never dispatch a key-up event if the key is not currently depressed
+            if (!isDown && !_activeKeysDown.ContainsKey(virtualKeyCode))
+            {
+                return;
+            }
+
             ushort vk = (ushort)virtualKeyCode;
             ushort scanCode = (ushort)MapVirtualKeyW(vk, 0);
 
@@ -306,12 +318,6 @@ namespace WheelPad.Core.Services
             };
 
             SendInput(1, new[] { input }, Marshal.SizeOf(typeof(INPUT)));
-
-            try
-            {
-                keybd_event((byte)vk, (byte)scanCode, isDown ? 0u : 0x0002u, UIntPtr.Zero);
-            }
-            catch { }
 
             if (isDown)
             {

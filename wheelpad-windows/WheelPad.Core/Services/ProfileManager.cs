@@ -207,11 +207,11 @@ namespace WheelPad.Core.Services
 
             // Add standard actions
             standard.Actions.Add(new GameAction { Id = "steer", Name = "Steering", InputType = InputType.AnalogAxis, BindingType = BindingType.XboxController, XboxTarget = XboxButton.LeftThumbX });
-            standard.Actions.Add(new GameAction { Id = "throttle", Name = "Accelerator", InputType = InputType.AnalogTrigger, BindingType = BindingType.XboxController, XboxTarget = XboxButton.RightTrigger, KeyboardKeyCode = 87, KeyboardKeyName = "W" });
-            standard.Actions.Add(new GameAction { Id = "brake", Name = "Brake / Reverse", InputType = InputType.AnalogTrigger, BindingType = BindingType.XboxController, XboxTarget = XboxButton.LeftTrigger, KeyboardKeyCode = 83, KeyboardKeyName = "S" });
-            standard.Actions.Add(new GameAction { Id = "handbrake", Name = "Handbrake (E-Brake)", InputType = InputType.DigitalButton, BindingType = BindingType.Composite, XboxTarget = XboxButton.A, KeyboardKeyCode = 32, KeyboardKeyName = "Space", Behavior = InputBehavior.Hold });
-            standard.Actions.Add(new GameAction { Id = "rewind", Name = "Rewind", InputType = InputType.DigitalButton, BindingType = BindingType.XboxController, XboxTarget = XboxButton.Y, KeyboardKeyCode = 82, KeyboardKeyName = "R" });
-            standard.Actions.Add(new GameAction { Id = "camera", Name = "Camera", InputType = InputType.DigitalButton, BindingType = BindingType.XboxController, XboxTarget = XboxButton.RightBumper, KeyboardKeyCode = 67, KeyboardKeyName = "C" });
+            standard.Actions.Add(new GameAction { Id = "throttle", Name = "Accelerator", InputType = InputType.AnalogTrigger, BindingType = BindingType.XboxController, XboxTarget = XboxButton.RightTrigger, KeyboardKeyCode = 0, KeyboardKeyName = "" });
+            standard.Actions.Add(new GameAction { Id = "brake", Name = "Brake / Reverse", InputType = InputType.AnalogTrigger, BindingType = BindingType.XboxController, XboxTarget = XboxButton.LeftTrigger, KeyboardKeyCode = 0, KeyboardKeyName = "" });
+            standard.Actions.Add(new GameAction { Id = "handbrake", Name = "Handbrake (E-Brake)", InputType = InputType.DigitalButton, BindingType = BindingType.XboxController, XboxTarget = XboxButton.A, KeyboardKeyCode = 0, KeyboardKeyName = "", Behavior = InputBehavior.Hold });
+            standard.Actions.Add(new GameAction { Id = "rewind", Name = "Rewind", InputType = InputType.DigitalButton, BindingType = BindingType.XboxController, XboxTarget = XboxButton.Y, KeyboardKeyCode = 0, KeyboardKeyName = "" });
+            standard.Actions.Add(new GameAction { Id = "camera", Name = "Camera", InputType = InputType.DigitalButton, BindingType = BindingType.XboxController, XboxTarget = XboxButton.RightBumper, KeyboardKeyCode = 0, KeyboardKeyName = "" });
 
             // Add standard layout
             standard.Layout.Add(new TouchControlElement { ElementId = "wheel", ActionId = "steer", Label = "STEER", Shape = ControlShape.CircleWheel, NormalizedX = 0.04f, NormalizedY = 0.15f, NormalizedWidth = 0.42f, NormalizedHeight = 0.75f, AccentColorHex = "#00E5FF" });

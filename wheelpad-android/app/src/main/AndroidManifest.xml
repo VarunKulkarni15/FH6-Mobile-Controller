@@ -37,6 +37,8 @@
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https" android:host="varuncoder777.github.io" android:pathPrefix="/fh6-controller" />
+                <data android:scheme="http" android:host="varuncoder777.github.io" android:pathPrefix="/fh6-controller" />
                 <data android:scheme="https" android:host="fh6-controller.github.io" />
                 <data android:scheme="http" android:host="fh6-controller.github.io" />
             </intent-filter>
@@ -46,6 +48,7 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="fh6controller" />
+                <data android:scheme="wheelpad" />
             </intent-filter>
         </activity>
 

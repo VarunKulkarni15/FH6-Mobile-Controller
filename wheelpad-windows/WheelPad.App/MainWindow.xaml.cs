@@ -79,7 +79,7 @@ namespace WheelPad.App
             try
             {
                 // Web deep-link payload: camera scanners open website with IP parameters which deep-links to app
-                string qrPayload = $"https://fh6-controller.github.io/?ip={localIp}&tcp=4243&udp=4242";
+                string qrPayload = $"https://varuncoder777.github.io/fh6-controller/?ip={localIp}&tcp=4243&udp=4242";
                 ImgQrCode.Source = QrCodeHelper.GenerateQrCode(qrPayload);
             }
             catch { }

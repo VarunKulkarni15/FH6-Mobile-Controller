@@ -528,38 +528,22 @@ fun DrivingScreen(
                                 }
                             }
                         }
-
-                        // Top & Bottom gradient motion fade masks to dissolve edges smoothly
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(8.dp)
-                                .align(Alignment.TopCenter)
-                                .background(Brush.verticalGradient(listOf(Color(0xF8051E1C), Color.Transparent)))
-                        )
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(8.dp)
-                                .align(Alignment.BottomCenter)
-                                .background(Brush.verticalGradient(listOf(Color.Transparent, Color(0xF8051E1C))))
-                        )
                     }
 
-                    // Full-Bleed Cancel Footer
+                    // Full-Bleed Cancel Footer (Solid, crisp motorsport footer)
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
                             .background(Color(0xFF03100E))
                             .clickable { viewModel.setActionCatalogVisible(false) }
-                            .padding(vertical = 9.dp),
+                            .padding(vertical = 10.dp),
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = "CANCEL",
+                            text = "[ESC] CANCEL",
                             color = Color(0xCCFFFFFF),
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Black,
+                            fontSize = 11.sp,
                             letterSpacing = 2.sp
                         )
                     }

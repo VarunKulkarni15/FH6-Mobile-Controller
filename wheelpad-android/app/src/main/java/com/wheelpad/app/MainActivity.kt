@@ -169,76 +169,138 @@ fun PairingDialog(
     var hostText by remember { mutableStateOf(currentHost) }
     val isConnected by syncClient.isConnected.collectAsState()
     val statusMsg by syncClient.statusMessage.collectAsState()
+    val context = androidx.compose.ui.platform.LocalContext.current
 
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        containerColor = Color(0xFF062220),
-        title = {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color(0xD0030E0C))
+            .clickable(onClick = onDismiss),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth(0.62f)
+                .widthIn(min = 460.dp, max = 540.dp)
+                .clip(RoundedCornerShape(4.dp))
+                .background(Color(0xF8051E1C))
+                .border(1.5.dp, Color(0xFFCCFF00), RoundedCornerShape(4.dp))
+                .clickable(enabled = false) {}
+        ) {
+            // Full-Bleed Solid Volt Lime Header
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(Color(0xFFCCFF00))
-                    .padding(vertical = 10.dp),
-                contentAlignment = Alignment.Center
+                    .padding(horizontal = 16.dp, vertical = 9.dp)
             ) {
-                Text(
-                    text = "PC CONNECTION // PAIRING",
-                    color = Color.Black,
-                    fontWeight = FontWeight.Black,
-                    fontSize = 13.sp,
-                    letterSpacing = 2.sp
-                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "PC CONNECTION // PAIRING",
+                        color = Color.Black,
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.Black,
+                        letterSpacing = 2.sp
+                    )
+                    Text(
+                        text = "[ESC] CLOSE",
+                        color = Color.Black,
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Black,
+                        modifier = Modifier.clickable(onClick = onDismiss)
+                    )
+                }
             }
-        },
-        text = {
+
+            // Body Content
             Column(
-                modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(14.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
+                // Connection Status
                 Text(
-                    text = if (isConnected) "CONNECTED TO WINDOWS LAPTOP" else "STATUS: $statusMsg",
-                    color = if (isConnected) Color(0xFFCCFF00) else Color.White,
-                    fontSize = 11.sp,
+                    text = if (isConnected) "STATUS: CONNECTED TO WINDOWS RIG" else "STATUS: $statusMsg",
+                    color = if (isConnected) Color(0xFFCCFF00) else Color(0xCCFFFFFF),
+                    fontSize = 10.sp,
                     fontWeight = FontWeight.Black,
                     letterSpacing = 1.sp
                 )
 
-                // Auto-Discovery Button (Solid Black with Volt Lime Border, Zero Emojis)
+                // Option A: Auto-Discovery Button
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clip(RoundedCornerShape(6.dp))
+                        .clip(RoundedCornerShape(4.dp))
                         .background(Color(0xFF0A0A0A))
-                        .border(1.5.dp, Color(0xFFCCFF00), RoundedCornerShape(6.dp))
+                        .border(1.2.dp, Color(0xFFCCFF00), RoundedCornerShape(4.dp))
                         .clickable {
                             udpClient.startAutoDiscovery { ip, tcpPort, udpPort ->
                                 hostText = ip
                                 onSaveHost(ip)
                             }
                         }
-                        .padding(vertical = 12.dp),
+                        .padding(vertical = 10.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
                         "AUTO-DISCOVER WINDOWS PC",
                         color = Color(0xFFCCFF00),
                         fontWeight = FontWeight.Black,
-                        fontSize = 12.sp,
+                        fontSize = 11.sp,
+                        letterSpacing = 1.5.sp
+                    )
+                }
+
+                // Option B: Scan QR Code Button
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(4.dp))
+                        .background(Color(0xFFCCFF00))
+                        .clickable {
+                            try {
+                                val scanIntent = android.content.Intent("com.google.zxing.client.android.SCAN").apply {
+                                    putExtra("SCAN_MODE", "QR_CODE_MODE")
+                                }
+                                context.startActivity(scanIntent)
+                            } catch (e: Exception) {
+                                try {
+                                    val camIntent = android.content.Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE)
+                                    context.startActivity(camIntent)
+                                } catch (ex: Exception) {
+                                    // Open default camera
+                                }
+                            }
+                        }
+                        .padding(vertical = 10.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        "SCAN PC QR CODE (CAMERA)",
+                        color = Color.Black,
+                        fontWeight = FontWeight.Black,
+                        fontSize = 11.sp,
                         letterSpacing = 1.5.sp
                     )
                 }
 
                 Text(
-                    "Or enter your Windows Laptop IP address manually:",
-                    color = Color(0xCCFFFFFF),
-                    fontSize = 10.sp,
-                    fontWeight = FontWeight.SemiBold
+                    "// OR ENTER IP MANUALLY",
+                    color = Color(0x80FFFFFF),
+                    fontSize = 9.sp,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 1.sp
                 )
 
                 OutlinedTextField(
                     value = hostText,
                     onValueChange = { hostText = it },
-                    label = { Text("Windows Host IP", color = Color(0x99FFFFFF)) },
                     singleLine = true,
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = Color(0xFFCCFF00),
@@ -248,21 +310,37 @@ fun PairingDialog(
                     ),
                     modifier = Modifier.fillMaxWidth()
                 )
-            }
-        },
-        confirmButton = {
-            Button(
-                onClick = { onSaveHost(hostText) },
-                colors = ButtonDefaults.buttonColors(containerColor = Color.White),
-                shape = RoundedCornerShape(6.dp)
-            ) {
-                Text("CONNECT", color = Color.Black, fontWeight = FontWeight.Black, letterSpacing = 1.5.sp)
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text("CANCEL", color = Color(0x99FFFFFF), fontWeight = FontWeight.Bold)
+
+                // Action Buttons Row
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .clip(RoundedCornerShape(4.dp))
+                            .background(Color.White)
+                            .clickable { onSaveHost(hostText) }
+                            .padding(vertical = 10.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text("CONNECT", color = Color.Black, fontWeight = FontWeight.Black, fontSize = 11.sp, letterSpacing = 1.sp)
+                    }
+
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .clip(RoundedCornerShape(4.dp))
+                            .background(Color(0x30FFFFFF))
+                            .clickable(onClick = onDismiss)
+                            .padding(vertical = 10.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text("CANCEL", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 11.sp, letterSpacing = 1.sp)
+                    }
+                }
             }
         }
-    )
+    }
 }
