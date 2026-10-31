@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FH6 CONTROLLER // FORZA HORIZON HUD SUITE</title>
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <link rel="icon" type="image/png" href="assets/fh6_logo.png">
+    <link rel="apple-touch-icon" href="assets/fh6_logo.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:ital,wght@0,600;0,700;1,700;1,800&family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
@@ -59,7 +62,32 @@
         .brand-container {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 14px;
+        }
+
+        .brand-logo-img {
+            width: 44px;
+            height: 44px;
+            border-radius: 8px;
+            border: 2px solid var(--forza-volt);
+            box-shadow: 0 0 14px rgba(204, 255, 0, 0.3);
+            object-fit: cover;
+            display: block;
+        }
+
+        .hero-logo-emblem {
+            width: 104px;
+            height: 104px;
+            border-radius: 18px;
+            border: 2.5px solid var(--forza-volt);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7), 0 0 24px rgba(204, 255, 0, 0.35);
+            margin-bottom: 24px;
+            display: inline-block;
+            transition: transform 0.2s ease;
+        }
+
+        .hero-logo-emblem:hover {
+            transform: scale(1.05) rotate(-2deg);
         }
 
         .volt-badge {
@@ -382,8 +410,11 @@
     <!-- Top Festival Nav -->
     <header>
         <div class="brand-container">
-            <div class="volt-badge">HORIZON SUITE</div>
-            <div class="logo-text">FH6 CONTROLLER</div>
+            <img src="assets/fh6_logo.png" alt="FH6 Controller Logo" class="brand-logo-img">
+            <div>
+                <div class="volt-badge">HORIZON SUITE</div>
+                <div class="logo-text">FH6 CONTROLLER</div>
+            </div>
         </div>
         <div class="nav-tags">
             <div class="pink-pill">FASTSTREAM 120Hz</div>
@@ -393,6 +424,7 @@
     <!-- Hero Section -->
     <main>
         <section class="hero">
+            <img src="assets/fh6_logo.png" alt="FH6 Controller Logo" class="hero-logo-emblem">
             <h1 class="hero-title">TURN YOUR PHONE INTO A <span class="lime">FORZA HUD RIG</span></h1>
             <p class="hero-subtitle">
                 Ultra-low latency virtual Xbox 360 controller emulation for PC with custom HUD layouts, gyro tilt steering, precision pedal modulation, and 1-click auto-driving assist.
