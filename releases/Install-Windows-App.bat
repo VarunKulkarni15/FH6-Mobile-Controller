@@ -34,3 +34,4 @@ echo.
 echo Starting application...
 start "" "%TARGET_EXE%"
 exit /b 0
+
