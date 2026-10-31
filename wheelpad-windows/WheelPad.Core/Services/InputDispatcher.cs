@@ -172,25 +172,39 @@ namespace WheelPad.Core.Services
             };
         }
 
+        private int _isAutoDriveRunning = 0;
+
         public void TriggerAutoDriveSequence()
         {
+            if (Interlocked.CompareExchange(ref _isAutoDriveRunning, 1, 0) != 0)
+            {
+                return;
+            }
+
             Task.Run(async () =>
             {
                 try
                 {
-                    // 1. Press C (0x43)
+                    // 1. Press C (0x43, scan code 0x2E)
                     SendWindowsKey(0x43, isDown: true);
-                    await Task.Delay(60);
+                    await Task.Delay(100);
                     SendWindowsKey(0x43, isDown: false);
 
-                    await Task.Delay(100);
+                    await Task.Delay(150);
 
-                    // 2. Press NumPad 2 (0x62)
+                    // 2. Press NumPad 2 (0x62) and top-row 2 (0x32)
                     SendWindowsKey(0x62, isDown: true);
-                    await Task.Delay(60);
+                    SendWindowsKey(0x32, isDown: true);
+                    await Task.Delay(100);
                     SendWindowsKey(0x62, isDown: false);
+                    SendWindowsKey(0x32, isDown: false);
                 }
                 catch { }
+                finally
+                {
+                    await Task.Delay(600);
+                    Interlocked.Exchange(ref _isAutoDriveRunning, 0);
+                }
             });
         }
 
@@ -242,12 +256,33 @@ namespace WheelPad.Core.Services
         [DllImport("user32.dll")]
         private static extern uint MapVirtualKeyW(uint uCode, uint uMapType);
 
+        [DllImport("user32.dll")]
+        private static extern void keybd_event(byte bVk, byte bScan, uint dwFlags, UIntPtr dwExtraInfo);
+
         private void SendWindowsKey(int virtualKeyCode, bool isDown)
         {
             if (virtualKeyCode <= 0) return;
 
             ushort vk = (ushort)virtualKeyCode;
             ushort scanCode = (ushort)MapVirtualKeyW(vk, 0);
+
+            if (scanCode == 0)
+            {
+                scanCode = vk switch
+                {
+                    0x43 => 0x2E, // 'C'
+                    0x62 => 0x50, // NumPad 2
+                    0x32 => 0x03, // '2'
+                    0x20 => 0x39, // Space
+                    _ => 0
+                };
+            }
+
+            uint flags = (isDown ? 0u : KEYEVENTF_KEYUP);
+            if (scanCode != 0)
+            {
+                flags |= KEYEVENTF_SCANCODE;
+            }
 
             var input = new INPUT
             {
@@ -256,13 +291,19 @@ namespace WheelPad.Core.Services
                 {
                     wVk = vk,
                     wScan = scanCode,
-                    dwFlags = isDown ? 0 : KEYEVENTF_KEYUP,
+                    dwFlags = flags,
                     time = 0,
                     dwExtraInfo = IntPtr.Zero
                 }
             };
 
             SendInput(1, new[] { input }, Marshal.SizeOf(typeof(INPUT)));
+
+            try
+            {
+                keybd_event((byte)vk, (byte)scanCode, isDown ? 0u : 0x0002u, UIntPtr.Zero);
+            }
+            catch { }
 
             if (isDown)
             {

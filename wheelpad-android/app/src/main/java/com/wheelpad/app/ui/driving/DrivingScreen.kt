@@ -24,6 +24,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.RoundRect
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.ClipOp
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
@@ -197,43 +198,62 @@ fun DrivingScreen(
                     }
                     else -> {
                         val bit = when (element.actionId) {
+                            "btn_a", "handbrake" -> 1 shl 0
                             "rewind", "btn_y" -> 1 shl 1
                             "camera", "btn_rb" -> 1 shl 2
-                            "map", "btn_back" -> 1 shl 3
-                            "pause", "btn_start" -> 1 shl 4
+                            "map", "btn_back", "btn_view" -> 1 shl 3
+                            "pause", "btn_start", "btn_menu" -> 1 shl 4
                             "btn_x" -> 1 shl 5
                             "btn_b" -> 1 shl 6
                             "btn_lb" -> 1 shl 7
-                            "btn_ls" -> 1 shl 8
-                            "btn_rs" -> 1 shl 9
+                            "btn_ls", "horn" -> 1 shl 8
+                            "btn_rs", "look_back" -> 1 shl 9
                             "dpad_up" -> 1 shl 10
                             "dpad_down" -> 1 shl 11
                             "dpad_left" -> 1 shl 12
                             "dpad_right" -> 1 shl 13
                             "guide" -> 1 shl 14
                             "auto_drive" -> 1 shl 15
-                            else -> 1 shl 15
+                            else -> 0
                         }
-                        val isPressed = (buttonsBitmask and bit) != 0
+                        val isPressed = if (bit != 0) ((buttonsBitmask and bit) != 0) else false
 
                         FH6ExactSvgActionButton(
+                            actionId = element.actionId,
                             label = element.label,
                             subLabel = when (element.actionId) {
-                                "rewind" -> "(Y)"
-                                "camera" -> "(RB)"
-                                "btn_lb" -> "(LB)"
-                                "btn_x" -> "(X)"
+                                "rewind", "btn_y" -> "(Y)"
+                                "btn_a" -> "(A)"
                                 "btn_b" -> "(B)"
+                                "btn_x" -> "(X)"
+                                "camera", "btn_rb" -> "(RB)"
+                                "btn_lb" -> "(LB)"
                                 "btn_ls" -> "(LS)"
                                 "btn_rs" -> "(RS)"
+                                "map", "btn_back" -> "(VIEW)"
+                                "pause", "btn_start" -> "(MENU)"
+                                "dpad_up" -> "UP"
+                                "dpad_down" -> "DOWN"
+                                "dpad_left" -> "LEFT"
+                                "dpad_right" -> "RIGHT"
                                 "auto_drive" -> "C+2"
                                 else -> ""
                             },
                             isEditMode = state.isEditMode,
                             isPressed = isPressed,
                             onPressedChange = { pressed ->
-                                if (pressed) view.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
-                                buttonsBitmask = if (pressed) (buttonsBitmask or bit) else (buttonsBitmask and bit.inv())
+                                if (pressed) {
+                                    view.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
+                                    syncClient?.testActionInput(element.actionId, true)
+                                    if (bit != 0) {
+                                        buttonsBitmask = buttonsBitmask or bit
+                                    }
+                                } else {
+                                    if (bit != 0) {
+                                        buttonsBitmask = buttonsBitmask and bit.inv()
+                                    }
+                                    syncClient?.testActionInput(element.actionId, false)
+                                }
                             }
                         )
                     }
@@ -367,75 +387,184 @@ fun DrivingScreen(
             }
         }
 
-        // 4. Action Catalog Modal Dialog (Authentic Forza Horizon Dialog)
+        // 4. Authentic Forza Horizon Action Catalog Modal Dialog
         if (state.isActionCatalogVisible) {
             val allActions = listOf(
+                GameAction(id = "auto_drive", name = "Auto Drive Assist (C+2)", inputType = InputType.DigitalButton),
+                GameAction(id = "rewind", name = "Y Button (Rewind)", inputType = InputType.DigitalButton, xboxTarget = XboxButton.Y),
+                GameAction(id = "btn_a", name = "A Button (E-Brake)", inputType = InputType.DigitalButton, xboxTarget = XboxButton.A),
+                GameAction(id = "btn_b", name = "B Button (Shift Up)", inputType = InputType.DigitalButton, xboxTarget = XboxButton.B),
+                GameAction(id = "btn_x", name = "X Button (Activate)", inputType = InputType.DigitalButton, xboxTarget = XboxButton.X),
+                GameAction(id = "camera", name = "RB (Switch Camera)", inputType = InputType.DigitalButton, xboxTarget = XboxButton.RightBumper),
+                GameAction(id = "btn_lb", name = "LB (Clutch / Cam)", inputType = InputType.DigitalButton, xboxTarget = XboxButton.LeftBumper),
+                GameAction(id = "btn_ls", name = "LS (Convertible / Horn)", inputType = InputType.DigitalButton, xboxTarget = XboxButton.LeftThumbClick),
+                GameAction(id = "btn_rs", name = "RS (Horn / Look Back)", inputType = InputType.DigitalButton, xboxTarget = XboxButton.RightThumbClick),
+                GameAction(id = "map", name = "View / World Map", inputType = InputType.DigitalButton, xboxTarget = XboxButton.Back),
+                GameAction(id = "pause", name = "Menu / Pause", inputType = InputType.DigitalButton, xboxTarget = XboxButton.Start),
+                GameAction(id = "dpad_up", name = "D-Pad UP (Photo Mode)", inputType = InputType.DigitalButton, xboxTarget = XboxButton.DpadUp),
+                GameAction(id = "dpad_down", name = "D-Pad DOWN (Activate ANNA)", inputType = InputType.DigitalButton, xboxTarget = XboxButton.DpadDown),
+                GameAction(id = "dpad_left", name = "D-Pad LEFT (Forza LINK)", inputType = InputType.DigitalButton, xboxTarget = XboxButton.DpadLeft),
+                GameAction(id = "dpad_right", name = "D-Pad RIGHT (Radio / Telemetry)", inputType = InputType.DigitalButton, xboxTarget = XboxButton.DpadRight),
                 GameAction(id = "steer", name = "Steering Wheel", inputType = InputType.AnalogAxis, xboxTarget = XboxButton.LeftThumbX),
                 GameAction(id = "throttle", name = "Accelerator (RT)", inputType = InputType.AnalogTrigger, xboxTarget = XboxButton.RightTrigger),
                 GameAction(id = "brake", name = "Brake / Rev (LT)", inputType = InputType.AnalogTrigger, xboxTarget = XboxButton.LeftTrigger),
-                GameAction(id = "handbrake", name = "Handbrake (A)", inputType = InputType.DigitalButton, xboxTarget = XboxButton.A),
-                GameAction(id = "auto_drive", name = "Auto Drive Assist (C+2)", inputType = InputType.DigitalButton),
-                GameAction(id = "btn_a", name = "A Button", inputType = InputType.DigitalButton, xboxTarget = XboxButton.A),
-                GameAction(id = "btn_b", name = "B Button", inputType = InputType.DigitalButton, xboxTarget = XboxButton.B),
-                GameAction(id = "btn_x", name = "X Button", inputType = InputType.DigitalButton, xboxTarget = XboxButton.X),
-                GameAction(id = "rewind", name = "Y Button (Rewind)", inputType = InputType.DigitalButton, xboxTarget = XboxButton.Y),
-                GameAction(id = "btn_lb", name = "LB (Clutch)", inputType = InputType.DigitalButton, xboxTarget = XboxButton.LeftBumper),
-                GameAction(id = "camera", name = "RB (Camera)", inputType = InputType.DigitalButton, xboxTarget = XboxButton.RightBumper),
-                GameAction(id = "btn_ls", name = "LS (Horn / Click)", inputType = InputType.DigitalButton, xboxTarget = XboxButton.LeftThumbClick),
-                GameAction(id = "btn_rs", name = "RS (Look Back)", inputType = InputType.DigitalButton, xboxTarget = XboxButton.RightThumbClick),
-                GameAction(id = "map", name = "View / Map", inputType = InputType.DigitalButton, xboxTarget = XboxButton.Back),
-                GameAction(id = "pause", name = "Menu / Pause", inputType = InputType.DigitalButton, xboxTarget = XboxButton.Start),
-                GameAction(id = "dpad_up", name = "D-Pad UP", inputType = InputType.DigitalButton, xboxTarget = XboxButton.DpadUp),
-                GameAction(id = "dpad_down", name = "D-Pad DOWN", inputType = InputType.DigitalButton, xboxTarget = XboxButton.DpadDown),
-                GameAction(id = "dpad_left", name = "D-Pad LEFT", inputType = InputType.DigitalButton, xboxTarget = XboxButton.DpadLeft),
-                GameAction(id = "dpad_right", name = "D-Pad RIGHT", inputType = InputType.DigitalButton, xboxTarget = XboxButton.DpadRight)
+                GameAction(id = "handbrake", name = "Handbrake (A)", inputType = InputType.DigitalButton, xboxTarget = XboxButton.A)
             )
 
-            AlertDialog(
-                onDismissRequest = { viewModel.setActionCatalogVisible(false) },
-                containerColor = Color(0xFF062220),
-                title = {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color(0xD0030E0C))
+                    .clickable { viewModel.setActionCatalogVisible(false) },
+                contentAlignment = Alignment.Center
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth(0.65f)
+                        .widthIn(min = 460.dp, max = 560.dp)
+                        .heightIn(max = 330.dp)
+                        .clip(RoundedCornerShape(6.dp))
+                        .background(Color(0xF8051E1C))
+                        .border(1.5.dp, Color(0xFFCCFF00), RoundedCornerShape(6.dp))
+                        .clickable(enabled = false) {}
+                ) {
+                    // Full-Bleed Volt Lime Header
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
                             .background(Color(0xFFCCFF00))
-                            .padding(vertical = 8.dp),
-                        contentAlignment = Alignment.Center
+                            .padding(horizontal = 16.dp, vertical = 9.dp)
                     ) {
-                        Text("SELECT AN ACTION", color = Color.Black, fontWeight = FontWeight.Black, fontSize = 14.sp, letterSpacing = 2.sp)
-                    }
-                },
-                text = {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .heightIn(max = 300.dp)
-                            .verticalScroll(rememberScrollState()),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        allActions.forEach { action ->
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .clip(RoundedCornerShape(4.dp))
-                                    .background(Color.White)
-                                    .clickable { viewModel.addActionToLayout(action) }
-                                    .padding(horizontal = 14.dp, vertical = 10.dp),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Text(action.name, color = Color.Black, fontWeight = FontWeight.Black, fontSize = 12.sp)
-                                Text("+ ADD", color = Color(0xFF007744), fontWeight = FontWeight.Black, fontSize = 11.sp)
-                            }
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "SELECT AN ACTION",
+                                color = Color.Black,
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.Black,
+                                letterSpacing = 2.sp
+                            )
+                            Text(
+                                text = "[ESC] CLOSE",
+                                color = Color.Black,
+                                fontSize = 10.sp,
+                                fontWeight = FontWeight.Black,
+                                modifier = Modifier.clickable { viewModel.setActionCatalogVisible(false) }
+                            )
                         }
                     }
-                },
-                confirmButton = {
-                    TextButton(onClick = { viewModel.setActionCatalogVisible(false) }) {
-                        Text("CANCEL", color = Color.White, fontWeight = FontWeight.Bold)
+
+                    // Content Container with Motion Blur Edge Fades
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f, fill = false)
+                    ) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 12.dp, vertical = 8.dp)
+                                .verticalScroll(rememberScrollState()),
+                            verticalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            allActions.forEach { action ->
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .clip(RoundedCornerShape(3.dp))
+                                        .background(Color.White)
+                                        .clickable { viewModel.addActionToLayout(action) }
+                                        .padding(horizontal = 14.dp, vertical = 8.dp),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text(
+                                        text = action.name,
+                                        color = Color.Black,
+                                        fontWeight = FontWeight.Black,
+                                        fontSize = 11.sp
+                                    )
+
+                                    val tagText = when (action.id) {
+                                        "auto_drive" -> "C+2"
+                                        "rewind" -> "Y"
+                                        "btn_a" -> "A"
+                                        "btn_b" -> "B"
+                                        "btn_x" -> "X"
+                                        "camera" -> "RB"
+                                        "btn_lb" -> "LB"
+                                        "btn_ls" -> "LS"
+                                        "btn_rs" -> "RS"
+                                        "map" -> "VIEW"
+                                        "pause" -> "MENU"
+                                        "dpad_up" -> "UP"
+                                        "dpad_down" -> "DOWN"
+                                        "dpad_left" -> "LEFT"
+                                        "dpad_right" -> "RIGHT"
+                                        "handbrake" -> "SPACE"
+                                        else -> "+ ADD"
+                                    }
+
+                                    Box(
+                                        modifier = Modifier
+                                            .clip(RoundedCornerShape(3.dp))
+                                            .background(
+                                                if (action.id == "auto_drive") Color(0xFFCCFF00)
+                                                else Color(0xFFE0E0E0)
+                                            )
+                                            .padding(horizontal = 8.dp, vertical = 2.dp)
+                                    ) {
+                                        Text(
+                                            text = tagText,
+                                            color = Color.Black,
+                                            fontWeight = FontWeight.Black,
+                                            fontSize = 10.sp,
+                                            letterSpacing = 1.sp
+                                        )
+                                    }
+                                }
+                            }
+                        }
+
+                        // Top & Bottom gradient motion fade masks to dissolve edges smoothly
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(8.dp)
+                                .align(Alignment.TopCenter)
+                                .background(Brush.verticalGradient(listOf(Color(0xF8051E1C), Color.Transparent)))
+                        )
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(8.dp)
+                                .align(Alignment.BottomCenter)
+                                .background(Brush.verticalGradient(listOf(Color.Transparent, Color(0xF8051E1C))))
+                        )
+                    }
+
+                    // Full-Bleed Cancel Footer
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(Color(0xFF03100E))
+                            .clickable { viewModel.setActionCatalogVisible(false) }
+                            .padding(vertical = 9.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "CANCEL",
+                            color = Color(0xCCFFFFFF),
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 10.sp,
+                            letterSpacing = 2.sp
+                        )
                     }
                 }
-            )
+            }
         }
 
         // 5. Sleek HUD Quick Menu Drawer (Forza Horizon Styling, Fully Scrollable)
@@ -974,7 +1103,7 @@ fun FH6ExactSvgBrakePedal(
 ) {
     val animatedPressure by animateFloatAsState(
         targetValue = pressure,
-        animationSpec = tween(durationMillis = 20),
+        animationSpec = tween(durationMillis = 60),
         label = "BrakePressure"
     )
 
@@ -983,22 +1112,13 @@ fun FH6ExactSvgBrakePedal(
             .fillMaxSize()
             .pointerInput(isEditMode) {
                 if (!isEditMode) {
-                    awaitPointerEventScope {
-                        while (true) {
-                            val event = awaitPointerEvent()
-                            val change = event.changes.firstOrNull { it.pressed }
-                            if (change != null) {
-                                change.consume()
-                                // Top-to-bottom sliding for reverse / brake as requested:
-                                val raw = (change.position.y / size.height).coerceIn(0.0f, 1.0f)
-                                onPressureChange(raw)
-                            } else {
-                                if (event.changes.all { !it.pressed }) {
-                                    onPressureChange(0f)
-                                }
-                            }
+                    detectTapGestures(
+                        onPress = {
+                            onPressureChange(1.0f)
+                            tryAwaitRelease()
+                            onPressureChange(0f)
                         }
-                    }
+                    )
                 }
             }
     ) {
@@ -1211,10 +1331,11 @@ fun FH6ExactSvgHandbrake(
 }
 
 /**
- * Clean Motorsport Action Button
+ * Clean Motorsport Action Button with Custom SVG Vector Art
  */
 @Composable
 fun FH6ExactSvgActionButton(
+    actionId: String,
     label: String,
     subLabel: String,
     isEditMode: Boolean,
@@ -1224,40 +1345,295 @@ fun FH6ExactSvgActionButton(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .clip(RoundedCornerShape(12.dp))
-            .background(if (isPressed) Color.White else Color.Transparent)
-            .border(
-                width = 1.2.dp,
-                color = if (isPressed) Color.White else Color(0x60FFFFFF),
-                shape = RoundedCornerShape(12.dp)
-            )
             .pointerInput(isEditMode) {
                 if (!isEditMode) {
                     detectTapGestures(
                         onPress = {
+                            val startTime = System.currentTimeMillis()
                             onPressedChange(true)
                             tryAwaitRelease()
+                            val elapsed = System.currentTimeMillis() - startTime
+                            // Guarantee a minimum hold duration of 150ms so games and 120Hz UDP never miss the state
+                            if (elapsed < 150) {
+                                kotlinx.coroutines.delay(150 - elapsed)
+                            }
                             onPressedChange(false)
                         }
                     )
                 }
-            },
-        contentAlignment = Alignment.Center
+            }
     ) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Canvas(modifier = Modifier.fillMaxSize()) {
+            val w = size.width
+            val h = size.height
+            val cx = w / 2f
+            val cy = h / 2f
+            val r = (minOf(w, h) / 2f) * 0.88f
+
+            when (actionId) {
+                "auto_drive" -> {
+                    // Autonomous Speedometer Arc & AI Guidance Vector
+                    val voltLime = Color(0xFFCCFF00)
+                    if (isPressed) {
+                        drawRoundRect(
+                            color = voltLime,
+                            cornerRadius = CornerRadius(12.dp.toPx(), 12.dp.toPx())
+                        )
+                    } else {
+                        drawRoundRect(
+                            color = Color(0xF2041A18),
+                            cornerRadius = CornerRadius(12.dp.toPx(), 12.dp.toPx())
+                        )
+                        drawRoundRect(
+                            color = voltLime,
+                            cornerRadius = CornerRadius(12.dp.toPx(), 12.dp.toPx()),
+                            style = Stroke(width = 1.6f)
+                        )
+                    }
+
+                    val arcColor = if (isPressed) Color.Black else voltLime
+                    val arcRect = Rect(cx - r * 0.72f, cy - r * 0.72f, cx + r * 0.72f, cy + r * 0.72f)
+                    drawArc(
+                        color = arcColor,
+                        startAngle = 145f,
+                        sweepAngle = 250f,
+                        useCenter = false,
+                        topLeft = arcRect.topLeft,
+                        size = arcRect.size,
+                        style = Stroke(width = 2.2f)
+                    )
+
+                    // Forward AI Guidance Triangle
+                    val arrowPath = Path().apply {
+                        moveTo(cx, cy - r * 0.45f)
+                        lineTo(cx + r * 0.22f, cy - r * 0.10f)
+                        lineTo(cx, cy - r * 0.20f)
+                        lineTo(cx - r * 0.22f, cy - r * 0.10f)
+                        close()
+                    }
+                    drawPath(arrowPath, arcColor)
+                }
+
+                "btn_a" -> {
+                    val green = Color(0xFF00E676)
+                    if (isPressed) {
+                        drawCircle(green, radius = r, center = Offset(cx, cy))
+                    } else {
+                        drawCircle(Color(0xE0061A12), radius = r, center = Offset(cx, cy))
+                        drawCircle(green, radius = r, center = Offset(cx, cy), style = Stroke(width = 2f))
+                        drawCircle(Color(0x6000E676), radius = r * 0.78f, center = Offset(cx, cy), style = Stroke(width = 1f))
+                    }
+                }
+
+                "btn_b" -> {
+                    val red = Color(0xFFFF1744)
+                    if (isPressed) {
+                        drawCircle(red, radius = r, center = Offset(cx, cy))
+                    } else {
+                        drawCircle(Color(0xE01A060A), radius = r, center = Offset(cx, cy))
+                        drawCircle(red, radius = r, center = Offset(cx, cy), style = Stroke(width = 2f))
+                        drawCircle(Color(0x60FF1744), radius = r * 0.78f, center = Offset(cx, cy), style = Stroke(width = 1f))
+                    }
+                }
+
+                "btn_x" -> {
+                    val blue = Color(0xFF00B0FF)
+                    if (isPressed) {
+                        drawCircle(blue, radius = r, center = Offset(cx, cy))
+                    } else {
+                        drawCircle(Color(0xE006121A), radius = r, center = Offset(cx, cy))
+                        drawCircle(blue, radius = r, center = Offset(cx, cy), style = Stroke(width = 2f))
+                        drawCircle(Color(0x6000B0FF), radius = r * 0.78f, center = Offset(cx, cy), style = Stroke(width = 1f))
+                    }
+                }
+
+                "rewind", "btn_y" -> {
+                    val yellow = Color(0xFFCCFF00)
+                    if (isPressed) {
+                        drawCircle(yellow, radius = r, center = Offset(cx, cy))
+                    } else {
+                        drawCircle(Color(0xE0161A06), radius = r, center = Offset(cx, cy))
+                        drawCircle(yellow, radius = r, center = Offset(cx, cy), style = Stroke(width = 2f))
+                        drawCircle(Color(0x60CCFF00), radius = r * 0.78f, center = Offset(cx, cy), style = Stroke(width = 1f))
+                    }
+                }
+
+                "camera", "btn_rb" -> {
+                    val white = Color.White
+                    if (isPressed) {
+                        drawRoundRect(white, cornerRadius = CornerRadius(10.dp.toPx(), 10.dp.toPx()))
+                    } else {
+                        drawRoundRect(Color(0xE0081418), cornerRadius = CornerRadius(10.dp.toPx(), 10.dp.toPx()))
+                        drawRoundRect(white, cornerRadius = CornerRadius(10.dp.toPx(), 10.dp.toPx()), style = Stroke(width = 1.6f))
+                    }
+                    val strokeColor = if (isPressed) Color.Black else Color.White
+                    drawCircle(strokeColor, radius = r * 0.35f, center = Offset(cx, cy - r * 0.15f), style = Stroke(width = 1.8f))
+                }
+
+                "map", "btn_back", "btn_view" -> {
+                    val white = Color.White
+                    if (isPressed) {
+                        drawRoundRect(white, cornerRadius = CornerRadius(10.dp.toPx(), 10.dp.toPx()))
+                    } else {
+                        drawRoundRect(Color(0xE0081418), cornerRadius = CornerRadius(10.dp.toPx(), 10.dp.toPx()))
+                        drawRoundRect(white, cornerRadius = CornerRadius(10.dp.toPx(), 10.dp.toPx()), style = Stroke(width = 1.6f))
+                    }
+                    val strokeColor = if (isPressed) Color.Black else Color.White
+                    val mapPath = Path().apply {
+                        moveTo(cx - r * 0.45f, cy - r * 0.3f)
+                        lineTo(cx - r * 0.15f, cy - r * 0.45f)
+                        lineTo(cx + r * 0.15f, cy - r * 0.3f)
+                        lineTo(cx + r * 0.45f, cy - r * 0.45f)
+                        lineTo(cx + r * 0.45f, cy + r * 0.05f)
+                        lineTo(cx + r * 0.15f, cy + r * 0.2f)
+                        lineTo(cx - r * 0.15f, cy + r * 0.05f)
+                        lineTo(cx - r * 0.45f, cy + r * 0.2f)
+                        close()
+                    }
+                    drawPath(mapPath, strokeColor, style = Stroke(width = 1.5f))
+                }
+
+                "pause", "btn_start", "btn_menu" -> {
+                    val white = Color.White
+                    if (isPressed) {
+                        drawRoundRect(white, cornerRadius = CornerRadius(10.dp.toPx(), 10.dp.toPx()))
+                    } else {
+                        drawRoundRect(Color(0xE0081418), cornerRadius = CornerRadius(10.dp.toPx(), 10.dp.toPx()))
+                        drawRoundRect(white, cornerRadius = CornerRadius(10.dp.toPx(), 10.dp.toPx()), style = Stroke(width = 1.6f))
+                    }
+                    val barColor = if (isPressed) Color.Black else Color.White
+                    drawRect(barColor, topLeft = Offset(cx - r * 0.22f, cy - r * 0.35f), size = Size(r * 0.14f, r * 0.45f))
+                    drawRect(barColor, topLeft = Offset(cx + r * 0.08f, cy - r * 0.35f), size = Size(r * 0.14f, r * 0.45f))
+                }
+
+                "dpad_up" -> {
+                    val white = Color.White
+                    if (isPressed) {
+                        drawRoundRect(white, cornerRadius = CornerRadius(10.dp.toPx(), 10.dp.toPx()))
+                    } else {
+                        drawRoundRect(Color(0xE0081418), cornerRadius = CornerRadius(10.dp.toPx(), 10.dp.toPx()))
+                        drawRoundRect(white, cornerRadius = CornerRadius(10.dp.toPx(), 10.dp.toPx()), style = Stroke(width = 1.6f))
+                    }
+                    val arrowColor = if (isPressed) Color.Black else Color.White
+                    val arrow = Path().apply {
+                        moveTo(cx, cy - r * 0.4f)
+                        lineTo(cx + r * 0.3f, cy - r * 0.05f)
+                        lineTo(cx - r * 0.3f, cy - r * 0.05f)
+                        close()
+                    }
+                    drawPath(arrow, arrowColor)
+                }
+
+                "dpad_down" -> {
+                    val white = Color.White
+                    if (isPressed) {
+                        drawRoundRect(white, cornerRadius = CornerRadius(10.dp.toPx(), 10.dp.toPx()))
+                    } else {
+                        drawRoundRect(Color(0xE0081418), cornerRadius = CornerRadius(10.dp.toPx(), 10.dp.toPx()))
+                        drawRoundRect(white, cornerRadius = CornerRadius(10.dp.toPx(), 10.dp.toPx()), style = Stroke(width = 1.6f))
+                    }
+                    val arrowColor = if (isPressed) Color.Black else Color.White
+                    val arrow = Path().apply {
+                        moveTo(cx, cy + r * 0.15f)
+                        lineTo(cx + r * 0.3f, cy - r * 0.2f)
+                        lineTo(cx - r * 0.3f, cy - r * 0.2f)
+                        close()
+                    }
+                    drawPath(arrow, arrowColor)
+                }
+
+                "dpad_left" -> {
+                    val white = Color.White
+                    if (isPressed) {
+                        drawRoundRect(white, cornerRadius = CornerRadius(10.dp.toPx(), 10.dp.toPx()))
+                    } else {
+                        drawRoundRect(Color(0xE0081418), cornerRadius = CornerRadius(10.dp.toPx(), 10.dp.toPx()))
+                        drawRoundRect(white, cornerRadius = CornerRadius(10.dp.toPx(), 10.dp.toPx()), style = Stroke(width = 1.6f))
+                    }
+                    val arrowColor = if (isPressed) Color.Black else Color.White
+                    val arrow = Path().apply {
+                        moveTo(cx - r * 0.3f, cy - r * 0.1f)
+                        lineTo(cx + r * 0.05f, cy - r * 0.35f)
+                        lineTo(cx + r * 0.05f, cy + r * 0.15f)
+                        close()
+                    }
+                    drawPath(arrow, arrowColor)
+                }
+
+                "dpad_right" -> {
+                    val white = Color.White
+                    if (isPressed) {
+                        drawRoundRect(white, cornerRadius = CornerRadius(10.dp.toPx(), 10.dp.toPx()))
+                    } else {
+                        drawRoundRect(Color(0xE0081418), cornerRadius = CornerRadius(10.dp.toPx(), 10.dp.toPx()))
+                        drawRoundRect(white, cornerRadius = CornerRadius(10.dp.toPx(), 10.dp.toPx()), style = Stroke(width = 1.6f))
+                    }
+                    val arrowColor = if (isPressed) Color.Black else Color.White
+                    val arrow = Path().apply {
+                        moveTo(cx + r * 0.3f, cy - r * 0.1f)
+                        lineTo(cx - r * 0.05f, cy - r * 0.35f)
+                        lineTo(cx - r * 0.05f, cy + r * 0.15f)
+                        close()
+                    }
+                    drawPath(arrow, arrowColor)
+                }
+
+                else -> {
+                    if (isPressed) {
+                        drawRoundRect(Color.White, cornerRadius = CornerRadius(10.dp.toPx(), 10.dp.toPx()))
+                    } else {
+                        drawRoundRect(Color(0xE0081418), cornerRadius = CornerRadius(10.dp.toPx(), 10.dp.toPx()))
+                        drawRoundRect(Color(0x80FFFFFF), cornerRadius = CornerRadius(10.dp.toPx(), 10.dp.toPx()), style = Stroke(width = 1.4f))
+                    }
+                }
+            }
+        }
+
+        // Center / Bottom Typography
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(bottom = 6.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Bottom
+        ) {
+            val textColor = if (isPressed) {
+                Color(0xFF080B10)
+            } else {
+                when (actionId) {
+                    "auto_drive", "rewind", "btn_y" -> Color(0xFFCCFF00)
+                    "btn_a" -> Color(0xFF00E676)
+                    "btn_b" -> Color(0xFFFF1744)
+                    "btn_x" -> Color(0xFF00B0FF)
+                    else -> Color.White
+                }
+            }
+
             Text(
-                text = label,
-                color = if (isPressed) Color(0xFF080B10) else Color.White,
-                fontSize = 11.sp,
-                fontWeight = FontWeight.Bold,
-                letterSpacing = 1.5.sp
+                text = when (actionId) {
+                    "btn_a" -> "A"
+                    "btn_b" -> "B"
+                    "btn_x" -> "X"
+                    "rewind", "btn_y" -> "Y"
+                    "auto_drive" -> "AUTO"
+                    else -> label
+                },
+                color = textColor,
+                fontSize = when (actionId) {
+                    "btn_a", "btn_b", "btn_x", "rewind", "btn_y" -> 16.sp
+                    else -> 10.sp
+                },
+                fontWeight = FontWeight.Black,
+                letterSpacing = 1.sp
             )
+
             if (subLabel.isNotEmpty()) {
                 Text(
                     text = subLabel,
-                    color = if (isPressed) Color(0x99000000) else Color(0x80FFFFFF),
-                    fontSize = 9.sp,
-                    fontWeight = FontWeight.Medium
+                    color = if (isPressed) Color(0x99000000) else Color(0xB3FFFFFF),
+                    fontSize = 8.sp,
+                    fontFamily = FontFamily.Monospace,
+                    fontWeight = FontWeight.Bold
                 )
             }
         }

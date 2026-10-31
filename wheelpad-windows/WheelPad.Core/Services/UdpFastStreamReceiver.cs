@@ -110,20 +110,37 @@ namespace WheelPad.Core.Services
             _inputDispatcher.DispatchAnalogInput("throttle", normalizedThrottle);
             _inputDispatcher.DispatchAnalogInput("brake", normalizedBrake);
 
-            // Separate handbrake dispatch
+            // Separate handbrake & A button dispatch
             bool handbrakePressed = handbrakePressure > 30 || ((buttons & 0x01) != 0);
             _inputDispatcher.DispatchDigitalInput("handbrake", handbrakePressed);
+            _inputDispatcher.DispatchDigitalInput("btn_a", handbrakePressed);
 
             // Dispatch full Xbox 360 controller button matrix
-            _inputDispatcher.DispatchDigitalInput("rewind", (buttons & (1 << 1)) != 0);
-            _inputDispatcher.DispatchDigitalInput("camera", (buttons & (1 << 2)) != 0);
-            _inputDispatcher.DispatchDigitalInput("map", (buttons & (1 << 3)) != 0);
-            _inputDispatcher.DispatchDigitalInput("pause", (buttons & (1 << 4)) != 0);
+            bool rewindPressed = (buttons & (1 << 1)) != 0;
+            _inputDispatcher.DispatchDigitalInput("rewind", rewindPressed);
+            _inputDispatcher.DispatchDigitalInput("btn_y", rewindPressed);
+
+            bool cameraPressed = (buttons & (1 << 2)) != 0;
+            _inputDispatcher.DispatchDigitalInput("camera", cameraPressed);
+            _inputDispatcher.DispatchDigitalInput("btn_rb", cameraPressed);
+
+            bool mapPressed = (buttons & (1 << 3)) != 0;
+            _inputDispatcher.DispatchDigitalInput("map", mapPressed);
+            _inputDispatcher.DispatchDigitalInput("btn_back", mapPressed);
+            _inputDispatcher.DispatchDigitalInput("btn_view", mapPressed);
+
+            bool pausePressed = (buttons & (1 << 4)) != 0;
+            _inputDispatcher.DispatchDigitalInput("pause", pausePressed);
+            _inputDispatcher.DispatchDigitalInput("btn_start", pausePressed);
+            _inputDispatcher.DispatchDigitalInput("btn_menu", pausePressed);
+
             _inputDispatcher.DispatchDigitalInput("btn_x", (buttons & (1 << 5)) != 0);
             _inputDispatcher.DispatchDigitalInput("btn_b", (buttons & (1 << 6)) != 0);
             _inputDispatcher.DispatchDigitalInput("btn_lb", (buttons & (1 << 7)) != 0);
             _inputDispatcher.DispatchDigitalInput("btn_ls", (buttons & (1 << 8)) != 0);
+            _inputDispatcher.DispatchDigitalInput("horn", (buttons & (1 << 8)) != 0);
             _inputDispatcher.DispatchDigitalInput("btn_rs", (buttons & (1 << 9)) != 0);
+            _inputDispatcher.DispatchDigitalInput("look_back", (buttons & (1 << 9)) != 0);
             _inputDispatcher.DispatchDigitalInput("dpad_up", (buttons & (1 << 10)) != 0);
             _inputDispatcher.DispatchDigitalInput("dpad_down", (buttons & (1 << 11)) != 0);
             _inputDispatcher.DispatchDigitalInput("dpad_left", (buttons & (1 << 12)) != 0);
