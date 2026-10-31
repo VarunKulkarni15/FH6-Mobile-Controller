@@ -19,3 +19,4 @@ $RECYCLE.BIN/
 # Keep dist output executables and APKs
 !dist-windows/fh6-controller-windows.exe
 !dist-android/fh6-controller-android.apk
+

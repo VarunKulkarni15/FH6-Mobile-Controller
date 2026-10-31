@@ -1,6 +1,6 @@
 # FH6 CONTROLLER // FORZA HORIZON MOBILE HUD & PC COMPANION SUITE
 
-Ultra-low latency virtual Xbox 360 controller emulation suite designed specifically for **Forza Horizon 6**. Turns your Android phone into an authentic, edge-to-edge motorsport HUD with gyroscope tilt steering, natural top-to-bottom brake pressure, and 1-click auto-driving assist.
+Ultra-low latency virtual Xbox 360 controller emulation suite designed specifically for **Forza Horizon 6**. Turns your Android phone into an authentic, edge-to-edge motorsport HUD with gyroscope tilt steering, precision pedal modulation, and 1-click auto-driving assist.
 
 ---
 
@@ -42,8 +42,8 @@ Ultra-low latency virtual Xbox 360 controller emulation suite designed specifica
    - High-performance binary 24-byte packet stream with sequence numbering, CRC16 error checking, and a 500ms safety watchdog that zeroes inputs if a connection drop occurs.
 2. **Native ViGEmBus Xbox 360 Controller Emulation**
    - Recognized natively by Windows, Steam, and Forza Horizon as an official Microsoft Xbox 360 Controller without requiring third-party remappers.
-3. **Natural Top-to-Bottom Reverse & Brake Drag**
-   - Dragging your thumb from top to bottom on the reverse/brake pedal smoothly increases braking and reverse pressure from 0% to 100%, perfectly matching mobile touch ergonomics.
+3. **Progressive Analog Reverse & Brake Modulation**
+   - Smooth, linear braking and reverse pressure from 0% to 100%, perfectly matched with responsive visual feedback and mobile touch ergonomics.
 4. **1-Click Auto-Drive Assist Sequencer**
    - A dedicated assist action on Android and Windows that dispatches `C` (`VK_C = 0x43`) followed by `NumPad 2` (`VK_NUMPAD2 = 0x62`) with precise 100ms hardware-level timing.
 5. **Physical Gyroscope Tilt Steering**
@@ -114,3 +114,4 @@ cd wheelpad-android
 ## License
 
 MIT License. Designed with authentic Forza Horizon festival styling for PC driving enthusiasts.
+
