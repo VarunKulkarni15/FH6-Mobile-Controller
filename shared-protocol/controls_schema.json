@@ -1,0 +1,101 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "WheelPad Dynamic Game Controls & Profile Protocol",
+  "description": "Defines schemas for two-way synchronization between WheelPad Windows Companion and Android Client.",
+  "definitions": {
+    "InputType": {
+      "type": "string",
+      "enum": ["AnalogAxis", "AnalogTrigger", "DigitalButton"]
+    },
+    "BindingType": {
+      "type": "string",
+      "enum": ["XboxController", "KeyboardKey", "Composite"]
+    },
+    "XboxButton": {
+      "type": "string",
+      "enum": [
+        "None", "A", "B", "X", "Y",
+        "LeftBumper", "RightBumper",
+        "Back", "Start", "Guide",
+        "LeftThumbClick", "RightThumbClick",
+        "DpadUp", "DpadDown", "DpadLeft", "DpadRight",
+        "LeftThumbX", "RightThumbX",
+        "LeftTrigger", "RightTrigger"
+      ]
+    },
+    "InputBehavior": {
+      "type": "string",
+      "enum": ["Instant", "Hold", "Toggle", "Repeat"]
+    },
+    "ControlShape": {
+      "type": "string",
+      "enum": ["CircleWheel", "VerticalPedal", "RoundedButton", "WideBar", "PillToggle"]
+    },
+    "GameAction": {
+      "type": "object",
+      "required": ["id", "name", "inputType", "bindingType", "behavior"],
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "category": { "type": "string" },
+        "inputType": { "$ref": "#/definitions/InputType" },
+        "bindingType": { "$ref": "#/definitions/BindingType" },
+        "xboxTarget": { "$ref": "#/definitions/XboxButton" },
+        "keyboardKeyCode": { "type": "integer", "description": "Windows Virtual Key Code (VK)" },
+        "keyboardKeyName": { "type": "string" },
+        "behavior": { "$ref": "#/definitions/InputBehavior" },
+        "repeatIntervalMs": { "type": "integer", "default": 50 },
+        "isCustom": { "type": "boolean", "default": false },
+        "description": { "type": "string" }
+      }
+    },
+    "TouchControlElement": {
+      "type": "object",
+      "required": ["elementId", "actionId", "shape", "normalizedX", "normalizedY", "normalizedWidth", "normalizedHeight"],
+      "properties": {
+        "elementId": { "type": "string" },
+        "actionId": { "type": "string" },
+        "label": { "type": "string" },
+        "shape": { "$ref": "#/definitions/ControlShape" },
+        "normalizedX": { "type": "number", "minimum": 0.0, "maximum": 1.0 },
+        "normalizedY": { "type": "number", "minimum": 0.0, "maximum": 1.0 },
+        "normalizedWidth": { "type": "number", "minimum": 0.02, "maximum": 1.0 },
+        "normalizedHeight": { "type": "number", "minimum": 0.02, "maximum": 1.0 },
+        "opacity": { "type": "number", "minimum": 0.1, "maximum": 1.0, "default": 0.85 },
+        "accentColorHex": { "type": "string", "default": "#00E5FF" },
+        "hapticFeedback": { "type": "boolean", "default": true },
+        "isEnabled": { "type": "boolean", "default": true }
+      }
+    },
+    "SteeringConfig": {
+      "type": "object",
+      "properties": {
+        "maxRotationDegrees": { "type": "integer", "default": 540 },
+        "deadzonePercent": { "type": "number", "minimum": 0.0, "maximum": 0.25, "default": 0.02 },
+        "gammaCurve": { "type": "number", "minimum": 0.5, "maximum": 3.0, "default": 1.2 },
+        "returnToCenterSpeed": { "type": "number", "default": 0.8 },
+        "useGyroSteering": { "type": "boolean", "default": false }
+      }
+    },
+    "ControllerProfile": {
+      "type": "object",
+      "required": ["profileId", "profileName", "actions", "layout"],
+      "properties": {
+        "profileId": { "type": "string" },
+        "profileName": { "type": "string" },
+        "steeringConfig": { "$ref": "#/definitions/SteeringConfig" },
+        "actions": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/GameAction" }
+        },
+        "layout": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/TouchControlElement" }
+        },
+        "isDefault": { "type": "boolean", "default": false },
+        "lastModifiedUtc": { "type": "string", "format": "date-time" }
+      }
+    }
+  }
+}
+

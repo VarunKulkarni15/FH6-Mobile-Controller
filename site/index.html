@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FH6 CONTROLLER // FORZA HORIZON HUD SUITE</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:ital,wght@0,600;0,700;1,700;1,800&family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --forza-bg: #062220;
+            --forza-bg-card: #0A2E2A;
+            --forza-bg-card-dark: #071E1C;
+            --forza-volt: #CCFF00;
+            --forza-pink: #FF007F;
+            --forza-cyan: #00F0FF;
+            --forza-white: #FFFFFF;
+            --forza-black: #0A0A0A;
+            --forza-border: #144C47;
+            --font-racing: 'Chakra Petch', 'Bahnschrift', 'Segoe UI Black', -apple-system, sans-serif;
+            --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--forza-bg);
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(204, 255, 0, 0.05) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(255, 0, 127, 0.07) 0%, transparent 45%),
+                linear-gradient(135deg, rgba(6, 34, 32, 0.96) 0%, rgba(4, 24, 22, 0.98) 100%);
+            color: var(--forza-white);
+            font-family: var(--font-body);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        /* Top Festival Nav */
+        header {
+            border-bottom: 2px solid var(--forza-border);
+            background: rgba(6, 34, 32, 0.85);
+            backdrop-filter: blur(12px);
+            padding: 18px 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .brand-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .volt-badge {
+            background: var(--forza-volt);
+            color: var(--forza-black);
+            font-family: var(--font-racing);
+            font-weight: 800;
+            font-size: 11px;
+            letter-spacing: 2px;
+            padding: 4px 10px;
+            transform: skew(-10deg);
+            display: inline-block;
+        }
+
+        .logo-text {
+            font-family: var(--font-racing);
+            font-weight: 800;
+            font-size: 20px;
+            letter-spacing: 1px;
+            color: var(--forza-white);
+            text-transform: uppercase;
+        }
+
+        .nav-tags {
+            display: flex;
+            gap: 10px;
+        }
+
+        .pink-pill {
+            background: var(--forza-pink);
+            color: #FFFFFF;
+            font-family: var(--font-racing);
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 1.5px;
+            padding: 4px 10px;
+            transform: skew(-10deg);
+        }
+
+        /* Hero Banner */
+        .hero {
+            max-width: 1200px;
+            margin: 40px auto 20px;
+            padding: 0 24px;
+            text-align: center;
+        }
+
+        .hero-title {
+            font-family: var(--font-racing);
+            font-size: clamp(34px, 5.5vw, 68px);
+            font-weight: 800;
+            line-height: 1.05;
+            text-transform: uppercase;
+            letter-spacing: -1px;
+            margin-bottom: 16px;
+        }
+
+        .hero-title span.lime {
+            color: var(--forza-volt);
+        }
+
+        .hero-subtitle {
+            font-size: clamp(14px, 1.8vw, 17px);
+            color: #A0D0CC;
+            max-width: 720px;
+            margin: 0 auto 32px;
+            line-height: 1.6;
+        }
+
+        /* Deep Link Detected Pairing Card */
+        #pairingNotice {
+            display: none;
+            max-width: 800px;
+            margin: 0 auto 40px;
+            background: var(--forza-black);
+            border: 2px solid var(--forza-volt);
+            border-radius: 8px;
+            padding: 24px;
+            text-align: center;
+            box-shadow: 0 0 30px rgba(204, 255, 0, 0.25);
+        }
+
+        .pairing-title {
+            font-family: var(--font-racing);
+            font-size: 13px;
+            color: var(--forza-volt);
+            letter-spacing: 2px;
+            font-weight: 800;
+            margin-bottom: 8px;
+        }
+
+        .pairing-ip {
+            font-family: var(--font-racing);
+            font-size: 28px;
+            font-weight: 800;
+            color: var(--forza-white);
+            margin-bottom: 16px;
+        }
+
+        .btn-launch-app {
+            background: var(--forza-volt);
+            color: var(--forza-black);
+            font-family: var(--font-racing);
+            font-size: 15px;
+            font-weight: 800;
+            letter-spacing: 1.5px;
+            padding: 14px 32px;
+            text-decoration: none;
+            display: inline-block;
+            transform: skew(-10deg);
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 15px rgba(204, 255, 0, 0.3);
+        }
+
+        .btn-launch-app:hover {
+            background: #FFFFFF;
+            transform: skew(-10deg) scale(1.03);
+        }
+
+        /* Download Cards Grid */
+        .cards-grid {
+            max-width: 1100px;
+            margin: 0 auto 60px;
+            padding: 0 24px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 24px;
+        }
+
+        .forza-card {
+            background: var(--forza-bg-card);
+            border: 1.5px solid var(--forza-border);
+            border-radius: 10px;
+            padding: 28px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: transform 0.2s ease, border-color 0.2s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .forza-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--forza-volt);
+        }
+
+        .forza-card.featured {
+            border-color: var(--forza-volt);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+        }
+
+        .card-top-tag {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .card-tag {
+            font-family: var(--font-racing);
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 1.5px;
+            padding: 3px 8px;
+            border-radius: 4px;
+        }
+
+        .tag-lime {
+            background: var(--forza-volt);
+            color: var(--forza-black);
+        }
+
+        .tag-pink {
+            background: var(--forza-pink);
+            color: #FFFFFF;
+        }
+
+        .card-title {
+            font-family: var(--font-racing);
+            font-size: 26px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+
+        .card-desc {
+            font-size: 13px;
+            color: #A0D0CC;
+            line-height: 1.5;
+            margin-bottom: 24px;
+        }
+
+        .card-specs {
+            list-style: none;
+            margin-bottom: 28px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .card-specs li {
+            font-size: 12px;
+            font-weight: 600;
+            color: #D8F2EF;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .card-specs li::before {
+            content: "";
+            width: 6px;
+            height: 6px;
+            background: var(--forza-volt);
+            display: inline-block;
+            transform: rotate(45deg);
+        }
+
+        .btn-card-action {
+            display: block;
+            text-align: center;
+            padding: 14px 20px;
+            font-family: var(--font-racing);
+            font-size: 13px;
+            font-weight: 800;
+            letter-spacing: 1.5px;
+            text-decoration: none;
+            text-transform: uppercase;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+
+        .btn-white {
+            background: var(--forza-white);
+            color: var(--forza-black);
+        }
+
+        .btn-white:hover {
+            background: var(--forza-volt);
+        }
+
+        .btn-volt {
+            background: var(--forza-volt);
+            color: var(--forza-black);
+        }
+
+        .btn-volt:hover {
+            background: #FFFFFF;
+        }
+
+        /* Features Section */
+        .features {
+            max-width: 1100px;
+            margin: 0 auto 60px;
+            padding: 0 24px;
+        }
+
+        .section-header {
+            font-family: var(--font-racing);
+            font-size: 18px;
+            font-weight: 800;
+            letter-spacing: 2px;
+            color: var(--forza-volt);
+            margin-bottom: 24px;
+            text-transform: uppercase;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 18px;
+        }
+
+        .feature-box {
+            background: var(--forza-bg-card-dark);
+            border: 1px solid var(--forza-border);
+            border-radius: 8px;
+            padding: 20px;
+        }
+
+        .feature-box h4 {
+            font-family: var(--font-racing);
+            font-size: 14px;
+            font-weight: 800;
+            color: var(--forza-white);
+            margin-bottom: 8px;
+            letter-spacing: 1px;
+        }
+
+        .feature-box p {
+            font-size: 12px;
+            color: #A0D0CC;
+            line-height: 1.5;
+        }
+
+        /* In-Game Footer Badges */
+        footer {
+            margin-top: auto;
+            border-top: 1px solid var(--forza-border);
+            background: rgba(4, 24, 22, 0.95);
+            padding: 18px 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 14px;
+        }
+
+        .footer-text {
+            font-size: 11px;
+            color: #7EE6D8;
+            font-weight: 600;
+        }
+
+        .footer-pills {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .action-pill {
+            background: #0A0A0A;
+            border: 1px solid #1C665F;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-family: var(--font-racing);
+            font-weight: 700;
+            color: #A0D0CC;
+        }
+
+        .action-pill span {
+            color: var(--forza-volt);
+            margin-right: 4px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Top Festival Nav -->
+    <header>
+        <div class="brand-container">
+            <div class="volt-badge">HORIZON SUITE</div>
+            <div class="logo-text">FH6 CONTROLLER</div>
+        </div>
+        <div class="nav-tags">
+            <div class="pink-pill">FASTSTREAM 120Hz</div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <main>
+        <section class="hero">
+            <h1 class="hero-title">TURN YOUR PHONE INTO A <span class="lime">FORZA HUD RIG</span></h1>
+            <p class="hero-subtitle">
+                Ultra-low latency virtual Xbox 360 controller emulation for PC with custom HUD layouts, gyro tilt steering, top-to-bottom brake pressure, and 1-click auto-driving assist.
+            </p>
+
+            <!-- Pairing Notice (Activated dynamically on QR Scan) -->
+            <div id="pairingNotice">
+                <div class="pairing-title">// INCOMING PAIRING REQUEST DETECTED</div>
+                <div class="pairing-ip" id="displayIp">CONNECTING TO PC...</div>
+                <a href="#" id="linkLaunchApp" class="btn-launch-app">LAUNCH FH6 CONTROLLER APP</a>
+                <p style="margin-top: 14px; font-size: 11px; color: #A0D0CC;">
+                    If the app does not open automatically, install the APK from below.
+                </p>
+            </div>
+        </section>
+
+        <!-- Download Cards Grid -->
+        <section class="cards-grid">
+            <!-- Windows Companion Card -->
+            <div class="forza-card featured">
+                <div>
+                    <div class="card-top-tag">
+                        <span class="card-tag tag-lime">WINDOWS COMPANION</span>
+                        <span style="font-size: 11px; color: var(--forza-volt); font-family: var(--font-racing); font-weight: 800;">v1.0.0</span>
+                    </div>
+                    <h2 class="card-title">fh6-controller-windows.exe</h2>
+                    <p class="card-desc">
+                        Native, ultra-lightweight Windows companion. Emulates an official Xbox 360 controller via ViGEmBus. Zero Electron, zero CMD popup windows.
+                    </p>
+                    <ul class="card-specs">
+                        <li>Native ViGEmBus Xbox 360 controller driver</li>
+                        <li>120Hz continuous UDP FastStream bridge</li>
+                        <li>Auto-drive assist sequencer (C + NumPad 2)</li>
+                        <li>Universal Spotify / YouTube Music SMTC bridge</li>
+                        <li>Single standalone executable (~150 KB)</li>
+                    </ul>
+                </div>
+                <a href="https://github.com/varuncoder777/fh6-controller/releases/download/v1.0.0/fh6-controller-windows.exe" class="btn-card-action btn-volt">DOWNLOAD WINDOWS EXE</a>
+            </div>
+
+            <!-- Android App Card -->
+            <div class="forza-card">
+                <div>
+                    <div class="card-top-tag">
+                        <span class="card-tag tag-pink">MOBILE HUD APP</span>
+                        <span style="font-size: 11px; color: var(--forza-pink); font-family: var(--font-racing); font-weight: 800;">v1.0.0</span>
+                    </div>
+                    <h2 class="card-title">fh6-controller-android.apk</h2>
+                    <p class="card-desc">
+                        Full-screen edge-to-edge minimalist HUD for Android (optimized for 120Hz AMOLED displays). Pure vector SVGs with zero clutter.
+                    </p>
+                    <ul class="card-specs">
+                        <li>True SVG steering wheel with 12 o'clock notch</li>
+                        <li>Top-to-bottom natural brake & reverse slider</li>
+                        <li>Physical gyroscope tilt steering with sensitivity</li>
+                        <li>Fully customizable & draggable control layouts</li>
+                        <li>Automatic LAN UDP PC discovery with zero typing</li>
+                    </ul>
+                </div>
+                <a href="https://github.com/varuncoder777/fh6-controller/releases/download/v1.0.0/fh6-controller-android.apk" class="btn-card-action btn-white">DOWNLOAD ANDROID APK</a>
+            </div>
+        </section>
+
+        <!-- Features Showcase -->
+        <section class="features">
+            <h3 class="section-header">// SYSTEM ARCHITECTURE & FEATURES</h3>
+            <div class="features-grid">
+                <div class="feature-box">
+                    <h4>0-DELAY FASTSTREAM UDP</h4>
+                    <p>Continuous 120Hz stream over binary 24-byte packets with CRC16 validation and 500ms watchdog protection.</p>
+                </div>
+                <div class="feature-box">
+                    <h4>VIGEMBUS XBOX 360 EMULATION</h4>
+                    <p>Steam, Forza Horizon, and Windows native games instantly detect a verified hardware Xbox 360 controller.</p>
+                </div>
+                <div class="feature-box">
+                    <h4>1-CLICK AUTO-DRIVE ASSIST</h4>
+                    <p>Dispatches in-game driving assist macro (C followed by NumPad 2) with a single tap on mobile or desktop.</p>
+                </div>
+                <div class="feature-box">
+                    <h4>ZERO POPUPS / ZERO EMOJIS</h4>
+                    <p>Clean motorsport typography and pure vector SVGs designed for true racing immersion.</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- In-Game Action Pills Footer -->
+    <footer>
+        <div class="footer-text">
+            FH6 CONTROLLER SUITE // AUTHORIZED GITHUB RELEASE
+        </div>
+        <div class="footer-pills">
+            <div class="action-pill"><span>[ENTER]</span> SELECT</div>
+            <div class="action-pill"><span>[A]</span> DOWNLOAD</div>
+            <div class="action-pill"><span>[ESC]</span> BACK</div>
+        </div>
+    </footer>
+
+    <!-- Deep-Link QR Pairing JavaScript -->
+    <script>
+        (function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const ip = urlParams.get('ip');
+            const tcp = urlParams.get('tcp') || '4243';
+            const udp = urlParams.get('udp') || '4242';
+
+            if (ip) {
+                const notice = document.getElementById('pairingNotice');
+                const displayIp = document.getElementById('displayIp');
+                const linkLaunchApp = document.getElementById('linkLaunchApp');
+
+                displayIp.textContent = 'PC IP: ' + ip + ' (UDP: ' + udp + ')';
+                const appDeepLink = 'fh6controller://connect?ip=' + encodeURIComponent(ip) + '&tcp=' + encodeURIComponent(tcp) + '&udp=' + encodeURIComponent(udp);
+                linkLaunchApp.href = appDeepLink;
+                notice.style.display = 'block';
+
+                // Automatically attempt to launch the app if the user is on mobile
+                if (/Android/i.test(navigator.userAgent)) {
+                    setTimeout(function() {
+                        window.location.href = appDeepLink;
+                    }, 500);
+                }
+            }
+        })();
+    </script>
+</body>
+</html>

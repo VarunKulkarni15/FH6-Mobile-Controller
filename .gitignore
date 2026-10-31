@@ -1,0 +1,21 @@
+# Build & Compilation outputs
+**/bin/
+**/obj/
+**/build/
+.gradle/
+.idea/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# System & OS
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+.DS_Store
+
+# Keep dist output executables and APKs
+!dist-windows/fh6-controller-windows.exe
+!dist-android/fh6-controller-android.apk

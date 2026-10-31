@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" width="100%" height="100%">
+  <!-- Forza Horizon 6 Pure Transparent Vector Steering Wheel (No Baked Background) -->
+  <!-- Outer Wheel Rim Ring (Thin White Outlines) -->
+  <circle cx="250" cy="250" r="230" fill="none" stroke="#ffffff" stroke-width="2.2"/>
+  <circle cx="250" cy="250" r="202" fill="none" stroke="rgba(255, 255, 255, 0.3)" stroke-width="1.2" stroke-dasharray="10 6"/>
+
+  <!-- Left Thumb Grip Arc -->
+  <path d="M 60 205 A 230 230 0 0 1 60 295" fill="none" stroke="#ffffff" stroke-width="5" stroke-linecap="round"/>
+  <!-- Right Thumb Grip Arc -->
+  <path d="M 440 205 A 230 230 0 0 0 440 295" fill="none" stroke="#ffffff" stroke-width="5" stroke-linecap="round"/>
+
+  <!-- Top 12 O'Clock Center Alignment Notch (Precision Marker) -->
+  <line x1="250" y1="12" x2="250" y2="42" stroke="#ffffff" stroke-width="4" stroke-linecap="round"/>
+  <circle cx="250" cy="48" r="3" fill="#ffffff"/>
+
+  <!-- Left Horizontal Spoke (9 o'clock) -->
+  <path d="M 48 250 L 195 240 L 195 260 Z" fill="none" stroke="#ffffff" stroke-width="1.5"/>
+  <line x1="75" y1="250" x2="185" y2="250" stroke="rgba(255, 255, 255, 0.7)" stroke-width="1.2"/>
+
+  <!-- Right Horizontal Spoke (3 o'clock) -->
+  <path d="M 452 250 L 305 240 L 305 260 Z" fill="none" stroke="#ffffff" stroke-width="1.5"/>
+  <line x1="425" y1="250" x2="315" y2="250" stroke="rgba(255, 255, 255, 0.7)" stroke-width="1.2"/>
+
+  <!-- Bottom Vertical Spoke (6 o'clock) -->
+  <path d="M 250 452 L 240 305 L 260 305 Z" fill="none" stroke="#ffffff" stroke-width="1.5"/>
+  <line x1="250" y1="425" x2="250" y2="315" stroke="rgba(255, 255, 255, 0.7)" stroke-width="1.2"/>
+
+  <!-- Center Hub Rings -->
+  <circle cx="250" cy="250" r="58" fill="none" stroke="#ffffff" stroke-width="1.8"/>
+  <circle cx="250" cy="250" r="44" fill="none" stroke="rgba(255, 255, 255, 0.35)" stroke-width="1"/>
+  <circle cx="250" cy="250" r="20" fill="none" stroke="#ffffff" stroke-width="1.5"/>
+</svg>

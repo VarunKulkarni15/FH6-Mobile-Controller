@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 340 120" width="100%" height="100%">
+  <!-- Forza Horizon 6 Pure Transparent Outline Handbrake Capsule (No Baked Background) -->
+  <!-- Sleek HUD Capsule Outline -->
+  <rect x="6" y="6" width="328" height="108" rx="20" fill="none" stroke="#ffffff" stroke-width="1.8"/>
+  <rect x="12" y="12" width="316" height="96" rx="16" fill="none" stroke="rgba(255, 255, 255, 0.25)" stroke-width="0.8"/>
+
+  <!-- Left & Right Accent Brackets -->
+  <path d="M 30 35 L 22 60 L 30 85" fill="none" stroke="rgba(255, 255, 255, 0.6)" stroke-width="2" stroke-linecap="round"/>
+  <path d="M 310 35 L 318 60 L 310 85" fill="none" stroke="rgba(255, 255, 255, 0.6)" stroke-width="2" stroke-linecap="round"/>
+
+  <!-- Center Text -->
+  <text x="170" y="58" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="16" font-weight="900" fill="#ffffff" letter-spacing="4">HANDBRAKE</text>
+  <text x="170" y="80" text-anchor="middle" font-family="'Consolas', 'Roboto Mono', monospace" font-size="11" font-weight="600" fill="rgba(255, 255, 255, 0.7)" letter-spacing="2">SPACE / (A)</text>
+</svg>

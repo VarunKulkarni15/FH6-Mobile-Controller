@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 190 360" width="100%" height="100%">
+  <!-- Forza Horizon 6 Pure Transparent Outline Brake Pedal (LT) -->
+  <!-- Outer Wide-Stance Motorsport Brake Contour (Thin White Outline, No Baked Background) -->
+  <path d="
+    M 36 14 
+    L 154 14 
+    Q 176 14 176 36 
+    L 176 324 
+    Q 176 346 154 346 
+    L 36 346 
+    Q 14 346 14 324 
+    L 14 36 
+    Q 14 14 36 14 Z"
+    fill="none" 
+    stroke="#ffffff" 
+    stroke-width="2.2"
+  />
+
+  <!-- Inset Secondary Precision Outline with Chamfer Accents -->
+  <path d="
+    M 38 22 
+    L 152 22 
+    Q 166 22 166 38 
+    L 166 322 
+    Q 166 338 152 338 
+    L 38 338 
+    Q 22 338 22 322 
+    L 22 36 
+    Q 22 22 38 22 Z"
+    fill="none" 
+    stroke="rgba(255, 255, 255, 0.35)" 
+    stroke-width="1.0"
+  />
+
+  <!-- Horizontal Dual-Block Grip Plates (Motorsport Non-Slip Tread Outlines) -->
+  <!-- Row 1 -->
+  <rect x="36" y="56" width="54" height="6.5" rx="3" fill="none" stroke="#ffffff" stroke-width="1.2"/>
+  <rect x="100" y="56" width="54" height="6.5" rx="3" fill="none" stroke="#ffffff" stroke-width="1.2"/>
+
+  <!-- Row 2 -->
+  <rect x="36" y="84" width="54" height="6.5" rx="3" fill="none" stroke="rgba(255, 255, 255, 0.55)" stroke-width="1.2"/>
+  <rect x="100" y="84" width="54" height="6.5" rx="3" fill="none" stroke="rgba(255, 255, 255, 0.55)" stroke-width="1.2"/>
+
+  <!-- Row 3 -->
+  <rect x="36" y="112" width="54" height="6.5" rx="3" fill="none" stroke="#ffffff" stroke-width="1.2"/>
+  <rect x="100" y="112" width="54" height="6.5" rx="3" fill="none" stroke="#ffffff" stroke-width="1.2"/>
+
+  <!-- Row 4 -->
+  <rect x="36" y="140" width="54" height="6.5" rx="3" fill="none" stroke="rgba(255, 255, 255, 0.55)" stroke-width="1.2"/>
+  <rect x="100" y="140" width="54" height="6.5" rx="3" fill="none" stroke="rgba(255, 255, 255, 0.55)" stroke-width="1.2"/>
+
+  <!-- Row 5 -->
+  <rect x="36" y="168" width="54" height="6.5" rx="3" fill="none" stroke="#ffffff" stroke-width="1.2"/>
+  <rect x="100" y="168" width="54" height="6.5" rx="3" fill="none" stroke="#ffffff" stroke-width="1.2"/>
+
+  <!-- Row 6 -->
+  <rect x="36" y="196" width="54" height="6.5" rx="3" fill="none" stroke="rgba(255, 255, 255, 0.55)" stroke-width="1.2"/>
+  <rect x="100" y="196" width="54" height="6.5" rx="3" fill="none" stroke="rgba(255, 255, 255, 0.55)" stroke-width="1.2"/>
+
+  <!-- Right Side Gradation Scale -->
+  <line x1="166" y1="68" x2="176" y2="68" stroke="rgba(255, 255, 255, 0.55)" stroke-width="1.2"/>
+  <line x1="162" y1="126" x2="176" y2="126" stroke="#ffffff" stroke-width="2"/>
+  <line x1="166" y1="184" x2="176" y2="184" stroke="rgba(255, 255, 255, 0.55)" stroke-width="1.2"/>
+
+  <!-- Clean Bold Typography -->
+  <text x="95" y="275" text-anchor="middle" font-family="'Consolas', 'Roboto Mono', monospace" font-size="10" font-weight="600" fill="rgba(255, 255, 255, 0.6)" letter-spacing="2">PRESSURE</text>
+  <text x="95" y="303" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="19" font-weight="900" fill="#ffffff" letter-spacing="4">BRAKE</text>
+  <text x="95" y="325" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="11" font-weight="700" fill="rgba(255, 255, 255, 0.85)" letter-spacing="1.5">LT / REVERSE</text>
+</svg>

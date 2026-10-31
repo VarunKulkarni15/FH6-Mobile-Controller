@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 400" width="100%" height="100%">
+  <!-- Forza Horizon 6 Pure Transparent Outline Throttle Pedal (RT) -->
+  <!-- Outer Beveled Racing Pedal Contour (Thin White Outline, No Baked Background) -->
+  <path d="
+    M 38 14 
+    L 122 14 
+    Q 148 14 148 38 
+    L 148 358 
+    Q 148 386 120 386 
+    L 40 386 
+    Q 12 386 12 358 
+    L 12 38 
+    Q 12 14 38 14 Z"
+    fill="none" 
+    stroke="#ffffff" 
+    stroke-width="1.8"
+  />
+
+  <!-- Inset Secondary Precision Hairline Outline -->
+  <path d="
+    M 40 22 
+    L 120 22 
+    Q 140 22 140 40 
+    L 140 352 
+    Q 140 378 116 378 
+    L 44 378 
+    Q 20 378 20 352 
+    L 20 40 
+    Q 20 22 40 22 Z"
+    fill="none" 
+    stroke="rgba(255, 255, 255, 0.35)" 
+    stroke-width="0.8"
+    stroke-dasharray="14 4"
+  />
+
+  <!-- Vertical CNC Motorsport Slits -->
+  <line x1="50" y1="80" x2="50" y2="240" stroke="rgba(255, 255, 255, 0.45)" stroke-width="2" stroke-linecap="round"/>
+  <line x1="80" y1="60" x2="80" y2="260" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round"/>
+  <line x1="110" y1="80" x2="110" y2="240" stroke="rgba(255, 255, 255, 0.45)" stroke-width="2" stroke-linecap="round"/>
+
+  <!-- Left Side Calibration Ticks -->
+  <line x1="12" y1="100" x2="22" y2="100" stroke="rgba(255, 255, 255, 0.5)" stroke-width="1.2"/>
+  <line x1="12" y1="180" x2="26" y2="180" stroke="#ffffff" stroke-width="1.8"/>
+  <line x1="12" y1="260" x2="22" y2="260" stroke="rgba(255, 255, 255, 0.5)" stroke-width="1.2"/>
+
+  <!-- Minimalist Typography Labels -->
+  <text x="80" y="318" text-anchor="middle" font-family="'Consolas', 'Roboto Mono', monospace" font-size="10" font-weight="600" fill="rgba(255, 255, 255, 0.6)" letter-spacing="2">THROTTLE</text>
+  <text x="80" y="346" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="18" font-weight="900" fill="#ffffff" letter-spacing="4">ACCEL</text>
+  <text x="80" y="368" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="11" font-weight="700" fill="rgba(255, 255, 255, 0.85)" letter-spacing="1.5">RT</text>
+</svg>
