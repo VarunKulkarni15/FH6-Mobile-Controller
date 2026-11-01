@@ -1,14 +1,14 @@
 {
   "android": {
-    "versionCode": 4,
-    "versionName": "1.4.0",
+    "versionCode": 5,
+    "versionName": "1.4.1",
     "apkUrl": "https://raw.githubusercontent.com/VarunKulkarni15/FH6-Mobile-Controller/master/dist-android/HorizonController.apk",
-    "changelog": "Pure Forza Horizon Cockpit: Dynamic Gyroscope Steering, 100% Touch-Only Instant Brake Pedal, clean uncluttered HUD, and background notification alerts."
+    "changelog": "Wi-Fi & Bluetooth fast auto-discovery, sub-millisecond UDP streaming, in-app QR code camera pairing, and zero-glitch pedals."
   },
   "windows": {
-    "versionCode": 4,
-    "versionName": "1.4.0",
+    "versionCode": 5,
+    "versionName": "1.4.1",
     "downloadUrl": "https://raw.githubusercontent.com/VarunKulkarni15/FH6-Mobile-Controller/master/dist-windows/fh6-controller-windows.exe",
-    "changelog": "Forza Horizon Sim-Racing Companion: Instant game launch detection, 120Hz FastStream telemetry, and ViGEmBus hardware controller emulation."
+    "changelog": "Forza Horizon Sim-Racing Companion: Multi-interface Wi-Fi & Bluetooth beacon broadcasting, zero .NET prerequisite self-contained binary."
   }
 }
