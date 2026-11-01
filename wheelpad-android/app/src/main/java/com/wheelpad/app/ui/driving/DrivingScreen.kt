@@ -1849,12 +1849,12 @@ fun FH6ExactSvgActionButton(
 
         // Scalable Proportional Typography
         val isSingleLetter = when (actionId) {
-            "btn_a", "btn_b", "btn_x", "rewind", "btn_y" -> true
+            "btn_a", "btn_b", "btn_x", "activate", "rewind", "btn_y" -> true
             else -> false
         }
-        val mainFontSize = (minDim.value * (if (isSingleLetter) 0.32f else 0.20f)).coerceIn(8f, 38f).sp
-        val subFontSize = (minDim.value * 0.11f).coerceIn(5.5f, 14f).sp
-        val letterSpacingVal = (minDim.value * 0.015f).coerceIn(0.5f, 2.5f).sp
+        val mainFontSize = (minDim.value * (if (isSingleLetter) 0.44f else 0.16f)).coerceIn(5f, 64f).sp
+        val subFontSize = (minDim.value * 0.085f).coerceIn(4f, 13f).sp
+        val letterSpacingVal = (minDim.value * 0.01f).coerceIn(0.2f, 1.5f).sp
 
         Canvas(modifier = Modifier.fillMaxSize()) {
             val cx = size.width / 2f
@@ -1931,7 +1931,7 @@ fun FH6ExactSvgActionButton(
                     drawLine(plusColor, Offset(cx, cy - r * 0.72f), Offset(cx, cy - r * 0.28f), strokeWidth = strokeWidth * 1.2f, cap = androidx.compose.ui.graphics.StrokeCap.Round)
                 }
 
-                "btn_x" -> {
+                "btn_x", "activate" -> {
                     val blue = Color(0xFF00B0FF)
                     if (isPressed) {
                         drawCircle(blue, radius = r, center = Offset(cx, cy))
@@ -2124,25 +2124,7 @@ fun FH6ExactSvgActionButton(
                     drawPath(t2, col)
                 }
 
-                "activate" -> {
-                    // Activate / Event Entry (Diamond with X)
-                    val blue = Color(0xFF00B0FF)
-                    if (isPressed) {
-                        drawRoundRect(blue, cornerRadius = CornerRadius(cornerRad, cornerRad))
-                    } else {
-                        drawRoundRect(Color(0xE006121A), cornerRadius = CornerRadius(cornerRad, cornerRad))
-                        drawRoundRect(blue, cornerRadius = CornerRadius(cornerRad, cornerRad), style = Stroke(width = strokeWidth))
-                    }
-                    val col = if (isPressed) Color.Black else blue
-                    val diamond = Path().apply {
-                        moveTo(cx, cy - r * 0.35f)
-                        lineTo(cx + r * 0.30f, cy - r * 0.05f)
-                        lineTo(cx, cy + r * 0.25f)
-                        lineTo(cx - r * 0.30f, cy - r * 0.05f)
-                        close()
-                    }
-                    drawPath(diamond, col, style = Stroke(width = strokeWidth * 1.1f))
-                }
+
 
                 "map", "btn_back", "btn_view" -> {
                     val white = Color.White
@@ -2263,66 +2245,94 @@ fun FH6ExactSvgActionButton(
             }
         }
 
-        // Scalable, Proportional Typography at the bottom/center
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(bottom = (minDim.value * 0.07f).coerceAtLeast(2f).dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Bottom
-        ) {
-            val textColor = if (isPressed) {
-                Color(0xFF080B10)
-            } else {
-                when (actionId) {
-                    "auto_drive", "rewind", "btn_y" -> Color(0xFFCCFF00)
-                    "btn_a", "handbrake" -> Color(0xFF00E676)
-                    "btn_b", "shift_up" -> Color(0xFFFF1744)
-                    "btn_x", "activate", "shift_down" -> Color(0xFF00B0FF)
-                    "btn_lb", "clutch" -> Color(0xFF00E5FF)
-                    "horn", "btn_rs" -> Color(0xFFFFD600)
-                    "look_back" -> Color(0xFFCCFF00)
-                    "convertible", "btn_ls" -> Color(0xFF00E5FF)
-                    "photo_mode" -> Color(0xFFE040FB)
-                    "radio_next" -> Color(0xFFFF4081)
-                    else -> Color.White
-                }
+        val textColor = if (isPressed) {
+            Color(0xFF080B10)
+        } else {
+            when (actionId) {
+                "auto_drive", "rewind", "btn_y" -> Color(0xFFCCFF00)
+                "btn_a", "handbrake" -> Color(0xFF00E676)
+                "btn_b", "shift_up" -> Color(0xFFFF1744)
+                "btn_x", "activate", "shift_down" -> Color(0xFF00B0FF)
+                "btn_lb", "clutch" -> Color(0xFF00E5FF)
+                "horn", "btn_rs" -> Color(0xFFFFD600)
+                "look_back" -> Color(0xFFCCFF00)
+                "convertible", "btn_ls" -> Color(0xFF00E5FF)
+                "photo_mode" -> Color(0xFFE040FB)
+                "radio_next" -> Color(0xFFFF4081)
+                else -> Color.White
             }
+        }
 
-            Text(
-                text = when (actionId) {
-                    "btn_a" -> "A"
-                    "btn_b" -> "B"
-                    "btn_x" -> "X"
-                    "rewind", "btn_y" -> "Y"
-                    "auto_drive" -> "AUTO"
-                    "btn_lb", "clutch" -> "CLUTCH"
-                    "horn", "btn_rs" -> "HORN"
-                    "look_back" -> "REAR"
-                    "convertible", "btn_ls" -> "ROOF"
-                    "activate" -> "ENTER"
-                    "photo_mode" -> "PHOTO"
-                    "radio_next" -> "RADIO"
-                    "shift_up" -> "UP"
-                    "shift_down" -> "DOWN"
-                    "camera", "btn_rb" -> "CAM"
-                    "map", "btn_back", "btn_view" -> "MAP"
-                    "pause", "btn_start", "btn_menu" -> "MENU"
-                    else -> label
-                },
-                color = textColor,
-                fontSize = mainFontSize,
-                fontWeight = FontWeight.Black,
-                letterSpacing = letterSpacingVal
-            )
-
-            if (subLabel.isNotEmpty()) {
+        if (isSingleLetter) {
+            // Authentic Xbox Face Button (A, B, X, Y) centered directly in circle
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(all = (minDim.value * 0.08f).dp),
+                contentAlignment = Alignment.Center
+            ) {
                 Text(
-                    text = subLabel,
-                    color = if (isPressed) Color(0x99000000) else Color(0xB3FFFFFF),
-                    fontSize = subFontSize,
-                    fontWeight = FontWeight.Bold
+                    text = when (actionId) {
+                        "btn_a" -> "A"
+                        "btn_b" -> "B"
+                        "btn_x", "activate" -> "X"
+                        "rewind", "btn_y" -> "Y"
+                        else -> label
+                    },
+                    color = textColor,
+                    fontSize = mainFontSize,
+                    fontWeight = FontWeight.Black,
+                    maxLines = 1,
+                    softWrap = false,
+                    textAlign = androidx.compose.ui.text.style.TextAlign.Center
                 )
+            }
+        } else {
+            // Adaptive Icon + Text Layout (fits snug inside SVG bounds at any scale)
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = (minDim.value * 0.04f).dp)
+                    .padding(bottom = (minDim.value * 0.05f).coerceAtLeast(1f).dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Bottom
+            ) {
+                Text(
+                    text = when (actionId) {
+                        "auto_drive" -> "AUTO"
+                        "btn_lb", "clutch" -> "CLUTCH"
+                        "horn", "btn_rs" -> "HORN"
+                        "look_back" -> "REAR"
+                        "convertible", "btn_ls" -> "ROOF"
+                        "photo_mode" -> "PHOTO"
+                        "radio_next" -> "RADIO"
+                        "shift_up" -> "UP"
+                        "shift_down" -> "DOWN"
+                        "camera", "btn_rb" -> "CAM"
+                        "map", "btn_back", "btn_view" -> "MAP"
+                        "pause", "btn_start", "btn_menu" -> "MENU"
+                        else -> label
+                    },
+                    color = textColor,
+                    fontSize = mainFontSize,
+                    fontWeight = FontWeight.Black,
+                    letterSpacing = letterSpacingVal,
+                    maxLines = 1,
+                    softWrap = false,
+                    textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                )
+
+                if (subLabel.isNotEmpty() && minDim.value >= 36f) {
+                    Text(
+                        text = subLabel,
+                        color = if (isPressed) Color(0x99000000) else Color(0xB3FFFFFF),
+                        fontSize = subFontSize,
+                        fontWeight = FontWeight.Bold,
+                        maxLines = 1,
+                        softWrap = false,
+                        textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                    )
+                }
             }
         }
     }

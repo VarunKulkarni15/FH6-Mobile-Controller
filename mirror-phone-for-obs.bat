@@ -21,6 +21,6 @@ if not exist "%SCRCPY_EXE%" (
     )
 )
 
-"%SCRCPY_EXE%" --window-title "Horizon Controller" --stay-awake --max-fps 60 --video-bit-rate 8M --no-audio
+"%SCRCPY_EXE%" --window-title "Horizon Controller" --stay-awake --max-fps 120 --video-bit-rate 16M --no-audio
 
 
