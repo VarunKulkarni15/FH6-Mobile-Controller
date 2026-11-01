@@ -246,15 +246,15 @@ class MainActivity : ComponentActivity() {
 }
 
 fun getAutoDetectedHost(context: Context? = null): String? {
-    // 1. Try default gateway from ConnectivityManager (100% reliable for USB tethering & Wi-Fi routers)
+    // 1. Try default gateway ONLY if on USB tethering or Ethernet (where the PC IS the gateway!)
     if (context != null) {
         val report = NetworkDiagnosticsHelper.runDiagnostics(context)
-        if (!report.gatewayIp.isNullOrBlank()) {
+        if (report.isEthernetOrUsbConnected && !report.gatewayIp.isNullOrBlank()) {
             return report.gatewayIp
         }
     }
 
-    // 2. Try /proc/net/arp (fallback on devices with readable /proc)
+    // 2. Try /proc/net/arp specifically for USB or RNDIS tethering
     try {
         val file = java.io.File("/proc/net/arp")
         if (file.exists()) {
@@ -265,7 +265,7 @@ fun getAutoDetectedHost(context: Context? = null): String? {
                         val ip = tokens[0]
                         val flags = tokens[2]
                         val device = tokens[5]
-                        if (flags == "0x2" && (device.contains("rndis") || device.contains("usb") || device.contains("wlan") || device.contains("eth"))) {
+                        if (flags == "0x2" && (device.contains("rndis") || device.contains("usb"))) {
                             return ip
                         }
                     }

@@ -1,3 +1,6 @@
+using System.Collections.Generic;
+using System.Linq;
+using System.Net.NetworkInformation;
 using System;
 using System.Drawing;
 using System.Net;
@@ -472,23 +475,53 @@ namespace WheelPad.App
         {
             try
             {
-                using var socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, 0);
-                socket.Connect("8.8.8.8", 65530);
-                if (socket.LocalEndPoint is IPEndPoint endPoint)
+                var interfaces = NetworkInterface.GetAllNetworkInterfaces()
+                    .Where(nic => nic.OperationalStatus == OperationalStatus.Up &&
+                                  nic.NetworkInterfaceType != NetworkInterfaceType.Loopback)
+                    .Where(nic =>
+                    {
+                        string desc = nic.Description.ToLower();
+                        string name = nic.Name.ToLower();
+                        return !desc.Contains("virtualbox") &&
+                               !desc.Contains("vmware") &&
+                               !desc.Contains("hyper-v") &&
+                               !desc.Contains("vethernet") &&
+                               !desc.Contains("wsl") &&
+                               !name.Contains("virtualbox") &&
+                               !name.Contains("vethernet") &&
+                               !name.Contains("wsl");
+                    })
+                    .OrderByDescending(nic => nic.GetIPProperties().GatewayAddresses.Count > 0 ? 1 : 0)
+                    .ThenByDescending(nic => nic.NetworkInterfaceType == NetworkInterfaceType.Wireless80211 ? 2 : (nic.NetworkInterfaceType == NetworkInterfaceType.Ethernet ? 1 : 0));
+
+                foreach (var nic in interfaces)
                 {
-                    return endPoint.Address.ToString();
+                    var ipProps = nic.GetIPProperties();
+                    foreach (var addr in ipProps.UnicastAddresses)
+                    {
+                        if (addr.Address.AddressFamily == AddressFamily.InterNetwork)
+                        {
+                            string ipStr = addr.Address.ToString();
+                            if (!ipStr.StartsWith("127.") && !ipStr.StartsWith("169.254.") && !ipStr.StartsWith("192.168.56."))
+                            {
+                                return ipStr;
+                            }
+                        }
+                    }
                 }
             }
             catch { }
 
             try
             {
-                var host = Dns.GetHostEntry(Dns.GetHostName());
-                foreach (var ip in host.AddressList)
+                using var socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, 0);
+                socket.Connect("8.8.8.8", 65530);
+                if (socket.LocalEndPoint is IPEndPoint endPoint)
                 {
-                    if (ip.AddressFamily == AddressFamily.InterNetwork && !IPAddress.IsLoopback(ip))
+                    string fallbackIp = endPoint.Address.ToString();
+                    if (!fallbackIp.StartsWith("192.168.56."))
                     {
-                        return ip.ToString();
+                        return fallbackIp;
                     }
                 }
             }
