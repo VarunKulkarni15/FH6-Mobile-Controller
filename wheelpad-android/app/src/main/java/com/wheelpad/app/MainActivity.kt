@@ -35,6 +35,8 @@ import com.wheelpad.app.network.UdpFastStreamClient
 import com.wheelpad.app.sensor.GyroSteeringManager
 import com.wheelpad.app.ui.controls.ControlEditorViewModel
 import com.wheelpad.app.ui.driving.DrivingScreen
+import com.wheelpad.app.ui.theme.ChakraPetch
+import com.wheelpad.app.ui.theme.HorizonTypography
 import com.wheelpad.app.util.NetworkDiagnosticsHelper
 import com.wheelpad.app.util.NotificationHelper
 import kotlinx.coroutines.launch
@@ -134,52 +136,60 @@ class MainActivity : ComponentActivity() {
         }
 
         setContent {
-            var showConnectDialog by remember { mutableStateOf(false) }
-            var showDiagnosticsDialog by remember { mutableStateOf(false) }
-
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(Color(0xFF080B10))
+            MaterialTheme(
+                typography = HorizonTypography
             ) {
-                // Pure Immersive Driving Screen HUD (Zero bottom navigation bar)
-                DrivingScreen(
-                    viewModel = controlEditorViewModel,
-                    udpClient = udpClient,
-                    syncClient = syncClient,
-                    onOpenConnectDialog = { showConnectDialog = true },
-                    onOpenDiagnosticsDialog = { showDiagnosticsDialog = true }
-                )
+                CompositionLocalProvider(
+                    LocalTextStyle provides androidx.compose.ui.text.TextStyle(fontFamily = ChakraPetch)
+                ) {
+                    var showConnectDialog by remember { mutableStateOf(false) }
+                    var showDiagnosticsDialog by remember { mutableStateOf(false) }
 
-                // Quick Connect / Pairing Modal
-                if (showConnectDialog) {
-                    PairingDialog(
-                        currentHost = prefs.getString("last_host_ip", "192.168.1.100") ?: "192.168.1.100",
-                        syncClient = syncClient,
-                        udpClient = udpClient,
-                        onDismiss = { showConnectDialog = false },
-                        onOpenDiagnostics = { showDiagnosticsDialog = true },
-                        onSaveHost = { newHost ->
-                            prefs.edit().putString("last_host_ip", newHost).apply()
-                            syncClient.connect(newHost)
-                            udpClient.initialize(newHost)
-                            showConnectDialog = false
-                        }
-                    )
-                }
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(Color(0xFF080B10))
+                    ) {
+                        // Pure Immersive Driving Screen HUD (Zero bottom navigation bar)
+                        DrivingScreen(
+                            viewModel = controlEditorViewModel,
+                            udpClient = udpClient,
+                            syncClient = syncClient,
+                            onOpenConnectDialog = { showConnectDialog = true },
+                            onOpenDiagnosticsDialog = { showDiagnosticsDialog = true }
+                        )
 
-                // App Requirements & Network Health Diagnostics Modal
-                if (showDiagnosticsDialog) {
-                    RequirementsDiagnosticsDialog(
-                        onDismiss = { showDiagnosticsDialog = false },
-                        onConnectToIp = { ip ->
-                            prefs.edit().putString("last_host_ip", ip).apply()
-                            syncClient.connect(ip)
-                            udpClient.initialize(ip)
-                            showDiagnosticsDialog = false
-                            showConnectDialog = false
+                        // Quick Connect / Pairing Modal
+                        if (showConnectDialog) {
+                            PairingDialog(
+                                currentHost = prefs.getString("last_host_ip", "192.168.1.100") ?: "192.168.1.100",
+                                syncClient = syncClient,
+                                udpClient = udpClient,
+                                onDismiss = { showConnectDialog = false },
+                                onOpenDiagnostics = { showDiagnosticsDialog = true },
+                                onSaveHost = { newHost ->
+                                    prefs.edit().putString("last_host_ip", newHost).apply()
+                                    syncClient.connect(newHost)
+                                    udpClient.initialize(newHost)
+                                    showConnectDialog = false
+                                }
+                            )
                         }
-                    )
+
+                        // App Requirements & Network Health Diagnostics Modal
+                        if (showDiagnosticsDialog) {
+                            RequirementsDiagnosticsDialog(
+                                onDismiss = { showDiagnosticsDialog = false },
+                                onConnectToIp = { ip ->
+                                    prefs.edit().putString("last_host_ip", ip).apply()
+                                    syncClient.connect(ip)
+                                    udpClient.initialize(ip)
+                                    showDiagnosticsDialog = false
+                                    showConnectDialog = false
+                                }
+                            )
+                        }
+                    }
                 }
             }
         }

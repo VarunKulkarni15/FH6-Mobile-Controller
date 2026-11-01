@@ -28,18 +28,35 @@ namespace WheelPad.Core.Services
     {
         public static readonly string[] DefaultTargetProcesses = new[]
         {
-            "ForzaHorizon5",
-            "forzahorizon5",
-            "ForzaHorizon4",
-            "forzahorizon4",
-            "ForzaHorizon3",
-            "forzahorizon3",
-            "ForzaMotorsport",
-            "forzamotorsport",
-            "ForzaHorizon6",
             "forzahorizon6",
+            "ForzaHorizon6",
+            "fh6",
+            "FH6",
+            "forzahorizon5",
+            "ForzaHorizon5",
+            "fh5",
+            "FH5",
+            "forzahorizon4",
+            "ForzaHorizon4",
+            "fh4",
+            "FH4",
+            "forzahorizon3",
+            "ForzaHorizon3",
+            "forzamotorsport",
+            "ForzaMotorsport",
+            "forza",
             "Forza",
-            "forza"
+            "tlou-i",
+            "tlou-i-l",
+            "tlou",
+            "tlou2",
+            "TheLastOfUs",
+            "TheLastOfUsPartI",
+            "TheLastOfUsPartII",
+            "Minecraft.Windows",
+            "Minecraft",
+            "minecraft",
+            "javaw"
         };
 
         private readonly string[] _targetProcessNames;
@@ -58,13 +75,18 @@ namespace WheelPad.Core.Services
 
         public static string GetFriendlyGameName(string processName)
         {
+            if (string.IsNullOrWhiteSpace(processName)) return "Unknown Game";
             string lower = processName.ToLowerInvariant();
-            if (lower.Contains("forzahorizon6") || lower.Contains("fh6")) return "Forza Horizon 6";
-            if (lower.Contains("forzahorizon5") || lower.Contains("fh5")) return "Forza Horizon 5";
-            if (lower.Contains("forzahorizon4") || lower.Contains("fh4")) return "Forza Horizon 4";
-            if (lower.Contains("forzahorizon3") || lower.Contains("fh3")) return "Forza Horizon 3";
-            if (lower.Contains("forzamotorsport")) return "Forza Motorsport";
-            return "Forza Horizon Series";
+            if (lower.Contains("6") && (lower.Contains("horizon") || lower.Contains("fh"))) return "Forza Horizon 6";
+            if (lower.Contains("5") && (lower.Contains("horizon") || lower.Contains("fh"))) return "Forza Horizon 5";
+            if (lower.Contains("4") && (lower.Contains("horizon") || lower.Contains("fh"))) return "Forza Horizon 4";
+            if (lower.Contains("3") && (lower.Contains("horizon") || lower.Contains("fh"))) return "Forza Horizon 3";
+            if (lower.Contains("motorsport")) return "Forza Motorsport";
+            if (lower.Contains("tlou") || lower.Contains("lastofus")) return "The Last of Us Part II";
+            if (lower.Contains("minecraft.windows") || lower.Contains("minecraft")) return "Minecraft Bedrock";
+            if (lower.Contains("javaw")) return "Minecraft Java";
+            if (lower.Contains("forza")) return "Forza Horizon";
+            return processName;
         }
 
         public event EventHandler<GameStatusEventArgs>? GameStatusChanged;
@@ -81,8 +103,13 @@ namespace WheelPad.Core.Services
             _targetProcessNames = targetProcessNames ?? DefaultTargetProcesses;
             _autoActivateProfileId = autoActivateProfileId;
 
-            // Poll process table every 2 seconds (0.001% CPU)
-            _pollTimer = new Timer(PollCallback, null, 1000, 2000);
+            // Poll process table immediately and then every 2 seconds
+            _pollTimer = new Timer(PollCallback, null, 100, 2000);
+        }
+
+        public void CheckImmediately()
+        {
+            PollCallback(null);
         }
 
         private void PollCallback(object? state)
@@ -93,49 +120,55 @@ namespace WheelPad.Core.Services
 
                 foreach (var name in _targetProcessNames)
                 {
-                    var matches = Process.GetProcessesByName(name);
-                    if (matches.Length > 0)
+                    try
                     {
-                        activeProcess = matches.First();
-                        break;
+                        var matches = Process.GetProcessesByName(name);
+                        if (matches.Length > 0)
+                        {
+                            activeProcess = matches.First();
+                            break;
+                        }
                     }
+                    catch { }
                 }
 
-                if (activeProcess != null && !_isGameRunning)
+                if (activeProcess != null)
                 {
-                    // Game just launched!
-                    _isGameRunning = true;
-                    _lastProcessId = activeProcess.Id;
-                    string friendlyName = GetFriendlyGameName(activeProcess.ProcessName);
-                    CurrentGameName = friendlyName;
-
-                    string? path = null;
-                    try { path = activeProcess.MainModule?.FileName; } catch { }
-
-                    LogMessage?.Invoke(this, $"[GameDetector] Detected {friendlyName} started (PID {_lastProcessId})");
-
-                    if (AutoProfileSwitchEnabled && !string.IsNullOrEmpty(_autoActivateProfileId))
+                    if (!_isGameRunning || _lastProcessId != activeProcess.Id)
                     {
-                        _profileManager.SetActiveProfile(_autoActivateProfileId);
+                        _isGameRunning = true;
+                        _lastProcessId = activeProcess.Id;
+                        string friendlyName = GetFriendlyGameName(activeProcess.ProcessName);
+                        CurrentGameName = friendlyName;
+
+                        string? path = null;
+                        try { path = activeProcess.MainModule?.FileName; } catch { }
+
+                        LogMessage?.Invoke(this, $"[GameDetector] Detected {friendlyName} running (PID {_lastProcessId})");
+
+                        if (AutoProfileSwitchEnabled && !string.IsNullOrEmpty(_autoActivateProfileId))
+                        {
+                            _profileManager.SetActiveProfile(_autoActivateProfileId);
+                        }
+
+                        var args = new GameStatusEventArgs(true, _lastProcessId, activeProcess.ProcessName, path);
+                        GameStatusChanged?.Invoke(this, args);
+
+                        // Notify Android companion via TCP sync
+                        _syncServer?.BroadcastEvent(new
+                        {
+                            type = "GAME_STATUS_CHANGED",
+                            isRunning = true,
+                            gameName = friendlyName,
+                            processId = _lastProcessId
+                        });
                     }
-
-                    var args = new GameStatusEventArgs(true, _lastProcessId, friendlyName, path);
-                    GameStatusChanged?.Invoke(this, args);
-
-                    // Notify Android companion via TCP sync
-                    _syncServer?.BroadcastEvent(new
-                    {
-                        type = "GAME_STATUS_CHANGED",
-                        isRunning = true,
-                        gameName = friendlyName,
-                        processId = _lastProcessId
-                    });
                 }
-                else if (activeProcess == null && _isGameRunning)
+                else if (_isGameRunning)
                 {
                     // Game just exited
                     _isGameRunning = false;
-                    string closedGame = CurrentGameName ?? "Forza Horizon";
+                    string closedGame = CurrentGameName ?? "Game";
                     CurrentGameName = null;
                     LogMessage?.Invoke(this, $"[GameDetector] {closedGame} closed (PID {_lastProcessId})");
 
@@ -155,13 +188,8 @@ namespace WheelPad.Core.Services
             }
             catch (Exception ex)
             {
-                LogMessage?.Invoke(this, $"[GameDetector] Error polling processes: {ex.Message}");
+                LogMessage?.Invoke(this, $"[GameDetector] Error in poll loop: {ex.Message}");
             }
-        }
-
-        public void SetAutoActivateProfile(string profileId)
-        {
-            _autoActivateProfileId = profileId;
         }
 
         public void Dispose()
@@ -170,4 +198,3 @@ namespace WheelPad.Core.Services
         }
     }
 }
-

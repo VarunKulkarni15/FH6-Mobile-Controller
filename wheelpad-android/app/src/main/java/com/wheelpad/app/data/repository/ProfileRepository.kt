@@ -57,12 +57,13 @@ class ProfileRepository(private val context: Context) {
             }
         }
 
-        // Ensure default TLOU2 profile is always populated
-        if (list.none { it.profileId == "profile_tlou2" }) {
-            val tlou = createTlouProfile()
-            saveProfile(tlou)
-            list.add(tlou)
-        }
+        // Purge any non-Forza profiles so the experience is 100% focused on Forza Horizon
+        try {
+            val tlouFile = File(profilesDir, "profile_tlou2.json")
+            if (tlouFile.exists()) tlouFile.delete()
+        } catch (_: Exception) {}
+
+        list.removeAll { it.profileId == "profile_tlou2" }
 
         return if (list.isNotEmpty()) list else createDefaultProfiles()
     }
@@ -235,8 +236,7 @@ class ProfileRepository(private val context: Context) {
             layout.add(TouchControlElement(elementId = "rewind", actionId = "rewind", label = "REWIND", shape = ControlShape.RoundedButton, normalizedX = 0.51f, normalizedY = 0.14f, normalizedWidth = 0.12f, normalizedHeight = 0.16f, accentColorHex = "#FFB300"))
         }
 
-        val tlou = createTlouProfile()
-        return listOf(standard, tlou)
+        return listOf(standard)
     }
 
     fun createTlouProfile(): ControllerProfile {

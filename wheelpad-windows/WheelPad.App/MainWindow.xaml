@@ -83,12 +83,13 @@
         <Grid Margin="24">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
             <!-- 1. Top Header: Clean Technical Motorsport Banner -->
-            <Grid Grid.Row="0" Margin="0,0,0,18">
+            <Grid Grid.Row="0" Margin="0,0,0,14">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
@@ -116,8 +117,30 @@
                 </Border>
             </Grid>
 
+            <!-- 1.5. Dynamic In-App Auto-Update Notification Banner -->
+            <Border Grid.Row="1" x:Name="BannerUpdate" Background="#162208" BorderBrush="#CCFF00" BorderThickness="1.5" CornerRadius="6" Padding="14,10" Margin="0,0,0,14" Visibility="Collapsed">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <TextBlock Text="⚡ UPDATE AVAILABLE:" FontWeight="Black" FontSize="11" Foreground="#CCFF00" Margin="0,0,8,0"/>
+                            <TextBlock x:Name="TxtUpdateTitle" Text="v1.2.0 is now live" FontWeight="Bold" FontSize="11" Foreground="#FFFFFF"/>
+                        </StackPanel>
+                        <TextBlock x:Name="TxtUpdateChangelog" Text="Changelog: Dual Analog Stick ViGEmBus axes and 120Hz FastStream extended pipeline." FontSize="10" Foreground="#A0B0C0" Margin="0,2,0,0"/>
+                        <ProgressBar x:Name="ProgUpdate" Height="4" Background="#080C12" Foreground="#CCFF00" BorderThickness="0" Margin="0,6,0,0" Visibility="Collapsed"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="12,0,0,0">
+                        <Button x:Name="BtnApplyUpdate" Style="{StaticResource VoltButton}" Content="UPDATE NOW" Padding="12,6" Click="BtnApplyUpdate_Click"/>
+                        <Button x:Name="BtnDismissUpdate" Background="Transparent" Foreground="#7E94AD" BorderThickness="0" Content="✕" Margin="8,0,0,0" FontSize="12" Cursor="Hand" Click="BtnDismissUpdate_Click"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
             <!-- 2. Main Dashboard Content Grid -->
-            <Grid Grid.Row="1">
+            <Grid Grid.Row="2">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="1.1*"/>
                     <ColumnDefinition Width="1.4*"/>
@@ -303,10 +326,13 @@
             </Grid>
 
             <!-- 3. Bottom Status Bar -->
-            <Border Grid.Row="2" Background="#0D131C" BorderBrush="#1C2738" BorderThickness="1.5" CornerRadius="6" Padding="14,10" Margin="0,14,0,0">
+            <Border Grid.Row="3" Background="#0D131C" BorderBrush="#1C2738" BorderThickness="1.5" CornerRadius="6" Padding="14,10" Margin="0,14,0,0">
                 <Grid>
                     <TextBlock x:Name="TxtFooter" Text="Forza Horizon Companion running · ViGEmBus controller slot 1 mapped · UDP FastStream active." FontSize="11" Foreground="#7E94AD" VerticalAlignment="Center"/>
-                    <Button HorizontalAlignment="Right" Style="{StaticResource VoltButton}" Content="MINIMIZE TO TRAY" Click="BtnMinimizeTray_Click"/>
+                    <StackPanel HorizontalAlignment="Right" Orientation="Horizontal">
+                        <Button Style="{StaticResource VoltButton}" Content="CHECK FOR UPDATES" Margin="0,0,8,0" Click="BtnCheckUpdates_Click"/>
+                        <Button Style="{StaticResource VoltButton}" Content="MINIMIZE TO TRAY" Click="BtnMinimizeTray_Click"/>
+                    </StackPanel>
                 </Grid>
             </Border>
         </Grid>

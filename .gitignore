@@ -4,12 +4,21 @@
 **/build/
 .gradle/
 .idea/
+.kotlin/
 *.user
 *.suo
 *.userosscache
 *.sln.docstates
 
-# System & OS
+# Android local configuration
+local.properties
+**/local.properties
+.cxx/
+captures/
+
+# Python & Scratch
+__pycache__/
+*.pyc
 Thumbs.db
 ehthumbs.db
 Desktop.ini
@@ -17,6 +26,7 @@ $RECYCLE.BIN/
 .DS_Store
 
 # Keep dist output executables and APKs
+dist-windows/*
 !dist-windows/fh6-controller-windows.exe
 !dist-android/fh6-controller-android.apk
 !releases/*

@@ -47,6 +47,7 @@ import com.wheelpad.app.data.repository.ProfileRepository
 import com.wheelpad.app.network.ControlSyncClient
 import com.wheelpad.app.network.UdpFastStreamClient
 import com.wheelpad.app.ui.controls.ControlEditorViewModel
+import com.wheelpad.app.ui.theme.ChakraPetch
 import kotlin.math.atan2
 
 /**
@@ -87,6 +88,14 @@ fun DrivingScreen(
     val gyroAngle by gyroManager.steeringAngle.collectAsState()
     var gyroSensitivity by remember { mutableStateOf(gyroManager.sensitivity) }
 
+    // OTA Auto-Update Manager
+    val updateManager = remember { com.wheelpad.app.updater.AutoUpdateManager(context) }
+    val updateState by updateManager.updateState.collectAsState()
+
+    LaunchedEffect(Unit) {
+        updateManager.checkForUpdates(silent = true)
+    }
+
     // Gyroscope lifecycle
     DisposableEffect(isGyroEnabled) {
         if (isGyroEnabled) {
@@ -103,19 +112,24 @@ fun DrivingScreen(
         }
     }
 
-    // Continuously stream inputs to UdpFastStream
-    LaunchedEffect(steeringAngle, throttlePressure, brakePressure, handbrakeState, buttonsBitmask, leftStickX, leftStickY, rightStickX, rightStickY) {
-        val isTlou = state.currentProfile.profileId == "profile_tlou2"
-        val effectiveSteer = if (isTlou) leftStickX else steeringAngle
+    // Tactile Redline Rumble when throttling at peak RPM
+    LaunchedEffect(throttlePressure >= 0.96f) {
+        if (throttlePressure >= 0.96f) {
+            view.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
+        }
+    }
+
+    // Continuously stream inputs to UdpFastStream (120Hz FastStream)
+    LaunchedEffect(steeringAngle, throttlePressure, brakePressure, handbrakeState, buttonsBitmask) {
         udpClient.updateInputs(
-            steering = effectiveSteer,
+            steering = steeringAngle,
             throttle = throttlePressure,
             brake = brakePressure,
             handbrake = handbrakeState,
             buttonsBitmask = buttonsBitmask,
-            leftThumbY = leftStickY,
-            rightThumbX = rightStickX,
-            rightThumbY = rightStickY
+            leftThumbY = 0f,
+            rightThumbX = 0f,
+            rightThumbY = 0f
         )
     }
 
@@ -125,86 +139,71 @@ fun DrivingScreen(
             .fillMaxSize()
             .background(Color(0xFF080B10))
     ) {
+        CompositionLocalProvider(
+            LocalTextStyle provides androidx.compose.ui.text.TextStyle(fontFamily = ChakraPetch)
+        ) {
         val screenWidth = maxWidth
         val screenHeight = maxHeight
         val density = androidx.compose.ui.platform.LocalDensity.current
         val screenWidthPx = with(density) { screenWidth.toPx() }
         val screenHeightPx = with(density) { screenHeight.toPx() }
 
-        // High-Precision Floating-Anchor Dynamic Steering (Ultra-responsive ~52dp thumb travel, zero opposite-side drift)
-        var pubgTouchActive by remember { mutableStateOf(false) }
-        var pubgTouchCurrent by remember { mutableStateOf(Offset.Zero) }
-        var pubgAnchorX by remember { mutableStateOf(0f) }
-        val maxTravelPx = with(density) { 52.dp.toPx() }
-
-        // 0. Full Left 52% Steering Touch Zone (Floating Anchor, Sporty Middle Lock, Zero Accidental Inversion)
-        if (!state.isEditMode && !isGyroEnabled) {
-            Box(
-                modifier = Modifier
-                    .fillMaxHeight()
-                    .fillMaxWidth(0.52f)
-                    .pointerInput(Unit) {
-                        awaitPointerEventScope {
-                            while (true) {
-                                val event = awaitPointerEvent()
-                                val pressedChanges = event.changes.filter { it.pressed }
-                                if (pressedChanges.isNotEmpty()) {
-                                    val primary = pressedChanges.first()
-                                    primary.consume()
-                                    val touchX = primary.position.x
-                                    pubgTouchCurrent = primary.position
-
-                                    if (!pubgTouchActive) {
-                                        pubgTouchActive = true
-                                        pubgAnchorX = touchX
-                                        steeringAngle = 0f
-                                    } else {
-                                        var dx = touchX - pubgAnchorX
-                                        // Floating Anchor: If dragged beyond full lock, dynamically drag the anchor with the thumb.
-                                        // When moving the thumb back towards center, it smoothly decreases steering and NEVER flips to the opposite side!
-                                        if (dx > maxTravelPx) {
-                                            pubgAnchorX = touchX - maxTravelPx
-                                            dx = maxTravelPx
-                                        } else if (dx < -maxTravelPx) {
-                                            pubgAnchorX = touchX + maxTravelPx
-                                            dx = -maxTravelPx
-                                        }
-                                        val normSteer = (dx / maxTravelPx).coerceIn(-1.0f, 1.0f)
-                                        // Progressive 4% deadzone for straight-line stability
-                                        val deadzone = 0.04f
-                                        val absVal = kotlin.math.abs(normSteer)
-                                        val signVal = kotlin.math.sign(normSteer)
-                                        steeringAngle = if (absVal <= deadzone) 0f else signVal * ((absVal - deadzone) / (1f - deadzone))
-                                    }
-                                } else {
-                                    if (pubgTouchActive) {
-                                        pubgTouchActive = false
-                                        steeringAngle = 0f
-                                    }
-                                }
-                            }
-                        }
-                    }
-            )
-
-            // Dynamic PUBG-Style Thumb Target Ring Feedback
-            if (pubgTouchActive) {
-                Canvas(
-                    modifier = Modifier.fillMaxSize()
+        // 0.5 GT3 / F1 Dynamic RPM Shift Light Bar (Positioned above pedals on top-right)
+        val rpmPercent = throttlePressure
+        val rpmVal = (rpmPercent * 8500).toInt()
+        val isRedline = rpmPercent >= 0.96f
+        Box(
+            modifier = Modifier
+                .offset(x = screenWidth * 0.58f, y = screenHeight * 0.025f)
+                .width(screenWidth * 0.32f)
+                .clip(RoundedCornerShape(6.dp))
+                .background(Color(0xFF0A0E15))
+                .border(1.2.dp, if (isRedline) Color(0xFFFF0055) else Color(0xFF1C2738), RoundedCornerShape(6.dp))
+                .padding(horizontal = 10.dp, vertical = 6.dp)
+        ) {
+            Column {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    // Outer Volt Lime glow ring
-                    drawCircle(
-                        color = Color(0x33CCFF00),
-                        radius = with(density) { 42.dp.toPx() },
-                        center = pubgTouchCurrent,
-                        style = Stroke(width = with(density) { 2.dp.toPx() })
+                    Text(
+                        text = if (isRedline) "⚡ REDLINE SHIFT" else "FORZA TACHOMETER",
+                        color = if (isRedline) Color(0xFFFF0055) else Color(0xFF7E94AD),
+                        fontSize = 9.sp,
+                        fontWeight = FontWeight.Black
                     )
-                    // Inner solid Volt Lime thumb core
-                    drawCircle(
-                        color = Color(0xFFCCFF00),
-                        radius = with(density) { 14.dp.toPx() },
-                        center = pubgTouchCurrent
+                    Text(
+                        text = "${rpmVal} RPM",
+                        color = if (isRedline) Color(0xFFFF0055) else Color(0xFFCCFF00),
+                        fontSize = 9.sp,
+                        fontWeight = FontWeight.Bold
                     )
+                }
+
+                Spacer(modifier = Modifier.height(4.dp))
+
+                // 8-Segment Shift Light Bar
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    val thresholds = listOf(0.15f, 0.30f, 0.45f, 0.60f, 0.75f, 0.85f, 0.92f, 0.98f)
+                    thresholds.forEachIndexed { idx, th ->
+                        val isActive = rpmPercent >= th
+                        val ledColor = when {
+                            idx < 4 -> Color(0xFFCCFF00) // Volt lime
+                            idx < 6 -> Color(0xFFFFAA00) // Amber gold
+                            else -> Color(0xFFFF0055)     // Race red
+                        }
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(6.dp)
+                                .clip(RoundedCornerShape(2.dp))
+                                .background(if (isActive) ledColor else Color(0xFF141C28))
+                        )
+                    }
                 }
             }
         }
@@ -516,6 +515,65 @@ fun DrivingScreen(
             }
         }
 
+        // 3b. OTA Auto-Update Floating Banner
+        when (val uState = updateState) {
+            is com.wheelpad.app.updater.UpdateState.Available -> {
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.TopCenter)
+                        .padding(top = 14.dp)
+                        .clip(RoundedCornerShape(20.dp))
+                        .background(Color(0xF50A1018))
+                        .border(1.5.dp, Color(0xFFCCFF00), RoundedCornerShape(20.dp))
+                        .clickable { updateManager.downloadAndInstall(uState.info) }
+                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                ) {
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(10.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text("⚡ UPDATE AVAILABLE (${uState.info.versionName})", color = Color(0xFFCCFF00), fontSize = 11.sp, fontWeight = FontWeight.Black)
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(Color(0xFFCCFF00))
+                                .padding(horizontal = 8.dp, vertical = 3.dp)
+                        ) {
+                            Text("UPDATE NOW", color = Color.Black, fontSize = 9.sp, fontWeight = FontWeight.Black)
+                        }
+                        Text("✕", color = Color(0x80FFFFFF), fontSize = 12.sp, modifier = Modifier.clickable { updateManager.dismiss() })
+                    }
+                }
+            }
+            is com.wheelpad.app.updater.UpdateState.Downloading -> {
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.TopCenter)
+                        .padding(top = 14.dp)
+                        .clip(RoundedCornerShape(20.dp))
+                        .background(Color(0xF50A1018))
+                        .border(1.5.dp, Color(0xFF00E5FF), RoundedCornerShape(20.dp))
+                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                ) {
+                    Text("DOWNLOADING UPDATE: ${uState.progressPercent}%", color = Color(0xFF00E5FF), fontSize = 11.sp, fontWeight = FontWeight.Black)
+                }
+            }
+            is com.wheelpad.app.updater.UpdateState.Error -> {
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.TopCenter)
+                        .padding(top = 14.dp)
+                        .clip(RoundedCornerShape(20.dp))
+                        .background(Color(0xF50A1018))
+                        .border(1.dp, Color(0x80FFFFFF), RoundedCornerShape(20.dp))
+                        .padding(horizontal = 14.dp, vertical = 6.dp)
+                ) {
+                    Text(uState.message, color = Color.White, fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                }
+            }
+            else -> {}
+        }
+
         // 4. Authentic Forza Horizon Action Catalog Modal Dialog
         if (state.isActionCatalogVisible) {
             val allActions = ProfileRepository.ALL_FORZA_ACTIONS
@@ -780,8 +838,9 @@ fun DrivingScreen(
                             Text("HEALTH >", color = Color.Black, fontSize = 10.sp, fontWeight = FontWeight.Black)
                         }
 
-                        // Option 1c: Controller Profiles (Forza Horizon vs The Last of Us Part II)
-                        val isTlouProfile = state.currentProfile.profileId == "profile_tlou2"
+                        // Option 1c: Forza Steering Angle Preset (Drift 540°, Circuit 360°, Arcade 270°)
+                        var steeringPresetIndex by remember { mutableStateOf(1) }
+                        val steeringPresets = listOf("DRIFT (540° Counter-Steer)", "CIRCUIT (360° Linear)", "ARCADE (270° Rapid)")
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -789,17 +848,17 @@ fun DrivingScreen(
                                 .background(Color(0xFF0F1722))
                                 .border(1.5.dp, Color(0xFFCCFF00), RoundedCornerShape(6.dp))
                                 .clickable {
-                                    val nextId = if (isTlouProfile) "profile_standard" else "profile_tlou2"
-                                    viewModel.selectProfileById(nextId)
+                                    steeringPresetIndex = (steeringPresetIndex + 1) % steeringPresets.size
+                                    view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
                                 }
                                 .padding(horizontal = 14.dp, vertical = 10.dp),
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Column {
-                                Text("GAME PROFILE", color = Color(0xFFCCFF00), fontSize = 11.sp, fontWeight = FontWeight.Black)
+                                Text("STEERING TUNING", color = Color(0xFFCCFF00), fontSize = 11.sp, fontWeight = FontWeight.Black)
                                 Text(
-                                    if (isTlouProfile) "The Last of Us Part II (Survival)" else "Forza Horizon (Sim Racing)",
+                                    steeringPresets[steeringPresetIndex],
                                     color = Color.White,
                                     fontSize = 10.sp,
                                     fontWeight = FontWeight.Bold
@@ -811,7 +870,7 @@ fun DrivingScreen(
                                     .background(Color(0xFFCCFF00))
                                     .padding(horizontal = 8.dp, vertical = 4.dp)
                             ) {
-                                Text("SWITCH >", color = Color.Black, fontSize = 9.sp, fontWeight = FontWeight.Black)
+                                Text("CHANGE >", color = Color.Black, fontSize = 9.sp, fontWeight = FontWeight.Black)
                             }
                         }
 
@@ -971,11 +1030,34 @@ fun DrivingScreen(
                             Text("RESET DEFAULT LAYOUT", color = Color(0xFFFF0055), fontSize = 11.sp, fontWeight = FontWeight.Black)
                             Text("RESTORE", color = Color(0xFFFF0055), fontSize = 10.sp, fontWeight = FontWeight.Black)
                         }
+
+                        // Option 5: Check for Updates (OTA Auto-Updater)
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(6.dp))
+                                .background(Color(0xFF0F1722))
+                                .border(1.2.dp, Color(0xFF00E5FF), RoundedCornerShape(6.dp))
+                                .clickable {
+                                    isMenuOpen = false
+                                    updateManager.checkForUpdates(silent = false)
+                                }
+                                .padding(horizontal = 14.dp, vertical = 10.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Column {
+                                Text("CHECK FOR UPDATES", color = Color(0xFF00E5FF), fontSize = 11.sp, fontWeight = FontWeight.Black)
+                                Text("Sync latest APK & game profiles", color = Color(0x99FFFFFF), fontSize = 9.sp)
+                            }
+                            Text("UPDATE >", color = Color(0xFF00E5FF), fontSize = 10.sp, fontWeight = FontWeight.Black)
+                        }
                     }
                 }
             }
         }
     }
+}
 }
 
 /**
@@ -997,92 +1079,176 @@ fun FH6ExactSvgSteeringWheel(
         label = "WheelRotation"
     )
 
-    Canvas(
-        modifier = Modifier.fillMaxSize()
+    val density = androidx.compose.ui.platform.LocalDensity.current
+    var touchActive by remember { mutableStateOf(false) }
+    var touchCurrent by remember { mutableStateOf(Offset.Zero) }
+    var anchorX by remember { mutableStateOf(0f) }
+    val maxTravelPx = with(density) { 56.dp.toPx() }
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .pointerInput(isEditMode, isGyroActive) {
+                if (!isEditMode && !isGyroActive) {
+                    awaitPointerEventScope {
+                        var trackedId: androidx.compose.ui.input.pointer.PointerId? = null
+                        while (true) {
+                            val event = awaitPointerEvent()
+                            if (trackedId == null) {
+                                val down = event.changes.firstOrNull { it.pressed && !it.isConsumed }
+                                if (down != null) {
+                                    trackedId = down.id
+                                    down.consume()
+                                    touchActive = true
+                                    touchCurrent = down.position
+                                    anchorX = down.position.x
+                                    onSteerChange(0f)
+                                }
+                            } else {
+                                val change = event.changes.firstOrNull { it.id == trackedId }
+                                if (change != null) {
+                                    if (change.pressed) {
+                                        change.consume()
+                                        touchCurrent = change.position
+                                        val touchX = change.position.x
+                                        var dx = touchX - anchorX
+
+                                        // Dynamic floating anchor tracking
+                                        if (dx > maxTravelPx) {
+                                            anchorX = touchX - maxTravelPx
+                                            dx = maxTravelPx
+                                        } else if (dx < -maxTravelPx) {
+                                            anchorX = touchX + maxTravelPx
+                                            dx = -maxTravelPx
+                                        }
+
+                                        val normSteer = (dx / maxTravelPx).coerceIn(-1.0f, 1.0f)
+                                        val deadzone = 0.03f
+                                        val absVal = kotlin.math.abs(normSteer)
+                                        val signVal = kotlin.math.sign(normSteer)
+                                        val finalSteer = if (absVal <= deadzone) 0f else signVal * ((absVal - deadzone) / (1f - deadzone))
+                                        onSteerChange(finalSteer)
+                                    } else {
+                                        change.consume()
+                                        trackedId = null
+                                        touchActive = false
+                                        onSteerChange(0f)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
     ) {
-        val s = size.minDimension / 500f
-        val center = Offset(size.width / 2f, size.height / 2f)
+        Canvas(
+            modifier = Modifier.fillMaxSize()
+        ) {
+            val s = size.minDimension / 500f
+            val center = Offset(size.width / 2f, size.height / 2f)
 
-        rotate(degrees = visualRotation, pivot = center) {
-            scale(scale = s, pivot = center) {
-                // 1. Outer Wheel Rim Ring (cx=250, cy=250, r=230, stroke-width=2.2)
-                drawCircle(
-                    color = Color.White,
-                    radius = 230f,
-                    center = center,
-                    style = Stroke(width = 2.2f)
-                )
-
-                // 2. Inner dashed circle (r=202, dash: 10 6)
-                drawCircle(
-                    color = Color(0x4DFFFFFF),
-                    radius = 202f,
-                    center = center,
-                    style = Stroke(
-                        width = 1.2f,
-                        pathEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 6f), 0f)
+            rotate(degrees = visualRotation, pivot = center) {
+                scale(scale = s, pivot = center) {
+                    // 1. Outer Wheel Rim Ring (cx=250, cy=250, r=230, stroke-width=2.2)
+                    drawCircle(
+                        color = Color.White,
+                        radius = 230f,
+                        center = center,
+                        style = Stroke(width = 2.2f)
                     )
+
+                    // 2. Inner dashed circle (r=202, dash: 10 6)
+                    drawCircle(
+                        color = Color(0x4DFFFFFF),
+                        radius = 202f,
+                        center = center,
+                        style = Stroke(
+                            width = 1.2f,
+                            pathEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 6f), 0f)
+                        )
+                    )
+
+                    // 3. Left Thumb Grip Arc (stroke-width=5)
+                    val leftGrip = Path().apply {
+                        val rect = Rect(center.x - 230f, center.y - 230f, center.x + 230f, center.y + 230f)
+                        // Arc from 205 deg to 295 deg
+                        arcTo(rect, 168f, 24f, false)
+                    }
+                    drawPath(leftGrip, Color.White, style = Stroke(width = 5f, cap = androidx.compose.ui.graphics.StrokeCap.Round))
+
+                    // 4. Right Thumb Grip Arc (stroke-width=5)
+                    val rightGrip = Path().apply {
+                        val rect = Rect(center.x - 230f, center.y - 230f, center.x + 230f, center.y + 230f)
+                        arcTo(rect, -12f, 24f, false)
+                    }
+                    drawPath(rightGrip, Color.White, style = Stroke(width = 5f, cap = androidx.compose.ui.graphics.StrokeCap.Round))
+
+                    // 5. Top 12 O'Clock Center Alignment Notch (x1=250, y1=12 to 42, dot at y=48)
+                    drawLine(
+                        color = Color.White,
+                        start = Offset(center.x, center.y - 238f),
+                        end = Offset(center.x, center.y - 208f),
+                        strokeWidth = 4f,
+                        cap = androidx.compose.ui.graphics.StrokeCap.Round
+                    )
+                    drawCircle(color = Color.White, radius = 3f, center = Offset(center.x, center.y - 202f))
+
+                    // 6. Left Horizontal Spoke (9 o'clock)
+                    val spoke9 = Path().apply {
+                        moveTo(center.x - 202f, center.y)
+                        lineTo(center.x - 55f, center.y - 10f)
+                        lineTo(center.x - 55f, center.y + 10f)
+                        close()
+                    }
+                    drawPath(spoke9, Color.White, style = Stroke(width = 1.5f))
+                    drawLine(Color(0xB3FFFFFF), Offset(center.x - 175f, center.y), Offset(center.x - 65f, center.y), strokeWidth = 1.2f)
+
+                    // 7. Right Horizontal Spoke (3 o'clock)
+                    val spoke3 = Path().apply {
+                        moveTo(center.x + 202f, center.y)
+                        lineTo(center.x + 55f, center.y - 10f)
+                        lineTo(center.x + 55f, center.y + 10f)
+                        close()
+                    }
+                    drawPath(spoke3, Color.White, style = Stroke(width = 1.5f))
+                    drawLine(Color(0xB3FFFFFF), Offset(center.x + 175f, center.y), Offset(center.x + 65f, center.y), strokeWidth = 1.2f)
+
+                    // 8. Bottom Vertical Spoke (6 o'clock)
+                    val spoke6 = Path().apply {
+                        moveTo(center.x, center.y + 202f)
+                        lineTo(center.x - 10f, center.y + 55f)
+                        lineTo(center.x + 10f, center.y + 55f)
+                        close()
+                    }
+                    drawPath(spoke6, Color.White, style = Stroke(width = 1.5f))
+                    drawLine(Color(0xB3FFFFFF), Offset(center.x, center.y + 175f), Offset(center.x, center.y + 65f), strokeWidth = 1.2f)
+
+                    // 9. Center Hub Concentric Rings (r=58, r=44, r=20) with Volt Lime FH Core
+                    drawCircle(Color.White, radius = 58f, center = center, style = Stroke(width = 1.8f))
+                    drawCircle(Color(0x59FFFFFF), radius = 44f, center = center, style = Stroke(width = 1.0f))
+                    drawCircle(Color.White, radius = 20f, center = center, style = Stroke(width = 1.5f))
+                    drawCircle(Color(0x40CCFF00), radius = 18f, center = center)
+                    drawCircle(Color(0xFFCCFF00), radius = 6f, center = center)
+                }
+            }
+        }
+
+        // Target ring feedback centered on the wheel's touch location
+        if (touchActive && !isGyroActive && !isEditMode) {
+            Canvas(modifier = Modifier.fillMaxSize()) {
+                // Outer Volt Lime glow ring
+                drawCircle(
+                    color = Color(0x33CCFF00),
+                    radius = with(density) { 36.dp.toPx() },
+                    center = touchCurrent,
+                    style = Stroke(width = with(density) { 2.dp.toPx() })
                 )
-
-                // 3. Left Thumb Grip Arc (stroke-width=5)
-                val leftGrip = Path().apply {
-                    val rect = Rect(center.x - 230f, center.y - 230f, center.x + 230f, center.y + 230f)
-                    // Arc from 205 deg to 295 deg
-                    arcTo(rect, 168f, 24f, false)
-                }
-                drawPath(leftGrip, Color.White, style = Stroke(width = 5f, cap = androidx.compose.ui.graphics.StrokeCap.Round))
-
-                // 4. Right Thumb Grip Arc (stroke-width=5)
-                val rightGrip = Path().apply {
-                    val rect = Rect(center.x - 230f, center.y - 230f, center.x + 230f, center.y + 230f)
-                    arcTo(rect, -12f, 24f, false)
-                }
-                drawPath(rightGrip, Color.White, style = Stroke(width = 5f, cap = androidx.compose.ui.graphics.StrokeCap.Round))
-
-                // 5. Top 12 O'Clock Center Alignment Notch (x1=250, y1=12 to 42, dot at y=48)
-                drawLine(
-                    color = Color.White,
-                    start = Offset(center.x, center.y - 238f),
-                    end = Offset(center.x, center.y - 208f),
-                    strokeWidth = 4f,
-                    cap = androidx.compose.ui.graphics.StrokeCap.Round
+                // Inner solid Volt Lime thumb core
+                drawCircle(
+                    color = Color(0xFFCCFF00),
+                    radius = with(density) { 12.dp.toPx() },
+                    center = touchCurrent
                 )
-                drawCircle(color = Color.White, radius = 3f, center = Offset(center.x, center.y - 202f))
-
-                // 6. Left Horizontal Spoke (9 o'clock)
-                val spoke9 = Path().apply {
-                    moveTo(center.x - 202f, center.y)
-                    lineTo(center.x - 55f, center.y - 10f)
-                    lineTo(center.x - 55f, center.y + 10f)
-                    close()
-                }
-                drawPath(spoke9, Color.White, style = Stroke(width = 1.5f))
-                drawLine(Color(0xB3FFFFFF), Offset(center.x - 175f, center.y), Offset(center.x - 65f, center.y), strokeWidth = 1.2f)
-
-                // 7. Right Horizontal Spoke (3 o'clock)
-                val spoke3 = Path().apply {
-                    moveTo(center.x + 202f, center.y)
-                    lineTo(center.x + 55f, center.y - 10f)
-                    lineTo(center.x + 55f, center.y + 10f)
-                    close()
-                }
-                drawPath(spoke3, Color.White, style = Stroke(width = 1.5f))
-                drawLine(Color(0xB3FFFFFF), Offset(center.x + 175f, center.y), Offset(center.x + 65f, center.y), strokeWidth = 1.2f)
-
-                // 8. Bottom Vertical Spoke (6 o'clock)
-                val spoke6 = Path().apply {
-                    moveTo(center.x, center.y + 202f)
-                    lineTo(center.x - 10f, center.y + 55f)
-                    lineTo(center.x + 10f, center.y + 55f)
-                    close()
-                }
-                drawPath(spoke6, Color.White, style = Stroke(width = 1.5f))
-                drawLine(Color(0xB3FFFFFF), Offset(center.x, center.y + 175f), Offset(center.x, center.y + 65f), strokeWidth = 1.2f)
-
-                // 9. Center Hub Concentric Rings (r=58, r=44, r=20)
-                drawCircle(Color.White, radius = 58f, center = center, style = Stroke(width = 1.8f))
-                drawCircle(Color(0x59FFFFFF), radius = 44f, center = center, style = Stroke(width = 1.0f))
-                drawCircle(Color.White, radius = 20f, center = center, style = Stroke(width = 1.5f))
             }
         }
     }
@@ -1111,16 +1277,29 @@ fun FH6ExactSvgAccelPedal(
             .pointerInput(isEditMode) {
                 if (!isEditMode) {
                     awaitPointerEventScope {
+                        var trackedId: androidx.compose.ui.input.pointer.PointerId? = null
                         while (true) {
                             val event = awaitPointerEvent()
-                            val change = event.changes.firstOrNull { it.pressed }
-                            if (change != null) {
-                                change.consume()
-                                val raw = (1.0f - (change.position.y / size.height)).coerceIn(0.0f, 1.0f)
-                                onPressureChange(raw)
+                            if (trackedId == null) {
+                                val down = event.changes.firstOrNull { it.pressed && !it.isConsumed }
+                                if (down != null) {
+                                    trackedId = down.id
+                                    down.consume()
+                                    val raw = (1.0f - (down.position.y / size.height)).coerceIn(0.0f, 1.0f)
+                                    onPressureChange(raw)
+                                }
                             } else {
-                                if (event.changes.all { !it.pressed }) {
-                                    onPressureChange(0f)
+                                val change = event.changes.firstOrNull { it.id == trackedId }
+                                if (change != null) {
+                                    if (change.pressed) {
+                                        change.consume()
+                                        val raw = (1.0f - (change.position.y / size.height)).coerceIn(0.0f, 1.0f)
+                                        onPressureChange(raw)
+                                    } else {
+                                        change.consume()
+                                        trackedId = null
+                                        onPressureChange(0f)
+                                    }
                                 }
                             }
                         }
@@ -1247,13 +1426,32 @@ fun FH6ExactSvgBrakePedal(
             .fillMaxSize()
             .pointerInput(isEditMode) {
                 if (!isEditMode) {
-                    detectTapGestures(
-                        onPress = {
-                            onPressureChange(1.0f)
-                            tryAwaitRelease()
-                            onPressureChange(0f)
+                    awaitPointerEventScope {
+                        var trackedId: androidx.compose.ui.input.pointer.PointerId? = null
+                        while (true) {
+                            val event = awaitPointerEvent()
+                            if (trackedId == null) {
+                                val down = event.changes.firstOrNull { it.pressed && !it.isConsumed }
+                                if (down != null) {
+                                    trackedId = down.id
+                                    down.consume()
+                                    onPressureChange(1.0f)
+                                }
+                            } else {
+                                val change = event.changes.firstOrNull { it.id == trackedId }
+                                if (change != null) {
+                                    if (change.pressed) {
+                                        change.consume()
+                                        onPressureChange(1.0f)
+                                    } else {
+                                        change.consume()
+                                        trackedId = null
+                                        onPressureChange(0f)
+                                    }
+                                }
+                            }
                         }
-                    )
+                    }
                 }
             }
     ) {
@@ -1375,13 +1573,31 @@ fun FH6ExactSvgHandbrake(
             .fillMaxSize()
             .pointerInput(isEditMode) {
                 if (!isEditMode) {
-                    detectTapGestures(
-                        onPress = {
-                            onPressedChange(true)
-                            tryAwaitRelease()
-                            onPressedChange(false)
+                    awaitPointerEventScope {
+                        var trackedId: androidx.compose.ui.input.pointer.PointerId? = null
+                        while (true) {
+                            val event = awaitPointerEvent()
+                            if (trackedId == null) {
+                                val down = event.changes.firstOrNull { it.pressed && !it.isConsumed }
+                                if (down != null) {
+                                    trackedId = down.id
+                                    down.consume()
+                                    onPressedChange(true)
+                                }
+                            } else {
+                                val change = event.changes.firstOrNull { it.id == trackedId }
+                                if (change != null) {
+                                    if (change.pressed) {
+                                        change.consume()
+                                    } else {
+                                        change.consume()
+                                        trackedId = null
+                                        onPressedChange(false)
+                                    }
+                                }
+                            }
                         }
-                    )
+                    }
                 }
             }
     ) {
@@ -1480,19 +1696,31 @@ fun FH6ExactSvgActionButton(
             .fillMaxSize()
             .pointerInput(isEditMode) {
                 if (!isEditMode) {
-                    detectTapGestures(
-                        onPress = {
-                            val startTime = System.currentTimeMillis()
-                            onPressedChange(true)
-                            tryAwaitRelease()
-                            val elapsed = System.currentTimeMillis() - startTime
-                            // Guarantee a minimum hold duration of 150ms so games and 120Hz UDP never miss the state
-                            if (elapsed < 150) {
-                                kotlinx.coroutines.delay(150 - elapsed)
+                    awaitPointerEventScope {
+                        var trackedId: androidx.compose.ui.input.pointer.PointerId? = null
+                        while (true) {
+                            val event = awaitPointerEvent()
+                            if (trackedId == null) {
+                                val down = event.changes.firstOrNull { it.pressed && !it.isConsumed }
+                                if (down != null) {
+                                    trackedId = down.id
+                                    down.consume()
+                                    onPressedChange(true)
+                                }
+                            } else {
+                                val change = event.changes.firstOrNull { it.id == trackedId }
+                                if (change != null) {
+                                    if (change.pressed) {
+                                        change.consume()
+                                    } else {
+                                        change.consume()
+                                        trackedId = null
+                                        onPressedChange(false)
+                                    }
+                                }
                             }
-                            onPressedChange(false)
                         }
-                    )
+                    }
                 }
             }
     ) {

@@ -21,8 +21,10 @@ namespace WheelPad.App
         private readonly UdpFastStreamReceiver _udpReceiver;
         private readonly BeaconBroadcaster _beaconBroadcaster;
         private readonly GameDetector _gameDetector;
+        private readonly AutoUpdateService _autoUpdateService;
         private readonly Forms.NotifyIcon _notifyIcon;
         private bool _isExplicitExit = false;
+        private string? _pendingUpdateUrl;
 
         public MainWindow()
         {
@@ -40,6 +42,7 @@ namespace WheelPad.App
             _udpReceiver = new UdpFastStreamReceiver(_dispatcher);
             _beaconBroadcaster = new BeaconBroadcaster();
             _gameDetector = new GameDetector(_profileManager, _syncServer);
+            _autoUpdateService = new AutoUpdateService();
 
             // Ambient background: Single Forza Horizon GT-R image
             InitAmbientBackground();
@@ -187,6 +190,90 @@ namespace WheelPad.App
 
             // Window Close handler
             Closing += MainWindow_Closing;
+
+            // Trigger immediate game detection on startup
+            _gameDetector.CheckImmediately();
+
+            // Check for updates in background
+            _ = CheckForUpdatesSilentlyAsync();
+        }
+
+        private async Task CheckForUpdatesSilentlyAsync()
+        {
+            try
+            {
+                var result = await _autoUpdateService.CheckForUpdatesAsync();
+                if (result.IsUpdateAvailable && result.LatestVersion != null)
+                {
+                    await Dispatcher.InvokeAsync(() =>
+                    {
+                        _pendingUpdateUrl = result.LatestVersion.DownloadUrl;
+                        TxtUpdateTitle.Text = $"v{result.LatestVersion.VersionName} is now live";
+                        TxtUpdateChangelog.Text = $"Changelog: {result.LatestVersion.Changelog}";
+                        BannerUpdate.Visibility = Visibility.Visible;
+                    });
+                }
+            }
+            catch { }
+        }
+
+        private async void BtnCheckUpdates_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                TxtFooter.Text = "Checking for updates...";
+                var result = await _autoUpdateService.CheckForUpdatesAsync();
+                if (result.IsUpdateAvailable && result.LatestVersion != null)
+                {
+                    _pendingUpdateUrl = result.LatestVersion.DownloadUrl;
+                    TxtUpdateTitle.Text = $"v{result.LatestVersion.VersionName} is now live";
+                    TxtUpdateChangelog.Text = $"Changelog: {result.LatestVersion.Changelog}";
+                    BannerUpdate.Visibility = Visibility.Visible;
+                    TxtFooter.Text = $"Update v{result.LatestVersion.VersionName} available! Click 'UPDATE NOW' above.";
+                }
+                else
+                {
+                    TxtFooter.Text = $"Companion is up-to-date (v{AutoUpdateService.CurrentVersionName}). No updates found.";
+                }
+            }
+            catch (Exception ex)
+            {
+                TxtFooter.Text = $"Update check failed: {ex.Message}";
+            }
+        }
+
+        private async void BtnApplyUpdate_Click(object sender, RoutedEventArgs e)
+        {
+            if (string.IsNullOrEmpty(_pendingUpdateUrl)) return;
+
+            BtnApplyUpdate.IsEnabled = false;
+            BtnApplyUpdate.Content = "DOWNLOADING...";
+            ProgUpdate.Visibility = Visibility.Visible;
+            ProgUpdate.Value = 0;
+
+            bool success = await _autoUpdateService.DownloadAndApplyUpdateAsync(_pendingUpdateUrl, pct =>
+            {
+                Dispatcher.InvokeAsync(() =>
+                {
+                    ProgUpdate.Value = pct;
+                    BtnApplyUpdate.Content = $"DOWNLOADING {pct}%";
+                });
+            });
+
+            if (!success)
+            {
+                Dispatcher.Invoke(() =>
+                {
+                    BtnApplyUpdate.IsEnabled = true;
+                    BtnApplyUpdate.Content = "RETRY UPDATE";
+                    TxtFooter.Text = "Update download failed. Please check network connection.";
+                });
+            }
+        }
+
+        private void BtnDismissUpdate_Click(object sender, RoutedEventArgs e)
+        {
+            BannerUpdate.Visibility = Visibility.Collapsed;
         }
 
         private void OnPacketsPerSecondUpdated(object? sender, int pps)
