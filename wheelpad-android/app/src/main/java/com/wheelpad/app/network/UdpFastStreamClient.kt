@@ -13,7 +13,7 @@ class UdpFastStreamClient {
     private var socket: DatagramSocket? = null
     private var serverAddress: InetAddress? = null
     private var serverPort: Int = 4242
-    private var sequenceNumber: Long = 0
+    private val sequenceNumber = java.util.concurrent.atomic.AtomicLong(0)
 
     private val packetBuffer = ByteBuffer.allocate(32).order(ByteOrder.LITTLE_ENDIAN)
 
@@ -70,9 +70,7 @@ class UdpFastStreamClient {
         currentLeftThumbY = leftThumbY
         currentRightThumbX = rightThumbX
         currentRightThumbY = rightThumbY
-
-        // Immediate fast flush
-        sendCurrentPacket()
+        // Streamed reliably at monotonic 120Hz via startContinuousStream() loop
     }
 
     /**
@@ -119,7 +117,7 @@ class UdpFastStreamClient {
                 // 0x00: Magic (0x5750 = 'WP')
                 packetBuffer.putShort(0x5750.toShort())
                 // 0x02: Sequence (uint32)
-                packetBuffer.putInt((sequenceNumber++ and 0xFFFFFFFFL).toInt())
+                packetBuffer.putInt((sequenceNumber.getAndIncrement() and 0xFFFFFFFFL).toInt())
                 // 0x06: Timestamp (uint64)
                 packetBuffer.putLong(System.nanoTime() / 1000)
                 // 0x0E: Steering / LeftThumbX (int16)

@@ -26,6 +26,7 @@ data class UpdateInfo(
 sealed class UpdateState {
     object Idle : UpdateState()
     object Checking : UpdateState()
+    data class UpToDate(val versionName: String) : UpdateState()
     data class Available(val info: UpdateInfo) : UpdateState()
     data class Downloading(val progressPercent: Int) : UpdateState()
     data class ReadyToInstall(val apkFile: File) : UpdateState()
@@ -39,9 +40,23 @@ class AutoUpdateManager(private val context: Context) {
     val updateState: StateFlow<UpdateState> = _updateState.asStateFlow()
 
     private val endpoints = listOf(
-        "https://horizoncontro.varunkulkarni.dpdns.org/version.json",
-        "https://raw.githubusercontent.com/VarunKulkarni15/FH6-Mobile-Controller/master/site/version.json"
+        "https://raw.githubusercontent.com/VarunKulkarni15/FH6-Mobile-Controller/master/site/version.json",
+        "https://horizoncontro.varunkulkarni.dpdns.org/version.json"
     )
+
+    fun getCurrentVersionName(): String {
+        return try {
+            val pInfo = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                context.packageManager.getPackageInfo(context.packageName, PackageManager.PackageInfoFlags.of(0))
+            } else {
+                @Suppress("DEPRECATION")
+                context.packageManager.getPackageInfo(context.packageName, 0)
+            }
+            pInfo.versionName ?: "1.3.0"
+        } catch (e: Exception) {
+            "1.3.0"
+        }
+    }
 
     fun getCurrentVersionCode(): Int {
         return try {
@@ -66,6 +81,7 @@ class AutoUpdateManager(private val context: Context) {
         scope.launch {
             if (!silent) _updateState.value = UpdateState.Checking
             val currentCode = getCurrentVersionCode()
+            val currentName = getCurrentVersionName()
 
             for (urlStr in endpoints) {
                 try {
@@ -88,13 +104,17 @@ class AutoUpdateManager(private val context: Context) {
                         val changelog = androidObj.optString("changelog", "Performance improvements & bug fixes")
 
                         if (remoteCode > currentCode && apkUrl.isNotBlank()) {
-                            _updateState.value = UpdateState.Available(
-                                UpdateInfo(
-                                    versionCode = remoteCode,
-                                    versionName = remoteName,
-                                    apkUrl = apkUrl,
-                                    changelog = changelog
-                                )
+                            val updateInfo = UpdateInfo(
+                                versionCode = remoteCode,
+                                versionName = remoteName,
+                                apkUrl = apkUrl,
+                                changelog = changelog
+                            )
+                            _updateState.value = UpdateState.Available(updateInfo)
+                            com.wheelpad.app.util.NotificationHelper.showStatusNotification(
+                                context,
+                                "⚡ Horizon Update Available (v${remoteName})",
+                                "New telemetry build ready. Tap to download & install."
                             )
                             return@launch
                         }
@@ -105,8 +125,8 @@ class AutoUpdateManager(private val context: Context) {
             }
 
             if (!silent) {
-                _updateState.value = UpdateState.Error("You are running the latest version!")
-                delay(3000)
+                _updateState.value = UpdateState.UpToDate(currentName)
+                delay(3500)
                 _updateState.value = UpdateState.Idle
             } else {
                 _updateState.value = UpdateState.Idle
@@ -143,27 +163,29 @@ class AutoUpdateManager(private val context: Context) {
                             downloadedBytes += bytesRead
 
                             val now = System.currentTimeMillis()
-                            if (totalBytes > 0 && (now - lastReportTime > 150)) {
-                                lastReportTime = now
-                                val progress = ((downloadedBytes.toFloat() / totalBytes) * 100).toInt()
+                            if (now - lastReportTime > 150 && totalBytes > 0) {
+                                val progress = ((downloadedBytes * 100L) / totalBytes).toInt().coerceIn(0, 99)
                                 _updateState.value = UpdateState.Downloading(progress)
+                                lastReportTime = now
                             }
                         }
                     }
                 }
 
                 _updateState.value = UpdateState.ReadyToInstall(apkFile)
-
-                // Launch Android Package Installer via FileProvider
-                installApk(apkFile)
+                delay(400)
+                launchInstaller(apkFile)
 
             } catch (e: Exception) {
+                e.printStackTrace()
                 _updateState.value = UpdateState.Error("Download failed: ${e.message}")
+                delay(4000)
+                _updateState.value = UpdateState.Idle
             }
         }
     }
 
-    fun installApk(apkFile: File) {
+    private fun launchInstaller(apkFile: File) {
         try {
             val apkUri = FileProvider.getUriForFile(
                 context,
@@ -185,4 +207,3 @@ class AutoUpdateManager(private val context: Context) {
         _updateState.value = UpdateState.Idle
     }
 }
-

@@ -1,14 +1,14 @@
 {
   "android": {
-    "versionCode": 3,
-    "versionName": "1.3.0",
-    "apkUrl": "https://horizoncontro.varunkulkarni.dpdns.org/HorizonController.apk",
-    "changelog": "Pure Forza Horizon Cockpit: GT3 Dynamic RPM Shift Light Bar, Redline Haptics, Drift Steering Presets, and Chakra Petch typography."
+    "versionCode": 4,
+    "versionName": "1.4.0",
+    "apkUrl": "https://raw.githubusercontent.com/VarunKulkarni15/FH6-Mobile-Controller/master/dist-android/HorizonController.apk",
+    "changelog": "Pure Forza Horizon Cockpit: Dynamic Gyroscope Steering, 100% Touch-Only Instant Brake Pedal, clean uncluttered HUD, and background notification alerts."
   },
   "windows": {
-    "versionCode": 3,
-    "versionName": "1.3.0",
-    "downloadUrl": "https://horizoncontro.varunkulkarni.dpdns.org/releases/fh6-controller-windows.exe",
+    "versionCode": 4,
+    "versionName": "1.4.0",
+    "downloadUrl": "https://raw.githubusercontent.com/VarunKulkarni15/FH6-Mobile-Controller/master/dist-windows/fh6-controller-windows.exe",
     "changelog": "Forza Horizon Sim-Racing Companion: Instant game launch detection, 120Hz FastStream telemetry, and ViGEmBus hardware controller emulation."
   }
 }

@@ -12,7 +12,7 @@ namespace WheelPad.Core.Services
     {
         public const int DefaultUdpPort = 4242;
         public const ushort PacketMagic = 0x5750; // 'WP'
-        public const int WatchdogTimeoutMs = 500; // Increased to 500ms to tolerate wireless jitter while preserving safety
+        public const int WatchdogTimeoutMs = 1500; // 1.5s tolerance for wireless jitter so throttle/brake never randomly drop
 
         private readonly InputDispatcher _inputDispatcher;
         private readonly int _port;
@@ -87,9 +87,11 @@ namespace WheelPad.Core.Services
             if (expectedCrc != computedCrc) return;
 
             uint seq = BitConverter.ToUInt32(data, 2);
-            // Ignore out-of-order stale packets if seq wrapped or is older
-            if (seq < _lastSequenceNumber && (_lastSequenceNumber - seq) < 10000)
+            // Allow packets that are newer, or allow if sequence wrapped past 0xFFFFFFFF
+            long delta = (long)seq - (long)_lastSequenceNumber;
+            if (delta < 0 && delta > -30 && _lastSequenceNumber > 0)
             {
+                // Minor out-of-order packet within 30 frames; drop stale duplicate
                 return;
             }
             _lastSequenceNumber = seq;

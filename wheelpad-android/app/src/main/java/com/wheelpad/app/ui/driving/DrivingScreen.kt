@@ -112,13 +112,6 @@ fun DrivingScreen(
         }
     }
 
-    // Tactile Redline Rumble when throttling at peak RPM
-    LaunchedEffect(throttlePressure >= 0.96f) {
-        if (throttlePressure >= 0.96f) {
-            view.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
-        }
-    }
-
     // Continuously stream inputs to UdpFastStream (120Hz FastStream)
     LaunchedEffect(steeringAngle, throttlePressure, brakePressure, handbrakeState, buttonsBitmask) {
         udpClient.updateInputs(
@@ -147,66 +140,6 @@ fun DrivingScreen(
         val density = androidx.compose.ui.platform.LocalDensity.current
         val screenWidthPx = with(density) { screenWidth.toPx() }
         val screenHeightPx = with(density) { screenHeight.toPx() }
-
-        // 0.5 GT3 / F1 Dynamic RPM Shift Light Bar (Positioned above pedals on top-right)
-        val rpmPercent = throttlePressure
-        val rpmVal = (rpmPercent * 8500).toInt()
-        val isRedline = rpmPercent >= 0.96f
-        Box(
-            modifier = Modifier
-                .offset(x = screenWidth * 0.58f, y = screenHeight * 0.025f)
-                .width(screenWidth * 0.32f)
-                .clip(RoundedCornerShape(6.dp))
-                .background(Color(0xFF0A0E15))
-                .border(1.2.dp, if (isRedline) Color(0xFFFF0055) else Color(0xFF1C2738), RoundedCornerShape(6.dp))
-                .padding(horizontal = 10.dp, vertical = 6.dp)
-        ) {
-            Column {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = if (isRedline) "⚡ REDLINE SHIFT" else "FORZA TACHOMETER",
-                        color = if (isRedline) Color(0xFFFF0055) else Color(0xFF7E94AD),
-                        fontSize = 9.sp,
-                        fontWeight = FontWeight.Black
-                    )
-                    Text(
-                        text = "${rpmVal} RPM",
-                        color = if (isRedline) Color(0xFFFF0055) else Color(0xFFCCFF00),
-                        fontSize = 9.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(4.dp))
-
-                // 8-Segment Shift Light Bar
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(4.dp)
-                ) {
-                    val thresholds = listOf(0.15f, 0.30f, 0.45f, 0.60f, 0.75f, 0.85f, 0.92f, 0.98f)
-                    thresholds.forEachIndexed { idx, th ->
-                        val isActive = rpmPercent >= th
-                        val ledColor = when {
-                            idx < 4 -> Color(0xFFCCFF00) // Volt lime
-                            idx < 6 -> Color(0xFFFFAA00) // Amber gold
-                            else -> Color(0xFFFF0055)     // Race red
-                        }
-                        Box(
-                            modifier = Modifier
-                                .weight(1f)
-                                .height(6.dp)
-                                .clip(RoundedCornerShape(2.dp))
-                                .background(if (isActive) ledColor else Color(0xFF141C28))
-                        )
-                    }
-                }
-            }
-        }
 
         // 1. Render all HUD controls from active profile
         state.currentProfile.layout.forEach { element ->
@@ -515,31 +448,114 @@ fun DrivingScreen(
             }
         }
 
-        // 3b. OTA Auto-Update Floating Banner
+        // 3b. Authentic FH6 Motorsport OTA Notification Capsule
         when (val uState = updateState) {
-            is com.wheelpad.app.updater.UpdateState.Available -> {
+            is com.wheelpad.app.updater.UpdateState.Checking -> {
                 Box(
                     modifier = Modifier
                         .align(Alignment.TopCenter)
-                        .padding(top = 14.dp)
-                        .clip(RoundedCornerShape(20.dp))
-                        .background(Color(0xF50A1018))
-                        .border(1.5.dp, Color(0xFFCCFF00), RoundedCornerShape(20.dp))
-                        .clickable { updateManager.downloadAndInstall(uState.info) }
-                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                        .padding(top = 16.dp)
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(Color(0xF0080E17))
+                        .border(1.2.dp, Color(0xFFCCFF00), RoundedCornerShape(8.dp))
+                        .padding(horizontal = 18.dp, vertical = 9.dp)
                 ) {
                     Row(
                         horizontalArrangement = Arrangement.spacedBy(10.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text("⚡ UPDATE AVAILABLE (${uState.info.versionName})", color = Color(0xFFCCFF00), fontSize = 11.sp, fontWeight = FontWeight.Black)
                         Box(
                             modifier = Modifier
-                                .clip(RoundedCornerShape(12.dp))
+                                .size(8.dp)
+                                .clip(CircleShape)
                                 .background(Color(0xFFCCFF00))
-                                .padding(horizontal = 8.dp, vertical = 3.dp)
+                        )
+                        Text(
+                            "HORIZON SYNC // CHECKING SERVERS...",
+                            color = Color(0xFFCCFF00),
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Black,
+                            fontFamily = ChakraPetch
+                        )
+                    }
+                }
+            }
+            is com.wheelpad.app.updater.UpdateState.UpToDate -> {
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.TopCenter)
+                        .padding(top = 16.dp)
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(Color(0xF2070D16))
+                        .border(1.2.dp, Color(0xFFCCFF00), RoundedCornerShape(8.dp))
+                        .padding(horizontal = 20.dp, vertical = 9.dp)
+                ) {
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            "✓",
+                            color = Color(0xFFCCFF00),
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Black
+                        )
+                        Column {
+                            Text(
+                                "HORIZON FESTIVAL // UP TO DATE",
+                                color = Color(0xFFCCFF00),
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Black,
+                                letterSpacing = 1.sp,
+                                fontFamily = ChakraPetch
+                            )
+                            Text(
+                                "Version ${uState.versionName} • 120Hz FastStream Ready",
+                                color = Color(0xD9FFFFFF),
+                                fontSize = 9.5.sp,
+                                fontWeight = FontWeight.Medium
+                            )
+                        }
+                    }
+                }
+            }
+            is com.wheelpad.app.updater.UpdateState.Available -> {
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.TopCenter)
+                        .padding(top = 16.dp)
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(Color(0xF5080E18))
+                        .border(1.5.dp, Color(0xFFCCFF00), RoundedCornerShape(8.dp))
+                        .clickable { updateManager.downloadAndInstall(uState.info) }
+                        .padding(horizontal = 18.dp, vertical = 9.dp)
+                ) {
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(14.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column {
+                            Text(
+                                "⚡ NEW HORIZON TELEMETRY BUILD (v${uState.info.versionName})",
+                                color = Color(0xFFCCFF00),
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Black,
+                                fontFamily = ChakraPetch
+                            )
+                            Text(
+                                uState.info.changelog,
+                                color = Color(0xB3FFFFFF),
+                                fontSize = 9.sp,
+                                maxLines = 1
+                            )
+                        }
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(4.dp))
+                                .background(Color(0xFFCCFF00))
+                                .padding(horizontal = 10.dp, vertical = 5.dp)
                         ) {
-                            Text("UPDATE NOW", color = Color.Black, fontSize = 9.sp, fontWeight = FontWeight.Black)
+                            Text("UPDATE", color = Color(0xFF080C12), fontSize = 10.sp, fontWeight = FontWeight.Black)
                         }
                         Text("✕", color = Color(0x80FFFFFF), fontSize = 12.sp, modifier = Modifier.clickable { updateManager.dismiss() })
                     }
@@ -549,26 +565,43 @@ fun DrivingScreen(
                 Box(
                     modifier = Modifier
                         .align(Alignment.TopCenter)
-                        .padding(top = 14.dp)
-                        .clip(RoundedCornerShape(20.dp))
-                        .background(Color(0xF50A1018))
-                        .border(1.5.dp, Color(0xFF00E5FF), RoundedCornerShape(20.dp))
-                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                        .padding(top = 16.dp)
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(Color(0xF5080E18))
+                        .border(1.5.dp, Color(0xFFCCFF00), RoundedCornerShape(8.dp))
+                        .padding(horizontal = 18.dp, vertical = 9.dp)
                 ) {
-                    Text("DOWNLOADING UPDATE: ${uState.progressPercent}%", color = Color(0xFF00E5FF), fontSize = 11.sp, fontWeight = FontWeight.Black)
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            "DOWNLOADING BUILD: ${uState.progressPercent}%",
+                            color = Color(0xFFCCFF00),
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Black,
+                            fontFamily = ChakraPetch
+                        )
+                    }
                 }
             }
             is com.wheelpad.app.updater.UpdateState.Error -> {
                 Box(
                     modifier = Modifier
                         .align(Alignment.TopCenter)
-                        .padding(top = 14.dp)
-                        .clip(RoundedCornerShape(20.dp))
-                        .background(Color(0xF50A1018))
-                        .border(1.dp, Color(0x80FFFFFF), RoundedCornerShape(20.dp))
-                        .padding(horizontal = 14.dp, vertical = 6.dp)
+                        .padding(top = 16.dp)
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(Color(0xF50D1118))
+                        .border(1.2.dp, Color(0xFFFF5252), RoundedCornerShape(8.dp))
+                        .padding(horizontal = 16.dp, vertical = 8.dp)
                 ) {
-                    Text(uState.message, color = Color.White, fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                    Text(
+                        "⚠ ${uState.message.uppercase()}",
+                        color = Color(0xFFFF5252),
+                        fontSize = 10.5.sp,
+                        fontWeight = FontWeight.Bold,
+                        fontFamily = ChakraPetch
+                    )
                 }
             }
             else -> {}
@@ -1031,13 +1064,13 @@ fun DrivingScreen(
                             Text("RESTORE", color = Color(0xFFFF0055), fontSize = 10.sp, fontWeight = FontWeight.Black)
                         }
 
-                        // Option 5: Check for Updates (OTA Auto-Updater)
+                        // Option 5: Check for Updates (OTA Auto-Updater) - Styled in Authentic FH6 Motorsport Volt
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clip(RoundedCornerShape(6.dp))
-                                .background(Color(0xFF0F1722))
-                                .border(1.2.dp, Color(0xFF00E5FF), RoundedCornerShape(6.dp))
+                                .background(Color(0xFF09101A))
+                                .border(1.2.dp, Color(0xFF1C2C40), RoundedCornerShape(6.dp))
                                 .clickable {
                                     isMenuOpen = false
                                     updateManager.checkForUpdates(silent = false)
@@ -1046,11 +1079,30 @@ fun DrivingScreen(
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Column {
-                                Text("CHECK FOR UPDATES", color = Color(0xFF00E5FF), fontSize = 11.sp, fontWeight = FontWeight.Black)
-                                Text("Sync latest APK & game profiles", color = Color(0x99FFFFFF), fontSize = 9.sp)
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .width(3.dp)
+                                        .height(26.dp)
+                                        .background(Color(0xFFCCFF00))
+                                )
+                                Column {
+                                    Text("CHECK FOR UPDATES", color = Color(0xFFCCFF00), fontSize = 11.sp, fontWeight = FontWeight.Black, fontFamily = ChakraPetch)
+                                    Text("v${updateManager.getCurrentVersionName()} • Tap to sync telemetry & builds", color = Color(0xB3FFFFFF), fontSize = 9.sp)
+                                }
                             }
-                            Text("UPDATE >", color = Color(0xFF00E5FF), fontSize = 10.sp, fontWeight = FontWeight.Black)
+                            Box(
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(4.dp))
+                                    .background(Color(0x25CCFF00))
+                                    .border(1.dp, Color(0xFFCCFF00), RoundedCornerShape(4.dp))
+                                    .padding(horizontal = 8.dp, vertical = 4.dp)
+                            ) {
+                                Text("SYNC", color = Color(0xFFCCFF00), fontSize = 9.sp, fontWeight = FontWeight.Black)
+                            }
                         }
                     }
                 }
