@@ -88,13 +88,9 @@ fun DrivingScreen(
     val gyroAngle by gyroManager.steeringAngle.collectAsState()
     var gyroSensitivity by remember { mutableStateOf(gyroManager.sensitivity) }
 
-    // OTA Auto-Update Manager
+    // OTA Auto-Update Manager (manual check via 3-dots drawer menu)
     val updateManager = remember { com.wheelpad.app.updater.AutoUpdateManager(context) }
     val updateState by updateManager.updateState.collectAsState()
-
-    LaunchedEffect(Unit) {
-        updateManager.checkForUpdates(silent = true)
-    }
 
     // Gyroscope lifecycle
     DisposableEffect(isGyroEnabled) {
@@ -448,17 +444,17 @@ fun DrivingScreen(
             }
         }
 
-        // 3b. Authentic FH6 Motorsport OTA Notification Capsule
+        // 3b. Authentic FH6 Motorsport OTA Notification Modal
         when (val uState = updateState) {
             is com.wheelpad.app.updater.UpdateState.Checking -> {
                 Box(
                     modifier = Modifier
                         .align(Alignment.TopCenter)
-                        .padding(top = 16.dp)
-                        .clip(RoundedCornerShape(8.dp))
-                        .background(Color(0xF0080E17))
-                        .border(1.2.dp, Color(0xFFCCFF00), RoundedCornerShape(8.dp))
-                        .padding(horizontal = 18.dp, vertical = 9.dp)
+                        .padding(top = 18.dp)
+                        .clip(RoundedCornerShape(3.dp))
+                        .background(Color(0xF5060C14))
+                        .border(1.5.dp, Color(0xFFCCFF00), RoundedCornerShape(3.dp))
+                        .padding(horizontal = 20.dp, vertical = 10.dp)
                 ) {
                     Row(
                         horizontalArrangement = Arrangement.spacedBy(10.dp),
@@ -466,12 +462,12 @@ fun DrivingScreen(
                     ) {
                         Box(
                             modifier = Modifier
-                                .size(8.dp)
-                                .clip(CircleShape)
+                                .width(4.dp)
+                                .height(18.dp)
                                 .background(Color(0xFFCCFF00))
                         )
                         Text(
-                            "HORIZON SYNC // CHECKING SERVERS...",
+                            "FORZA OTA // CONNECTING TELEMETRY REPO...",
                             color = Color(0xFFCCFF00),
                             fontSize = 11.sp,
                             fontWeight = FontWeight.Black,
@@ -484,33 +480,33 @@ fun DrivingScreen(
                 Box(
                     modifier = Modifier
                         .align(Alignment.TopCenter)
-                        .padding(top = 16.dp)
-                        .clip(RoundedCornerShape(8.dp))
-                        .background(Color(0xF2070D16))
-                        .border(1.2.dp, Color(0xFFCCFF00), RoundedCornerShape(8.dp))
-                        .padding(horizontal = 20.dp, vertical = 9.dp)
+                        .padding(top = 18.dp)
+                        .clip(RoundedCornerShape(3.dp))
+                        .background(Color(0xF8060C14))
+                        .border(1.5.dp, Color(0xFFCCFF00), RoundedCornerShape(3.dp))
+                        .padding(horizontal = 22.dp, vertical = 11.dp)
                 ) {
                     Row(
-                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        horizontalArrangement = Arrangement.spacedBy(14.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text(
-                            "✓",
-                            color = Color(0xFFCCFF00),
-                            fontSize = 14.sp,
-                            fontWeight = FontWeight.Black
+                        Box(
+                            modifier = Modifier
+                                .width(4.dp)
+                                .height(26.dp)
+                                .background(Color(0xFFCCFF00))
                         )
                         Column {
                             Text(
                                 "HORIZON FESTIVAL // UP TO DATE",
                                 color = Color(0xFFCCFF00),
-                                fontSize = 11.sp,
+                                fontSize = 12.sp,
                                 fontWeight = FontWeight.Black,
                                 letterSpacing = 1.sp,
                                 fontFamily = ChakraPetch
                             )
                             Text(
-                                "Version ${uState.versionName} • 120Hz FastStream Ready",
+                                "Build v${uState.versionName} • 120Hz Monotonic UDP Engine Active",
                                 color = Color(0xD9FFFFFF),
                                 fontSize = 9.5.sp,
                                 fontWeight = FontWeight.Medium
@@ -524,40 +520,74 @@ fun DrivingScreen(
                     modifier = Modifier
                         .align(Alignment.TopCenter)
                         .padding(top = 16.dp)
-                        .clip(RoundedCornerShape(8.dp))
-                        .background(Color(0xF5080E18))
-                        .border(1.5.dp, Color(0xFFCCFF00), RoundedCornerShape(8.dp))
-                        .clickable { updateManager.downloadAndInstall(uState.info) }
-                        .padding(horizontal = 18.dp, vertical = 9.dp)
+                        .widthIn(min = 380.dp, max = 520.dp)
+                        .clip(RoundedCornerShape(3.dp))
+                        .background(Color(0xF8060C14))
+                        .border(1.5.dp, Color(0xFFCCFF00), RoundedCornerShape(3.dp))
                 ) {
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(14.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Column {
+                    Column {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .background(Color(0xFFCCFF00))
+                                .padding(horizontal = 14.dp, vertical = 6.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
                             Text(
-                                "⚡ NEW HORIZON TELEMETRY BUILD (v${uState.info.versionName})",
-                                color = Color(0xFFCCFF00),
+                                "// FORZA OTA UPDATE AVAILABLE",
+                                color = Color(0xFF080C12),
                                 fontSize = 11.sp,
                                 fontWeight = FontWeight.Black,
                                 fontFamily = ChakraPetch
                             )
                             Text(
-                                uState.info.changelog,
-                                color = Color(0xB3FFFFFF),
-                                fontSize = 9.sp,
-                                maxLines = 1
+                                "✕",
+                                color = Color(0xFF080C12),
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.Black,
+                                modifier = Modifier.clickable { updateManager.dismiss() }
                             )
                         }
-                        Box(
+                        Row(
                             modifier = Modifier
-                                .clip(RoundedCornerShape(4.dp))
-                                .background(Color(0xFFCCFF00))
-                                .padding(horizontal = 10.dp, vertical = 5.dp)
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp, vertical = 12.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Text("UPDATE", color = Color(0xFF080C12), fontSize = 10.sp, fontWeight = FontWeight.Black)
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    "VERSION ${uState.info.versionName.uppercase()}",
+                                    color = Color.White,
+                                    fontSize = 13.sp,
+                                    fontWeight = FontWeight.Black,
+                                    fontFamily = ChakraPetch
+                                )
+                                Text(
+                                    uState.info.changelog,
+                                    color = Color(0xB3FFFFFF),
+                                    fontSize = 9.5.sp,
+                                    maxLines = 2
+                                )
+                            }
+                            Spacer(modifier = Modifier.width(16.dp))
+                            Box(
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(2.dp))
+                                    .background(Color(0xFFCCFF00))
+                                    .clickable { updateManager.downloadAndInstall(uState.info) }
+                                    .padding(horizontal = 16.dp, vertical = 8.dp)
+                            ) {
+                                Text(
+                                    "INSTALL NOW",
+                                    color = Color(0xFF080C12),
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.Black,
+                                    fontFamily = ChakraPetch
+                                )
+                            }
                         }
-                        Text("✕", color = Color(0x80FFFFFF), fontSize = 12.sp, modifier = Modifier.clickable { updateManager.dismiss() })
                     }
                 }
             }
@@ -566,22 +596,46 @@ fun DrivingScreen(
                     modifier = Modifier
                         .align(Alignment.TopCenter)
                         .padding(top = 16.dp)
-                        .clip(RoundedCornerShape(8.dp))
-                        .background(Color(0xF5080E18))
-                        .border(1.5.dp, Color(0xFFCCFF00), RoundedCornerShape(8.dp))
-                        .padding(horizontal = 18.dp, vertical = 9.dp)
+                        .widthIn(min = 360.dp, max = 460.dp)
+                        .clip(RoundedCornerShape(3.dp))
+                        .background(Color(0xF8060C14))
+                        .border(1.5.dp, Color(0xFFCCFF00), RoundedCornerShape(3.dp))
+                        .padding(14.dp)
                 ) {
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(12.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            "DOWNLOADING BUILD: ${uState.progressPercent}%",
-                            color = Color(0xFFCCFF00),
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.Black,
-                            fontFamily = ChakraPetch
-                        )
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                "DOWNLOADING TELEMETRY BUILD...",
+                                color = Color(0xFFCCFF00),
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Black,
+                                fontFamily = ChakraPetch
+                            )
+                            Text(
+                                "${uState.progressPercent}%",
+                                color = Color.White,
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Black,
+                                fontFamily = ChakraPetch
+                            )
+                        }
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(6.dp)
+                                .background(Color(0xFF14202C))
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxHeight()
+                                    .fillMaxWidth(uState.progressPercent / 100f)
+                                    .background(Color(0xFFCCFF00))
+                            )
+                        }
                     }
                 }
             }
@@ -589,16 +643,16 @@ fun DrivingScreen(
                 Box(
                     modifier = Modifier
                         .align(Alignment.TopCenter)
-                        .padding(top = 16.dp)
-                        .clip(RoundedCornerShape(8.dp))
+                        .padding(top = 18.dp)
+                        .clip(RoundedCornerShape(3.dp))
                         .background(Color(0xF50D1118))
-                        .border(1.2.dp, Color(0xFFFF5252), RoundedCornerShape(8.dp))
-                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                        .border(1.5.dp, Color(0xFFFF5252), RoundedCornerShape(3.dp))
+                        .padding(horizontal = 18.dp, vertical = 9.dp)
                 ) {
                     Text(
                         "⚠ ${uState.message.uppercase()}",
                         color = Color(0xFFFF5252),
-                        fontSize = 10.5.sp,
+                        fontSize = 11.sp,
                         fontWeight = FontWeight.Bold,
                         fontFamily = ChakraPetch
                     )
