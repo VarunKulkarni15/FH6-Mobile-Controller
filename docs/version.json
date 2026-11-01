@@ -1,0 +1,14 @@
+{
+  "android": {
+    "versionCode": 6,
+    "versionName": "1.4.2",
+    "apkUrl": "https://raw.githubusercontent.com/VarunKulkarni15/FH6-Mobile-Controller/master/dist-android/HorizonController.apk",
+    "changelog": "Dedicated Forza Horizon Controls: Real RS Down Look Back, RS Click Klaxon Horn, LS Convertible/Roof toggle, Enter/Activate (X), Photo Mode & Radio Skip."
+  },
+  "windows": {
+    "versionCode": 6,
+    "versionName": "1.4.2",
+    "downloadUrl": "https://raw.githubusercontent.com/VarunKulkarni15/FH6-Mobile-Controller/master/dist-windows/fh6-controller-windows.exe",
+    "changelog": "Forza Horizon Sim-Racing Companion: Direct RS Down rearview axis dispatch, Klaxon horn, convertible roof toggle, and OBS zero-lag stream mirror."
+  }
+}

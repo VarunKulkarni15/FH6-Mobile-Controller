@@ -123,22 +123,40 @@
         "description": "Camera perspective"
       },
       {
-        "id": "btn_ls",
-        "name": "LS (Horn / Click)",
-        "category": "Controls",
-        "inputType": "DigitalButton",
-        "bindingType": "XboxController",
-        "xboxTarget": "LeftThumbClick",
-        "description": "Car Horn"
-      },
-      {
-        "id": "btn_rs",
-        "name": "RS (Look Back / Click)",
+        "id": "horn",
+        "name": "Horn (RS Click)",
         "category": "Controls",
         "inputType": "DigitalButton",
         "bindingType": "XboxController",
         "xboxTarget": "RightThumbClick",
-        "description": "Look Back"
+        "description": "Car Horn"
+      },
+      {
+        "id": "look_back",
+        "name": "Look Back (RS Down)",
+        "category": "Camera",
+        "inputType": "DigitalButton",
+        "bindingType": "XboxController",
+        "xboxTarget": "RightThumbY",
+        "description": "Look Behind Car"
+      },
+      {
+        "id": "convertible",
+        "name": "Convertible Roof (LS Click)",
+        "category": "Controls",
+        "inputType": "DigitalButton",
+        "bindingType": "XboxController",
+        "xboxTarget": "LeftThumbClick",
+        "description": "Toggle Convertible and Aero"
+      },
+      {
+        "id": "activate",
+        "name": "Activate / Enter (X)",
+        "category": "Gameplay",
+        "inputType": "DigitalButton",
+        "bindingType": "XboxController",
+        "xboxTarget": "X",
+        "description": "Enter Festival / Start Race"
       },
       {
         "id": "map",

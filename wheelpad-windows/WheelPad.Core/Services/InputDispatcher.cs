@@ -134,6 +134,16 @@ namespace WheelPad.Core.Services
                 return;
             }
 
+            if (actionId == "look_back")
+            {
+                // In Forza Horizon, Look Back is RS Down (pull Right Thumb Stick down)
+                if (_xboxController != null && _xboxController.IsConnected)
+                {
+                    _xboxController.SetAxis(XboxButton.RightThumbY, isPressed ? (short)-32767 : (short)0);
+                }
+                return;
+            }
+
             var action = FindAction(actionId);
             if (action == null) return;
 
@@ -193,19 +203,20 @@ namespace WheelPad.Core.Services
                 "throttle" => new GameAction { Id = "throttle", InputType = InputType.AnalogTrigger, XboxTarget = XboxButton.RightTrigger },
                 "brake" => new GameAction { Id = "brake", InputType = InputType.AnalogTrigger, XboxTarget = XboxButton.LeftTrigger },
                 "handbrake" or "btn_a" => new GameAction { Id = actionId, InputType = InputType.DigitalButton, XboxTarget = XboxButton.A },
-                "btn_b" => new GameAction { Id = "btn_b", InputType = InputType.DigitalButton, XboxTarget = XboxButton.B },
-                "btn_x" => new GameAction { Id = "btn_x", InputType = InputType.DigitalButton, XboxTarget = XboxButton.X },
+                "btn_b" or "shift_up" => new GameAction { Id = actionId, InputType = InputType.DigitalButton, XboxTarget = XboxButton.B },
+                "btn_x" or "activate" or "shift_down" => new GameAction { Id = actionId, InputType = InputType.DigitalButton, XboxTarget = XboxButton.X },
                 "rewind" or "btn_y" => new GameAction { Id = actionId, InputType = InputType.DigitalButton, XboxTarget = XboxButton.Y },
-                "btn_lb" => new GameAction { Id = "btn_lb", InputType = InputType.DigitalButton, XboxTarget = XboxButton.LeftBumper },
+                "btn_lb" or "clutch" => new GameAction { Id = actionId, InputType = InputType.DigitalButton, XboxTarget = XboxButton.LeftBumper },
                 "camera" or "btn_rb" => new GameAction { Id = actionId, InputType = InputType.DigitalButton, XboxTarget = XboxButton.RightBumper },
-                "btn_ls" => new GameAction { Id = actionId, InputType = InputType.DigitalButton, XboxTarget = XboxButton.LeftThumbClick },
+                "btn_ls" or "convertible" => new GameAction { Id = actionId, InputType = InputType.DigitalButton, XboxTarget = XboxButton.LeftThumbClick },
                 "btn_rs" or "horn" => new GameAction { Id = actionId, InputType = InputType.DigitalButton, XboxTarget = XboxButton.RightThumbClick },
+                "look_back" => new GameAction { Id = "look_back", InputType = InputType.DigitalButton, XboxTarget = XboxButton.RightThumbY },
                 "map" or "btn_back" or "btn_view" => new GameAction { Id = actionId, InputType = InputType.DigitalButton, XboxTarget = XboxButton.Back },
                 "pause" or "btn_start" or "btn_menu" => new GameAction { Id = actionId, InputType = InputType.DigitalButton, XboxTarget = XboxButton.Start },
-                "dpad_up" => new GameAction { Id = "dpad_up", InputType = InputType.DigitalButton, XboxTarget = XboxButton.DpadUp },
-                "dpad_down" => new GameAction { Id = "dpad_down", InputType = InputType.DigitalButton, XboxTarget = XboxButton.DpadDown },
-                "dpad_left" => new GameAction { Id = "dpad_left", InputType = InputType.DigitalButton, XboxTarget = XboxButton.DpadLeft },
-                "dpad_right" => new GameAction { Id = "dpad_right", InputType = InputType.DigitalButton, XboxTarget = XboxButton.DpadRight },
+                "dpad_up" or "photo_mode" => new GameAction { Id = actionId, InputType = InputType.DigitalButton, XboxTarget = XboxButton.DpadUp },
+                "dpad_down" or "anna" => new GameAction { Id = actionId, InputType = InputType.DigitalButton, XboxTarget = XboxButton.DpadDown },
+                "dpad_left" or "forza_link" => new GameAction { Id = actionId, InputType = InputType.DigitalButton, XboxTarget = XboxButton.DpadLeft },
+                "dpad_right" or "radio_next" => new GameAction { Id = actionId, InputType = InputType.DigitalButton, XboxTarget = XboxButton.DpadRight },
                 "guide" => new GameAction { Id = "guide", InputType = InputType.DigitalButton, XboxTarget = XboxButton.Guide },
                 "auto_drive" => new GameAction { Id = "auto_drive", Name = "Auto Drive", InputType = InputType.DigitalButton },
                 _ => null

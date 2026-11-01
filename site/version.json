@@ -1,14 +1,14 @@
 {
   "android": {
-    "versionCode": 5,
-    "versionName": "1.4.1",
+    "versionCode": 6,
+    "versionName": "1.4.2",
     "apkUrl": "https://raw.githubusercontent.com/VarunKulkarni15/FH6-Mobile-Controller/master/dist-android/HorizonController.apk",
-    "changelog": "Wi-Fi & Bluetooth fast auto-discovery, sub-millisecond UDP streaming, in-app QR code camera pairing, and zero-glitch pedals."
+    "changelog": "Dedicated Forza Horizon Controls: Real RS Down Look Back, RS Click Klaxon Horn, LS Convertible/Roof toggle, Enter/Activate (X), Photo Mode & Radio Skip."
   },
   "windows": {
-    "versionCode": 5,
-    "versionName": "1.4.1",
+    "versionCode": 6,
+    "versionName": "1.4.2",
     "downloadUrl": "https://raw.githubusercontent.com/VarunKulkarni15/FH6-Mobile-Controller/master/dist-windows/fh6-controller-windows.exe",
-    "changelog": "Forza Horizon Sim-Racing Companion: Multi-interface Wi-Fi & Bluetooth beacon broadcasting, zero .NET prerequisite self-contained binary."
+    "changelog": "Forza Horizon Sim-Racing Companion: Direct RS Down rearview axis dispatch, Klaxon horn, convertible roof toggle, and OBS zero-lag stream mirror."
   }
 }

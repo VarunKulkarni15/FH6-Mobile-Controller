@@ -109,16 +109,16 @@ fun DrivingScreen(
     }
 
     // Continuously stream inputs to UdpFastStream (120Hz FastStream)
-    LaunchedEffect(steeringAngle, throttlePressure, brakePressure, handbrakeState, buttonsBitmask) {
+    LaunchedEffect(steeringAngle, throttlePressure, brakePressure, handbrakeState, buttonsBitmask, rightStickY) {
         udpClient.updateInputs(
             steering = steeringAngle,
             throttle = throttlePressure,
             brake = brakePressure,
             handbrake = handbrakeState,
             buttonsBitmask = buttonsBitmask,
-            leftThumbY = 0f,
-            rightThumbX = 0f,
-            rightThumbY = 0f
+            leftThumbY = leftStickY,
+            rightThumbX = rightStickX,
+            rightThumbY = rightStickY
         )
     }
 
@@ -245,17 +245,18 @@ fun DrivingScreen(
                             "camera", "btn_rb", "listen_mode" -> 1 shl 2
                             "map", "btn_back", "btn_view", "backpack" -> 1 shl 3
                             "pause", "btn_start", "btn_menu" -> 1 shl 4
-                            "btn_x", "strike" -> 1 shl 5
-                            "btn_b", "crouch" -> 1 shl 6
+                            "btn_x", "strike", "activate", "shift_down" -> 1 shl 5
+                            "btn_b", "crouch", "shift_up" -> 1 shl 6
                             "btn_lb", "clutch", "dodge" -> 1 shl 7
-                            "btn_ls", "horn", "sprint" -> 1 shl 8
-                            "btn_rs", "look_back", "zoom" -> 1 shl 9
-                            "dpad_up" -> 1 shl 10
-                            "dpad_down" -> 1 shl 11
-                            "dpad_left" -> 1 shl 12
-                            "dpad_right" -> 1 shl 13
+                            "btn_ls", "convertible", "sprint" -> 1 shl 8
+                            "btn_rs", "horn" -> 1 shl 9
+                            "dpad_up", "photo_mode" -> 1 shl 10
+                            "dpad_down", "anna" -> 1 shl 11
+                            "dpad_left", "forza_link" -> 1 shl 12
+                            "dpad_right", "radio_next" -> 1 shl 13
                             "guide" -> 1 shl 14
                             "auto_drive" -> 1 shl 15
+                            "look_back" -> 1 shl 16
                             else -> 0
                         }
                         val isTrigger = element.actionId == "aim_weapon" || element.actionId == "fire_weapon"
@@ -269,23 +270,22 @@ fun DrivingScreen(
                             actionId = element.actionId,
                             label = element.label,
                             subLabel = when (element.actionId) {
-                                "rewind", "btn_y", "interact" -> "(Y)"
-                                "btn_a", "jump" -> "(A)"
-                                "btn_b", "crouch" -> "(B)"
-                                "btn_x", "strike" -> "(X)"
-                                "camera", "btn_rb", "listen_mode" -> "(RB)"
-                                "btn_lb", "clutch", "dodge" -> "(LB)"
-                                "aim_weapon" -> "LT"
-                                "fire_weapon" -> "RT"
-                                "btn_ls", "horn", "sprint" -> "(LS)"
-                                "btn_rs", "look_back", "zoom" -> "(RS)"
-                                "map", "btn_back", "btn_view", "backpack" -> "BAG"
-                                "pause", "btn_start", "btn_menu" -> "MENU"
-                                "dpad_up" -> "MED"
-                                "dpad_down" -> "ITEM"
-                                "dpad_left" -> "SIDE"
-                                "dpad_right" -> "GUN"
-                                "auto_drive" -> "C+2"
+                                "rewind", "btn_y" -> "(Y)"
+                                "btn_a", "handbrake" -> "(A)"
+                                "btn_b", "shift_up" -> "(B)"
+                                "btn_x", "activate", "shift_down" -> "(X)"
+                                "camera", "btn_rb" -> "(RB)"
+                                "btn_lb", "clutch" -> "(LB)"
+                                "horn", "btn_rs" -> "(RS)"
+                                "look_back" -> "(RS DOWN)"
+                                "convertible", "btn_ls" -> "(LS)"
+                                "photo_mode", "dpad_up" -> "(D-UP)"
+                                "radio_next", "dpad_right" -> "(D-RIGHT)"
+                                "dpad_down", "anna" -> "(ANNA)"
+                                "dpad_left", "forza_link" -> "(LINK)"
+                                "map", "btn_back", "btn_view" -> "(VIEW)"
+                                "pause", "btn_start", "btn_menu" -> "(START)"
+                                "auto_drive" -> "(AUTO)"
                                 else -> ""
                             },
                             isEditMode = state.isEditMode,
@@ -298,7 +298,10 @@ fun DrivingScreen(
                                         brakePressure = 1.0f
                                     } else if (element.actionId == "fire_weapon") {
                                         throttlePressure = 1.0f
-                                    } else if (bit != 0) {
+                                    } else if (element.actionId == "look_back") {
+                                        rightStickY = -1.0f
+                                    }
+                                    if (bit != 0) {
                                         buttonsBitmask = buttonsBitmask or bit
                                     }
                                 } else {
@@ -306,7 +309,10 @@ fun DrivingScreen(
                                         brakePressure = 0.0f
                                     } else if (element.actionId == "fire_weapon") {
                                         throttlePressure = 0.0f
-                                    } else if (bit != 0) {
+                                    } else if (element.actionId == "look_back") {
+                                        rightStickY = 0.0f
+                                    }
+                                    if (bit != 0) {
                                         buttonsBitmask = buttonsBitmask and bit.inv()
                                     }
                                     syncClient?.testActionInput(element.actionId, false)
@@ -770,21 +776,21 @@ fun DrivingScreen(
 
                                     val tagText = when (action.id) {
                                         "rewind", "btn_y" -> "Y"
-                                        "btn_a" -> "A"
-                                        "btn_b" -> "B"
-                                        "btn_x" -> "X"
+                                        "btn_a", "handbrake" -> "A"
+                                        "btn_b", "shift_up" -> "B"
+                                        "btn_x", "activate", "shift_down" -> "X"
                                         "camera", "btn_rb" -> "RB"
                                         "btn_lb", "clutch" -> "LB"
-                                        "btn_ls", "horn" -> "LS"
-                                        "btn_rs", "look_back" -> "RS"
+                                        "horn", "btn_rs" -> "RS"
+                                        "look_back" -> "REAR"
+                                        "convertible", "btn_ls" -> "LS"
+                                        "photo_mode", "dpad_up" -> "PHOTO"
+                                        "radio_next", "dpad_right" -> "RADIO"
+                                        "dpad_down", "anna" -> "ANNA"
+                                        "dpad_left", "forza_link" -> "LINK"
                                         "map", "btn_back", "btn_view" -> "VIEW"
                                         "pause", "btn_start", "btn_menu" -> "MENU"
-                                        "dpad_up" -> "UP"
-                                        "dpad_down" -> "DOWN"
-                                        "dpad_left" -> "LEFT"
-                                        "dpad_right" -> "RIGHT"
-                                        "handbrake" -> "SPACE"
-                                        "auto_drive" -> "C+2"
+                                        "auto_drive" -> "AUTO"
                                         else -> "+ ADD"
                                     }
 
@@ -2011,7 +2017,7 @@ fun FH6ExactSvgActionButton(
                     drawCircle(strokeColor, radius = r * 0.14f, center = Offset(cx, cy + r * 0.02f), style = Stroke(width = strokeWidth * 0.9f))
                 }
 
-                "btn_ls", "horn" -> {
+                "horn", "btn_rs" -> {
                     // Car Horn / Klaxon Trumpet with Dual Acoustic Waves
                     val gold = Color(0xFFFFD600)
                     if (isPressed) {
@@ -2039,16 +2045,16 @@ fun FH6ExactSvgActionButton(
                     drawArc(hornColor, -45f, 90f, false, waveRect2.topLeft, waveRect2.size, style = Stroke(width = strokeWidth * 0.9f, cap = androidx.compose.ui.graphics.StrokeCap.Round))
                 }
 
-                "btn_rs", "look_back" -> {
-                    // Rearview Mirror Icon
-                    val white = Color.White
+                "look_back" -> {
+                    // Rearview Mirror Icon (RS Down)
+                    val voltLime = Color(0xFFCCFF00)
                     if (isPressed) {
-                        drawRoundRect(white, cornerRadius = CornerRadius(cornerRad, cornerRad))
+                        drawRoundRect(voltLime, cornerRadius = CornerRadius(cornerRad, cornerRad))
                     } else {
                         drawRoundRect(Color(0xE0081418), cornerRadius = CornerRadius(cornerRad, cornerRad))
-                        drawRoundRect(white, cornerRadius = CornerRadius(cornerRad, cornerRad), style = Stroke(width = strokeWidth))
+                        drawRoundRect(voltLime, cornerRadius = CornerRadius(cornerRad, cornerRad), style = Stroke(width = strokeWidth))
                     }
-                    val strokeColor = if (isPressed) Color.Black else white
+                    val strokeColor = if (isPressed) Color.Black else voltLime
                     // Mirror outline
                     val mirrorRect = Rect(cx - r * 0.48f, cy - r * 0.32f, cx + r * 0.48f, cy + r * 0.08f)
                     drawRoundRect(strokeColor, mirrorRect.topLeft, mirrorRect.size, CornerRadius(6.dp.toPx(), 6.dp.toPx()), style = Stroke(width = strokeWidth * 0.9f))
@@ -2057,6 +2063,85 @@ fun FH6ExactSvgActionButton(
                     // Perspective road lines inside mirror
                     drawLine(strokeColor.copy(alpha = 0.6f), Offset(cx - r * 0.25f, cy + r * 0.08f), Offset(cx - r * 0.05f, cy - r * 0.12f), strokeWidth = thinStroke)
                     drawLine(strokeColor.copy(alpha = 0.6f), Offset(cx + r * 0.25f, cy + r * 0.08f), Offset(cx + r * 0.05f, cy - r * 0.12f), strokeWidth = thinStroke)
+                }
+
+                "convertible", "btn_ls" -> {
+                    // Convertible Roof Icon
+                    val cyan = Color(0xFF00E5FF)
+                    if (isPressed) {
+                        drawRoundRect(cyan, cornerRadius = CornerRadius(cornerRad, cornerRad))
+                    } else {
+                        drawRoundRect(Color(0xE0051720), cornerRadius = CornerRadius(cornerRad, cornerRad))
+                        drawRoundRect(cyan, cornerRadius = CornerRadius(cornerRad, cornerRad), style = Stroke(width = strokeWidth))
+                    }
+                    val roofColor = if (isPressed) Color.Black else cyan
+                    val roofPath = Path().apply {
+                        moveTo(cx - r * 0.40f, cy + r * 0.08f)
+                        lineTo(cx - r * 0.20f, cy - r * 0.25f)
+                        lineTo(cx + r * 0.20f, cy - r * 0.25f)
+                        lineTo(cx + r * 0.40f, cy + r * 0.08f)
+                    }
+                    drawPath(roofPath, roofColor, style = Stroke(width = strokeWidth * 1.1f, cap = androidx.compose.ui.graphics.StrokeCap.Round))
+                }
+
+                "photo_mode" -> {
+                    // Photo Mode Aperture
+                    val purple = Color(0xFFE040FB)
+                    if (isPressed) {
+                        drawRoundRect(purple, cornerRadius = CornerRadius(cornerRad, cornerRad))
+                    } else {
+                        drawRoundRect(Color(0xE01A0620), cornerRadius = CornerRadius(cornerRad, cornerRad))
+                        drawRoundRect(purple, cornerRadius = CornerRadius(cornerRad, cornerRad), style = Stroke(width = strokeWidth))
+                    }
+                    val col = if (isPressed) Color.Black else purple
+                    drawCircle(col, radius = r * 0.28f, center = Offset(cx, cy - r * 0.05f), style = Stroke(width = strokeWidth * 0.9f))
+                    drawCircle(col, radius = r * 0.10f, center = Offset(cx, cy - r * 0.05f))
+                }
+
+                "radio_next" -> {
+                    // Radio Track Skip
+                    val pink = Color(0xFFFF4081)
+                    if (isPressed) {
+                        drawRoundRect(pink, cornerRadius = CornerRadius(cornerRad, cornerRad))
+                    } else {
+                        drawRoundRect(Color(0xE0200612), cornerRadius = CornerRadius(cornerRad, cornerRad))
+                        drawRoundRect(pink, cornerRadius = CornerRadius(cornerRad, cornerRad), style = Stroke(width = strokeWidth))
+                    }
+                    val col = if (isPressed) Color.Black else pink
+                    val t1 = Path().apply {
+                        moveTo(cx - r * 0.25f, cy - r * 0.25f)
+                        lineTo(cx, cy - r * 0.05f)
+                        lineTo(cx - r * 0.25f, cy + r * 0.15f)
+                        close()
+                    }
+                    val t2 = Path().apply {
+                        moveTo(cx, cy - r * 0.25f)
+                        lineTo(cx + r * 0.25f, cy - r * 0.05f)
+                        lineTo(cx, cy + r * 0.15f)
+                        close()
+                    }
+                    drawPath(t1, col)
+                    drawPath(t2, col)
+                }
+
+                "activate" -> {
+                    // Activate / Event Entry (Diamond with X)
+                    val blue = Color(0xFF00B0FF)
+                    if (isPressed) {
+                        drawRoundRect(blue, cornerRadius = CornerRadius(cornerRad, cornerRad))
+                    } else {
+                        drawRoundRect(Color(0xE006121A), cornerRadius = CornerRadius(cornerRad, cornerRad))
+                        drawRoundRect(blue, cornerRadius = CornerRadius(cornerRad, cornerRad), style = Stroke(width = strokeWidth))
+                    }
+                    val col = if (isPressed) Color.Black else blue
+                    val diamond = Path().apply {
+                        moveTo(cx, cy - r * 0.35f)
+                        lineTo(cx + r * 0.30f, cy - r * 0.05f)
+                        lineTo(cx, cy + r * 0.25f)
+                        lineTo(cx - r * 0.30f, cy - r * 0.05f)
+                        close()
+                    }
+                    drawPath(diamond, col, style = Stroke(width = strokeWidth * 1.1f))
                 }
 
                 "map", "btn_back", "btn_view" -> {
@@ -2191,11 +2276,15 @@ fun FH6ExactSvgActionButton(
             } else {
                 when (actionId) {
                     "auto_drive", "rewind", "btn_y" -> Color(0xFFCCFF00)
-                    "btn_a" -> Color(0xFF00E676)
-                    "btn_b" -> Color(0xFFFF1744)
-                    "btn_x" -> Color(0xFF00B0FF)
+                    "btn_a", "handbrake" -> Color(0xFF00E676)
+                    "btn_b", "shift_up" -> Color(0xFFFF1744)
+                    "btn_x", "activate", "shift_down" -> Color(0xFF00B0FF)
                     "btn_lb", "clutch" -> Color(0xFF00E5FF)
-                    "btn_ls", "horn" -> Color(0xFFFFD600)
+                    "horn", "btn_rs" -> Color(0xFFFFD600)
+                    "look_back" -> Color(0xFFCCFF00)
+                    "convertible", "btn_ls" -> Color(0xFF00E5FF)
+                    "photo_mode" -> Color(0xFFE040FB)
+                    "radio_next" -> Color(0xFFFF4081)
                     else -> Color.White
                 }
             }
@@ -2208,8 +2297,14 @@ fun FH6ExactSvgActionButton(
                     "rewind", "btn_y" -> "Y"
                     "auto_drive" -> "AUTO"
                     "btn_lb", "clutch" -> "CLUTCH"
-                    "btn_ls", "horn" -> "HORN"
-                    "btn_rs", "look_back" -> "REAR"
+                    "horn", "btn_rs" -> "HORN"
+                    "look_back" -> "REAR"
+                    "convertible", "btn_ls" -> "ROOF"
+                    "activate" -> "ENTER"
+                    "photo_mode" -> "PHOTO"
+                    "radio_next" -> "RADIO"
+                    "shift_up" -> "UP"
+                    "shift_down" -> "DOWN"
                     "camera", "btn_rb" -> "CAM"
                     "map", "btn_back", "btn_view" -> "MAP"
                     "pause", "btn_start", "btn_menu" -> "MENU"
