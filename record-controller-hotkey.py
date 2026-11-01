@@ -86,8 +86,8 @@ def main():
                         f"--record={current_filepath}",
                         f"--window-title={WINDOW_TITLE}",
                         "--stay-awake",
-                        "--max-fps=120",
-                        "--video-bit-rate=16M",
+                        "--max-fps=60",
+                        "--video-bit-rate=12M",
                         "--no-audio"
                     ]
 
