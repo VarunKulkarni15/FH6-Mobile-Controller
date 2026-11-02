@@ -36,6 +36,9 @@ class ControlSyncClient(
     private val _gameStatus = MutableStateFlow(com.wheelpad.app.data.model.GameStatus())
     val gameStatus: StateFlow<com.wheelpad.app.data.model.GameStatus> = _gameStatus
 
+    private val _isGamePaused = MutableStateFlow(false)
+    val isGamePaused: StateFlow<Boolean> = _isGamePaused
+
     private val _statusMessage = MutableStateFlow("Disconnected")
     val statusMessage: StateFlow<String> = _statusMessage
 
@@ -127,6 +130,9 @@ class ControlSyncClient(
                         gameName = root.optString("gameName", "Forza Horizon 6"),
                         processId = root.optInt("processId", 0)
                     )
+                }
+                "PAUSE_STATE_CHANGED" -> {
+                    _isGamePaused.value = root.optBoolean("isPaused", false)
                 }
                 "SPOTIFY_STATE_CHANGED" -> {
                     val trackObj = root.optJSONObject("track")

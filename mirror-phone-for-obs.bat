@@ -1,4 +1,4 @@
-@echo off
+se@echo off
 title Horizon Controller - OBS Mirroring Stream
 echo ========================================================
 echo   FORZA HORIZON CONTROLLER - OBS LOW-LATENCY MIRROR

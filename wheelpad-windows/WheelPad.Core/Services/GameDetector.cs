@@ -1,3 +1,4 @@
+using System.Runtime.InteropServices;
 using System;
 using System.Diagnostics;
 using System.IO;
@@ -63,12 +64,26 @@ namespace WheelPad.Core.Services
         private readonly ProfileManager _profileManager;
         private readonly ControlSyncServer? _syncServer;
         private readonly Timer _pollTimer;
+        private readonly Timer _keyStateTimer;
 
         private bool _isGameRunning;
+        private bool _isGamePaused;
+        private bool _lastEscDown;
+        private bool _lastMDown;
+
+        [DllImport("user32.dll")]
+        private static extern short GetAsyncKeyState(int vKey);
+
+        [DllImport("user32.dll")]
+        private static extern IntPtr GetForegroundWindow();
+
+        [DllImport("user32.dll")]
+        private static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint lpdwProcessId);
         private int _lastProcessId;
         private string? _autoActivateProfileId;
 
         public bool IsGameRunning => _isGameRunning;
+        public bool IsGamePaused => _isGamePaused;
         public int CurrentProcessId => _lastProcessId;
         public string? CurrentGameName { get; private set; }
         public bool AutoProfileSwitchEnabled { get; set; } = true;
@@ -105,6 +120,69 @@ namespace WheelPad.Core.Services
 
             // Poll process table immediately and then every 2 seconds
             _pollTimer = new Timer(PollCallback, null, 100, 2000);
+
+            // High-frequency key monitor (50ms) to detect ESC/M on laptop keyboard
+            _keyStateTimer = new Timer(KeyPollCallback, null, 200, 50);
+        }
+
+        private void KeyPollCallback(object? state)
+        {
+            try
+            {
+                // 0x1B = VK_ESCAPE, 0x4D = 'M' (World Map)
+                bool escDown = (GetAsyncKeyState(0x1B) & 0x8000) != 0;
+                bool mDown = (GetAsyncKeyState(0x4D) & 0x8000) != 0;
+
+                if ((escDown && !_lastEscDown) || (mDown && !_lastMDown))
+                {
+                    if (_isGameRunning)
+                    {
+                        IntPtr fg = GetForegroundWindow();
+                        GetWindowThreadProcessId(fg, out uint fgPid);
+                        bool isGameActive = (fgPid == (uint)_lastProcessId || fg == IntPtr.Zero);
+                        if (!isGameActive)
+                        {
+                            try
+                            {
+                                var proc = Process.GetProcessById((int)fgPid);
+                                string pName = proc.ProcessName.ToLowerInvariant();
+                                if (pName.Contains("forza") || pName.Contains("applicationframehost") || pName.Contains("fh"))
+                                {
+                                    isGameActive = true;
+                                }
+                            }
+                            catch { }
+                        }
+
+                        if (isGameActive)
+                        {
+                            _isGamePaused = !_isGamePaused;
+                            _syncServer?.BroadcastEvent(new
+                            {
+                                type = "PAUSE_STATE_CHANGED",
+                                isPaused = _isGamePaused
+                            });
+                            LogMessage?.Invoke(this, $"[GameDetector] Laptop key pressed. Pause/Map state: {_isGamePaused}");
+                        }
+                    }
+                }
+                _lastEscDown = escDown;
+                _lastMDown = mDown;
+            }
+            catch { }
+        }
+
+        public void SetPauseState(bool isPaused)
+        {
+            if (_isGamePaused != isPaused)
+            {
+                _isGamePaused = isPaused;
+                _syncServer?.BroadcastEvent(new
+                {
+                    type = "PAUSE_STATE_CHANGED",
+                    isPaused = _isGamePaused
+                });
+            }
         }
 
         public void CheckImmediately()
@@ -195,6 +273,7 @@ namespace WheelPad.Core.Services
         public void Dispose()
         {
             _pollTimer.Dispose();
+            _keyStateTimer?.Dispose();
         }
     }
 }

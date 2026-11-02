@@ -45,6 +45,7 @@ namespace WheelPad.App
             _udpReceiver = new UdpFastStreamReceiver(_dispatcher);
             _beaconBroadcaster = new BeaconBroadcaster();
             _gameDetector = new GameDetector(_profileManager, _syncServer);
+            _dispatcher.GameDetector = _gameDetector;
             _autoUpdateService = new AutoUpdateService();
 
             // Ambient background: Single Forza Horizon GT-R image

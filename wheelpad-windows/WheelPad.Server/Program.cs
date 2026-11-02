@@ -73,6 +73,7 @@ namespace WheelPad.Server
 
             // 6. Initialize Game Detector (Auto-detects forzahorizon6.exe)
             var gameDetector = new GameDetector(profileManager, syncServer);
+            dispatcher.GameDetector = gameDetector;
             gameDetector.LogMessage += (s, msg) => Console.WriteLine(msg);
             gameDetector.GameStatusChanged += (s, e) =>
             {

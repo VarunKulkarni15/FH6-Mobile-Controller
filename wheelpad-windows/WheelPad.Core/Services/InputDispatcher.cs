@@ -43,6 +43,7 @@ namespace WheelPad.Core.Services
 
         private readonly ProfileManager _profileManager;
         private readonly IVirtualXboxController? _xboxController;
+        public GameDetector? GameDetector { get; set; }
         private readonly ConcurrentDictionary<int, bool> _activeKeysDown = new();
         private readonly ConcurrentDictionary<string, bool> _toggleStates = new();
         private readonly object _stateLock = new();
@@ -61,10 +62,20 @@ namespace WheelPad.Core.Services
             // Fast path for direct analog axes
             if (_xboxController != null && _xboxController.IsConnected)
             {
-                if (actionId == "left_stick_y")
+                if (actionId == "left_stick_x" || (actionId == "steer" && (GameDetector?.IsGamePaused == true)))
+                {
+                    short raw = (short)(normalizedValue * 32767f);
+                    _xboxController.SetAxis(XboxButton.LeftThumbX, raw);
+                    int dx = (int)(normalizedValue * 22f);
+                    if (Math.Abs(dx) > 1) mouse_event(MOUSEEVENTF_MOVE, dx, 0, 0, UIntPtr.Zero);
+                    return;
+                }
+                else if (actionId == "left_stick_y")
                 {
                     short raw = (short)(normalizedValue * 32767f);
                     _xboxController.SetAxis(XboxButton.LeftThumbY, raw);
+                    int dy = (int)(-normalizedValue * 22f);
+                    if (Math.Abs(dy) > 1) mouse_event(MOUSEEVENTF_MOVE, 0, dy, 0, UIntPtr.Zero);
                     return;
                 }
                 else if (actionId == "right_stick_x")
@@ -182,29 +193,93 @@ namespace WheelPad.Core.Services
                 return;
             }
 
+// Dual dispatch: Xbox Controller + PC Keyboard for all Forza Horizon Menu & Map Actions
+            if (actionId == "pause" || actionId == "btn_start" || actionId == "btn_menu")
+            {
+                if (isPressed && GameDetector != null)
+                {
+                    GameDetector.SetPauseState(!GameDetector.IsGamePaused);
+                }
+                if (_xboxController != null && _xboxController.IsConnected) _xboxController.SetButton(XboxButton.Start, isPressed);
+                SendWindowsKey(27, isPressed); // ESC
+                return;
+            }
+            if (actionId == "map" || actionId == "btn_back" || actionId == "btn_view")
+            {
+                if (isPressed && GameDetector != null)
+                {
+                    GameDetector.SetPauseState(true);
+                }
+                if (_xboxController != null && _xboxController.IsConnected) _xboxController.SetButton(XboxButton.Back, isPressed);
+                SendWindowsKey(0x4D, isPressed); // M (World Map)
+                SendWindowsKey(32, isPressed);   // Space (Collection Journal)
+                return;
+            }
+            if (actionId == "btn_b")
+            {
+                if (_xboxController != null && _xboxController.IsConnected) _xboxController.SetButton(XboxButton.B, isPressed);
+                SendWindowsKey(27, isPressed); // ESC / Back
+                return;
+            }
+            if (actionId == "btn_a")
+            {
+                if (_xboxController != null && _xboxController.IsConnected) _xboxController.SetButton(XboxButton.A, isPressed);
+                SendWindowsKey(13, isPressed); // Enter / Set Route
+                return;
+            }
+            if (actionId == "btn_x")
+            {
+                if (_xboxController != null && _xboxController.IsConnected) _xboxController.SetButton(XboxButton.X, isPressed);
+                SendWindowsKey(0x58, isPressed); // X / Fast Travel
+                return;
+            }
+            if (actionId == "btn_y" || actionId == "rewind")
+            {
+                if (_xboxController != null && _xboxController.IsConnected) _xboxController.SetButton(XboxButton.Y, isPressed);
+                SendWindowsKey(0x59, isPressed); // Y / Reveal Map
+                SendWindowsKey(0x52, isPressed); // R / Rewind
+                return;
+            }
             if (actionId == "btn_lb" || actionId == "clutch")
             {
-                // In Forza Horizon: Left Bumper (Xbox) + PC Left Arrow (VK_LEFT = 37) for category tabs
-                if (_xboxController != null && _xboxController.IsConnected)
-                {
-                    _xboxController.SetButton(XboxButton.LeftBumper, isPressed);
-                }
-                SendWindowsKey(37, isPressed);
+                if (_xboxController != null && _xboxController.IsConnected) _xboxController.SetButton(XboxButton.LeftBumper, isPressed);
+                SendWindowsKey(37, isPressed); // Left Arrow
+                SendWindowsKey(33, isPressed); // Page Up
                 return;
             }
-
             if (actionId == "camera" || actionId == "btn_rb")
             {
-                // In Forza Horizon: Right Bumper (Xbox) + PC Right Arrow (VK_RIGHT = 39) for category tabs
-                if (_xboxController != null && _xboxController.IsConnected)
-                {
-                    _xboxController.SetButton(XboxButton.RightBumper, isPressed);
-                }
-                SendWindowsKey(39, isPressed);
+                if (_xboxController != null && _xboxController.IsConnected) _xboxController.SetButton(XboxButton.RightBumper, isPressed);
+                SendWindowsKey(39, isPressed); // Right Arrow
+                SendWindowsKey(34, isPressed); // Page Down
+                return;
+            }
+            if (actionId == "dpad_up")
+            {
+                if (_xboxController != null && _xboxController.IsConnected) _xboxController.SetButton(XboxButton.DpadUp, isPressed);
+                SendWindowsKey(38, isPressed); // Up Arrow
+                return;
+            }
+            if (actionId == "dpad_down")
+            {
+                if (_xboxController != null && _xboxController.IsConnected) _xboxController.SetButton(XboxButton.DpadDown, isPressed);
+                SendWindowsKey(40, isPressed); // Down Arrow
+                return;
+            }
+            if (actionId == "dpad_left")
+            {
+                if (_xboxController != null && _xboxController.IsConnected) _xboxController.SetButton(XboxButton.DpadLeft, isPressed);
+                SendWindowsKey(37, isPressed); // Left Arrow
+                return;
+            }
+            if (actionId == "dpad_right")
+            {
+                if (_xboxController != null && _xboxController.IsConnected) _xboxController.SetButton(XboxButton.DpadRight, isPressed);
+                SendWindowsKey(39, isPressed); // Right Arrow
                 return;
             }
 
-            var action = FindAction(actionId);
+                        var action = FindAction(actionId);
             if (action == null) return;
 
             // Handle behavior
@@ -378,6 +453,10 @@ namespace WheelPad.Core.Services
 
         [DllImport("user32.dll")]
         private static extern uint MapVirtualKeyW(uint uCode, uint uMapType);
+
+        [DllImport("user32.dll")]
+        private static extern void mouse_event(uint dwFlags, int dx, int dy, uint dwData, UIntPtr dwExtraInfo);
+        private const uint MOUSEEVENTF_MOVE = 0x0001;
 
         [DllImport("user32.dll")]
         private static extern void keybd_event(byte bVk, byte bScan, uint dwFlags, UIntPtr dwExtraInfo);

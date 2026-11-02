@@ -115,6 +115,13 @@ fun DrivingScreen(
     var hwVolumeDownAction by remember { mutableStateOf(prefs.getString("hw_volume_down_action", "btn_lb") ?: "btn_lb") }
     var pickingVolumeKeyTarget by remember { mutableStateOf<String?>(null) } // "UP", "DOWN", or null
     var isMenuState by remember { mutableStateOf(false) }
+    val syncGamePaused by (syncClient?.isGamePaused?.collectAsState() ?: remember { mutableStateOf(false) })
+
+    LaunchedEffect(syncGamePaused) {
+        if (isMenuState != syncGamePaused) {
+            isMenuState = syncGamePaused
+        }
+    }
     var isAutoDriveActive by remember { mutableStateOf(false) }
 
     val triggerAction: (String, Boolean) -> Unit = { actionId, isDown ->
@@ -145,8 +152,6 @@ fun DrivingScreen(
         // Smart Auto-Detection for Pause Menu / Car Selection / Settings
         if ((actionId == "pause" || actionId == "btn_menu" || actionId == "btn_start" || actionId == "map" || actionId == "btn_view") && isDown) {
             isMenuState = !isMenuState
-        } else if (actionId == "btn_b" && isDown && isMenuState) {
-            isMenuState = false
         } else if (actionId == "auto_drive" && isDown) {
             isAutoDriveActive = !isAutoDriveActive
         }
@@ -198,7 +203,7 @@ fun DrivingScreen(
                 val actionId = if (isMenuState) {
                     // In Settings / Garage / Car Selection / Menus:
                     // Volume UP = [LB] (Left / Prev Tab), Volume DOWN = [RB] (Right / Next Tab)
-                    if (keyCode == android.view.KeyEvent.KEYCODE_VOLUME_UP) "btn_lb" else "camera"
+                    if (keyCode == android.view.KeyEvent.KEYCODE_VOLUME_UP) "btn_lb" else "btn_rb"
                 } else {
                     if (keyCode == android.view.KeyEvent.KEYCODE_VOLUME_UP) hwVolumeUpAction else hwVolumeDownAction
                 }
@@ -243,8 +248,23 @@ fun DrivingScreen(
         val screenWidthPx = with(density) { screenWidth.toPx() }
         val screenHeightPx = with(density) { screenHeight.toPx() }
 
-        // 1. Render all HUD controls from active profile (Driving controls ALWAYS present)
-        state.currentProfile.layout.forEach { element ->
+        // 1. Render Screen Based on Menu/Driving State
+        if (isMenuState) {
+            FH6SettingsNavScreen(
+                onTriggerAction = triggerAction,
+                onAnalogMove = { x, y ->
+                    steeringAngle = x
+                    leftStickY = y
+                },
+                onReturnToDrive = {
+                    triggerAction("pause", true)
+                    triggerAction("pause", false)
+                    isMenuState = false
+                }
+            )
+        } else {
+            // Standard Driving Sim-Racing Rig
+            state.currentProfile.layout.forEach { element ->
             val elementX = screenWidth * element.normalizedX
             val elementY = screenHeight * element.normalizedY
             val elementW = screenWidth * element.normalizedWidth
@@ -423,26 +443,9 @@ fun DrivingScreen(
                 }
             }
         }
+        } // End of Driving Rig else branch
 
-        // 1b. Discreet Menu Tab Indicator when user is browsing Pause Menu / Car Selection
-        if (isMenuState) {
-            Box(
-                modifier = Modifier
-                    .align(Alignment.TopCenter)
-                    .padding(top = 10.dp)
-                    .clip(RoundedCornerShape(6.dp))
-                    .background(Color(0xE0061218))
-                    .border(1.dp, Color(0xFFCCFF00), RoundedCornerShape(6.dp))
-                    .padding(horizontal = 14.dp, vertical = 6.dp)
-            ) {
-                Text(
-                    text = "MENU TABS ACTIVE  •  VOL UP: [LB] ◀   VOL DOWN: ▶ [RB]",
-                    color = Color(0xFFCCFF00),
-                    fontSize = 10.sp,
-                    fontWeight = FontWeight.Black
-                )
-            }
-        }
+
 
         // 2. Discreet 3-Dots Corner Menu Button (Crisp Vector Canvas)
         Box(
@@ -1419,7 +1422,7 @@ fun FH6ExactSvgActionButton(
                 }
 
                 "shift_down" -> {
-                    val blue = Color(0xFFCCFF00)
+                    val blue = Color(0xFF00B0FF)
                     if (isPressed) {
                         drawRoundRect(blue, cornerRadius = CornerRadius(cornerRad, cornerRad))
                     } else {
@@ -1596,13 +1599,13 @@ fun FH6ExactSvgActionButton(
                 }
 
                 "btn_x", "activate" -> {
-                    val blue = Color(0xFFCCFF00)
+                    val blue = Color(0xFF00B0FF)
                     if (isPressed) {
                         drawCircle(blue, radius = r, center = Offset(cx, cy))
                     } else {
                         drawCircle(Color(0xE006121A), radius = r, center = Offset(cx, cy))
                         drawCircle(blue, radius = r, center = Offset(cx, cy), style = Stroke(width = strokeWidth))
-                        drawCircle(Color(0x60CCFF00), radius = r * 0.78f, center = Offset(cx, cy), style = Stroke(width = thinStroke))
+                        drawCircle(Color(0x6000B0FF), radius = r * 0.78f, center = Offset(cx, cy), style = Stroke(width = thinStroke))
                     }
                     // Paddle Shift Down (−) Top Accent
                     val minusColor = if (isPressed) Color.Black else blue
@@ -1616,7 +1619,7 @@ fun FH6ExactSvgActionButton(
                     } else {
                         drawCircle(Color(0xE0161A06), radius = r, center = Offset(cx, cy))
                         drawCircle(yellow, radius = r, center = Offset(cx, cy), style = Stroke(width = strokeWidth))
-                        drawCircle(Color(0x60CCFF00), radius = r * 0.78f, center = Offset(cx, cy), style = Stroke(width = thinStroke))
+                        drawCircle(Color(0x6000B0FF), radius = r * 0.78f, center = Offset(cx, cy), style = Stroke(width = thinStroke))
                     }
                     // Signature Forza Horizon Counter-Clockwise Rewind Arc
                     val arcColor = if (isPressed) Color.Black else yellow
@@ -1916,7 +1919,7 @@ fun FH6ExactSvgActionButton(
                 "auto_drive", "rewind", "btn_y", "steer", "move_stick" -> Color(0xFFCCFF00)
                 "btn_a", "throttle", "fire_weapon" -> Color(0xFF00E676)
                 "btn_b", "shift_up", "brake", "aim_weapon" -> Color(0xFFFF1744)
-                "btn_x", "activate", "shift_down" -> Color(0xFFCCFF00)
+                "btn_x", "activate", "shift_down" -> Color(0xFF00B0FF)
                 "btn_lb", "clutch", "convertible", "btn_ls", "look_left", "look_right", "look_forward" -> Color(0xFFCCFF00)
                 "horn", "btn_rs", "handbrake" -> Color(0xFFFFD600)
                 "look_back" -> Color(0xFFCCFF00)
