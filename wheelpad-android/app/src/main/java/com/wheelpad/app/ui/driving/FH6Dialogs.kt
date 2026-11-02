@@ -1,4 +1,4 @@
-package com.wheelpad.app.ui.driving
+﻿package com.wheelpad.app.ui.driving
 
 import android.content.Context
 import android.view.HapticFeedbackConstants
@@ -112,7 +112,7 @@ fun FH6ActionCatalogDialog(
                             ) {
                                 Box(
                                     modifier = Modifier
-                                        .size(36.dp)
+                                        .size(40.dp)
                                         .clip(RoundedCornerShape(6.dp))
                                         .background(Color(0xFF030D0C))
                                         .border(1.dp, Color(0x40FFFFFF), RoundedCornerShape(6.dp))
@@ -284,7 +284,7 @@ fun FH6VolumeKeyPickerDialog(
                             ) {
                                 Box(
                                     modifier = Modifier
-                                        .size(36.dp)
+                                        .size(40.dp)
                                         .clip(RoundedCornerShape(6.dp))
                                         .background(Color(0xFF030D0C))
                                         .border(1.dp, Color(0x40FFFFFF), RoundedCornerShape(6.dp))
@@ -715,11 +715,11 @@ fun FH6QuickSettingsDrawer(
                                     FH6MiniActionPreview(actionId = hwVolumeDownAction)
                                 }
                                 Column {
-                                    Text("VOL DOWN (−)", color = Color(0xFF00E5FF), fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                                    Text("VOL DOWN (−)", color = Color(0xFFCCFF00), fontSize = 10.sp, fontWeight = FontWeight.Bold)
                                     Text(volDownActionObj?.name ?: hwVolumeDownAction, color = Color.White, fontSize = 9.sp, fontWeight = FontWeight.Medium)
                                 }
                             }
-                            Text("CHANGE >", color = Color(0xFF00E5FF), fontSize = 9.sp, fontWeight = FontWeight.Black)
+                            Text("CHANGE >", color = Color(0xFFCCFF00), fontSize = 9.sp, fontWeight = FontWeight.Black)
                         }
 
                         // Quick Presets
@@ -763,8 +763,8 @@ fun FH6QuickSettingsDrawer(
                                 modifier = Modifier
                                     .weight(1f)
                                     .clip(RoundedCornerShape(4.dp))
-                                    .background(Color(0x3000E5FF))
-                                    .border(1.dp, Color(0x6000E5FF), RoundedCornerShape(4.dp))
+                                    .background(Color(0x30CCFF00))
+                                    .border(1.dp, Color(0x60CCFF00), RoundedCornerShape(4.dp))
                                     .clickable {
                                         onSetVolumePreset("radio_next", "radio_prev")
                                         view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
@@ -772,7 +772,7 @@ fun FH6QuickSettingsDrawer(
                                     .padding(vertical = 5.dp),
                                 contentAlignment = Alignment.Center
                             ) {
-                                Text("D-PAD (R/L)", color = Color(0xFF00E5FF), fontSize = 8.sp, fontWeight = FontWeight.Black)
+                                Text("D-PAD (R/L)", color = Color(0xFFCCFF00), fontSize = 8.sp, fontWeight = FontWeight.Black)
                             }
                         }
                     }

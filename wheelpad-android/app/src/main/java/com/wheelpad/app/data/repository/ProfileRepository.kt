@@ -208,7 +208,7 @@ class ProfileRepository(private val context: Context) {
                         normalizedWidth = elemObj.optDouble("normalizedWidth", 0.1).toFloat(),
                         normalizedHeight = elemObj.optDouble("normalizedHeight", 0.1).toFloat(),
                         opacity = elemObj.optDouble("opacity", 0.85).toFloat(),
-                        accentColorHex = elemObj.optString("accentColorHex", "#00E5FF"),
+                        accentColorHex = elemObj.optString("accentColorHex", "#CCFF00"),
                         hapticFeedback = elemObj.optBoolean("hapticFeedback", true),
                         isEnabled = elemObj.optBoolean("isEnabled", true)
                     )
@@ -249,10 +249,10 @@ class ProfileRepository(private val context: Context) {
             actions.addAll(ALL_TLOU_ACTIONS)
 
             // Left Movement Stick
-            layout.add(TouchControlElement(elementId = "tlou_move", actionId = "move_stick", label = "MOVE (LS)", shape = ControlShape.AnalogStick, normalizedX = 0.04f, normalizedY = 0.38f, normalizedWidth = 0.25f, normalizedHeight = 0.52f, accentColorHex = "#00E5FF"))
+            layout.add(TouchControlElement(elementId = "tlou_move", actionId = "move_stick", label = "MOVE (LS)", shape = ControlShape.AnalogStick, normalizedX = 0.04f, normalizedY = 0.38f, normalizedWidth = 0.25f, normalizedHeight = 0.52f, accentColorHex = "#CCFF00"))
 
             // Left Shoulder Triggers: Aim & Dodge
-            layout.add(TouchControlElement(elementId = "tlou_lt", actionId = "aim_weapon", label = "AIM (LT)", shape = ControlShape.RoundedButton, normalizedX = 0.04f, normalizedY = 0.08f, normalizedWidth = 0.14f, normalizedHeight = 0.20f, accentColorHex = "#00E5FF"))
+            layout.add(TouchControlElement(elementId = "tlou_lt", actionId = "aim_weapon", label = "AIM (LT)", shape = ControlShape.RoundedButton, normalizedX = 0.04f, normalizedY = 0.08f, normalizedWidth = 0.14f, normalizedHeight = 0.20f, accentColorHex = "#CCFF00"))
             layout.add(TouchControlElement(elementId = "tlou_lb", actionId = "dodge", label = "DODGE (LB)", shape = ControlShape.RoundedButton, normalizedX = 0.20f, normalizedY = 0.08f, normalizedWidth = 0.12f, normalizedHeight = 0.20f, accentColorHex = "#FFFFFF"))
 
             // Tactical D-Pad Weapon Cross (Center-Left)
@@ -270,7 +270,7 @@ class ProfileRepository(private val context: Context) {
 
             // Action Diamond (Far Right)
             layout.add(TouchControlElement(elementId = "tlou_y", actionId = "btn_y", label = "GRAB (Y)", shape = ControlShape.RoundedButton, normalizedX = 0.86f, normalizedY = 0.32f, normalizedWidth = 0.09f, normalizedHeight = 0.16f, accentColorHex = "#FFB300"))
-            layout.add(TouchControlElement(elementId = "tlou_x", actionId = "btn_x", label = "STRIKE (X)", shape = ControlShape.RoundedButton, normalizedX = 0.78f, normalizedY = 0.49f, normalizedWidth = 0.09f, normalizedHeight = 0.16f, accentColorHex = "#00E5FF"))
+            layout.add(TouchControlElement(elementId = "tlou_x", actionId = "btn_x", label = "STRIKE (X)", shape = ControlShape.RoundedButton, normalizedX = 0.78f, normalizedY = 0.49f, normalizedWidth = 0.09f, normalizedHeight = 0.16f, accentColorHex = "#CCFF00"))
             layout.add(TouchControlElement(elementId = "tlou_b", actionId = "btn_b", label = "CROUCH (B)", shape = ControlShape.RoundedButton, normalizedX = 0.94f, normalizedY = 0.49f, normalizedWidth = 0.09f, normalizedHeight = 0.16f, accentColorHex = "#FF1744"))
             layout.add(TouchControlElement(elementId = "tlou_a", actionId = "btn_a", label = "JUMP (A)", shape = ControlShape.RoundedButton, normalizedX = 0.86f, normalizedY = 0.66f, normalizedWidth = 0.09f, normalizedHeight = 0.16f, accentColorHex = "#00E676"))
 

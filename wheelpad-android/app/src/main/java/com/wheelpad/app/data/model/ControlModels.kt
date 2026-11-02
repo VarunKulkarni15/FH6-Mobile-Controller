@@ -1,4 +1,4 @@
-﻿package com.wheelpad.app.data.model
+package com.wheelpad.app.data.model
 
 import java.util.UUID
 
@@ -81,7 +81,7 @@ data class TouchControlElement(
     var normalizedWidth: Float = 0.1f,
     var normalizedHeight: Float = 0.1f,
     var opacity: Float = 0.85f,
-    var accentColorHex: String = "#00E5FF",
+    var accentColorHex: String = "#CCFF00",
     var hapticFeedback: Boolean = true,
     var isEnabled: Boolean = true
 )
