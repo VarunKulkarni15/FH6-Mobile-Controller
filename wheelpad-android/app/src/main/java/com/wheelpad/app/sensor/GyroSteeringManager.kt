@@ -1,4 +1,4 @@
-package com.wheelpad.app.sensor
+﻿package com.wheelpad.app.sensor
 
 import android.content.Context
 import android.hardware.Sensor

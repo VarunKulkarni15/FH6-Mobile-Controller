@@ -3,6 +3,7 @@ package com.wheelpad.app
 import android.content.Context
 import android.os.Build
 import android.os.Bundle
+import android.view.KeyEvent
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -42,6 +43,8 @@ import com.wheelpad.app.util.NotificationHelper
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
+
+    var onVolumeKeyEvent: ((keyCode: Int, isDown: Boolean) -> Boolean)? = null
 
     private lateinit var profileRepository: ProfileRepository
     private lateinit var syncClient: ControlSyncClient
@@ -209,6 +212,24 @@ class MainActivity : ComponentActivity() {
     override fun onResume() {
         super.onResume()
         setImmersiveSticky()
+    }
+
+    override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
+        if (keyCode == KeyEvent.KEYCODE_VOLUME_UP || keyCode == KeyEvent.KEYCODE_VOLUME_DOWN) {
+            if (onVolumeKeyEvent?.invoke(keyCode, true) == true) {
+                return true
+            }
+        }
+        return super.onKeyDown(keyCode, event)
+    }
+
+    override fun onKeyUp(keyCode: Int, event: KeyEvent?): Boolean {
+        if (keyCode == KeyEvent.KEYCODE_VOLUME_UP || keyCode == KeyEvent.KEYCODE_VOLUME_DOWN) {
+            if (onVolumeKeyEvent?.invoke(keyCode, false) == true) {
+                return true
+            }
+        }
+        return super.onKeyUp(keyCode, event)
     }
 
     override fun onWindowFocusChanged(hasFocus: Boolean) {

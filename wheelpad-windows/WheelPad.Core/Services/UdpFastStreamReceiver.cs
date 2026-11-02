@@ -229,6 +229,26 @@ namespace WheelPad.Core.Services
                     bool s = (buttons & (1 << 16)) != 0;
                     _inputDispatcher.DispatchDigitalInput("look_back", s);
                 }
+                if ((changed & (1 << 17)) != 0)
+                {
+                    bool s = (buttons & (1 << 17)) != 0;
+                    _inputDispatcher.DispatchDigitalInput("look_left", s);
+                }
+                if ((changed & (1 << 18)) != 0)
+                {
+                    bool s = (buttons & (1 << 18)) != 0;
+                    _inputDispatcher.DispatchDigitalInput("look_right", s);
+                }
+                if ((changed & (1 << 19)) != 0)
+                {
+                    bool s = (buttons & (1 << 19)) != 0;
+                    _inputDispatcher.DispatchDigitalInput("look_forward", s);
+                }
+                if ((changed & (1 << 20)) != 0)
+                {
+                    bool s = (buttons & (1 << 20)) != 0;
+                    _inputDispatcher.DispatchDigitalInput("radio_prev", s);
+                }
             }
 
             _inputDispatcher.NotifyState(normalizedSteer, normalizedThrottle, normalizedBrake, handbrakePressed);

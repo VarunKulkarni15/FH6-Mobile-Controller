@@ -1,4 +1,4 @@
-package com.wheelpad.app.updater
+﻿package com.wheelpad.app.updater
 
 import android.content.Context
 import android.content.Intent

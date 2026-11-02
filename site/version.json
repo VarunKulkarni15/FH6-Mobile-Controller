@@ -1,14 +1,14 @@
 {
   "android": {
-    "versionCode": 7,
-    "versionName": "1.4.3",
+    "versionCode": 8,
+    "versionName": "1.4.4",
     "apkUrl": "https://raw.githubusercontent.com/VarunKulkarni15/FH6-Mobile-Controller/master/dist-android/HorizonController.apk",
-    "changelog": "Restored authentic Xbox (X) button for event entry and menu navigation, RS Down rear-view mirror, and 120 FPS OBS screen streaming."
+    "changelog": "Hardware Volume Buttons remapping (Paddle Shifters or Car Selection Menu nav), complete FH6 dedicated action catalog with full miniature SVG vector previews."
   },
   "windows": {
-    "versionCode": 7,
-    "versionName": "1.4.3",
+    "versionCode": 8,
+    "versionName": "1.4.4",
     "downloadUrl": "https://raw.githubusercontent.com/VarunKulkarni15/FH6-Mobile-Controller/master/dist-windows/fh6-controller-windows.exe",
-    "changelog": "Forza Horizon Sim-Racing Companion: Direct RS Down rearview axis dispatch, Klaxon horn, convertible roof toggle, and OBS zero-lag stream mirror."
+    "changelog": "Forza Horizon Sim-Racing Companion v1.4.4: 120Hz FastStream with extended look left/right/forward, radio prev, and paddle shift dispatch."
   }
 }

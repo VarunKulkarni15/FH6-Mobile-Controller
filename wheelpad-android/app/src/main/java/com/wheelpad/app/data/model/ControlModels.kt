@@ -1,4 +1,4 @@
-package com.wheelpad.app.data.model
+﻿package com.wheelpad.app.data.model
 
 import java.util.UUID
 

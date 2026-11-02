@@ -1,4 +1,4 @@
-package com.wheelpad.app.data.model
+﻿package com.wheelpad.app.data.model
 
 data class SpotifyTrackState(
     val trackName: String = "No Track Playing",

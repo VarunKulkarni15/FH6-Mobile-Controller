@@ -1,4 +1,4 @@
-package com.wheelpad.app.util
+﻿package com.wheelpad.app.util
 
 import android.content.Context
 import android.net.ConnectivityManager

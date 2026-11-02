@@ -108,8 +108,89 @@ fun DrivingScreen(
         }
     }
 
+    val activity = context as? com.wheelpad.app.MainActivity
+    val prefs = remember { context.getSharedPreferences("wheelpad_prefs", android.content.Context.MODE_PRIVATE) }
+    var hwVolumeEnabled by remember { mutableStateOf(prefs.getBoolean("hw_volume_enabled", true)) }
+    var hwVolumeUpAction by remember { mutableStateOf(prefs.getString("hw_volume_up_action", "camera") ?: "camera") }
+    var hwVolumeDownAction by remember { mutableStateOf(prefs.getString("hw_volume_down_action", "btn_lb") ?: "btn_lb") }
+    var pickingVolumeKeyTarget by remember { mutableStateOf<String?>(null) } // "UP", "DOWN", or null
+
+    val triggerAction: (String, Boolean) -> Unit = { actionId, isDown ->
+        val bit = when (actionId) {
+            "btn_a", "handbrake", "jump" -> 1 shl 0
+            "rewind", "btn_y", "interact" -> 1 shl 1
+            "camera", "btn_rb", "listen_mode" -> 1 shl 2
+            "map", "btn_back", "btn_view", "backpack" -> 1 shl 3
+            "pause", "btn_start", "btn_menu" -> 1 shl 4
+            "btn_x", "strike", "activate", "shift_down" -> 1 shl 5
+            "btn_b", "crouch", "shift_up" -> 1 shl 6
+            "btn_lb", "clutch", "dodge" -> 1 shl 7
+            "btn_ls", "convertible", "sprint" -> 1 shl 8
+            "btn_rs", "horn" -> 1 shl 9
+            "dpad_up", "photo_mode" -> 1 shl 10
+            "dpad_down", "anna" -> 1 shl 11
+            "dpad_left", "forza_link", "radio_prev" -> 1 shl 12
+            "dpad_right", "radio_next" -> 1 shl 13
+            "guide" -> 1 shl 14
+            "auto_drive" -> 1 shl 15
+            "look_back" -> 1 shl 16
+            "look_left" -> 1 shl 17
+            "look_right" -> 1 shl 18
+            "look_forward" -> 1 shl 19
+            else -> 0
+        }
+
+        if (actionId == "throttle" || actionId == "fire_weapon") {
+            throttlePressure = if (isDown) 1.0f else 0.0f
+        } else if (actionId == "brake" || actionId == "aim_weapon") {
+            brakePressure = if (isDown) 1.0f else 0.0f
+        } else if (actionId == "handbrake") {
+            handbrakeState = isDown
+            if (isDown) buttonsBitmask = buttonsBitmask or (1 shl 0)
+            else buttonsBitmask = buttonsBitmask and (1 shl 0).inv()
+        } else if (actionId == "look_back") {
+            rightStickY = if (isDown) -1.0f else 0.0f
+            if (isDown) buttonsBitmask = buttonsBitmask or (1 shl 16)
+            else buttonsBitmask = buttonsBitmask and (1 shl 16).inv()
+        } else if (actionId == "look_left") {
+            rightStickX = if (isDown) -1.0f else 0.0f
+            if (isDown) buttonsBitmask = buttonsBitmask or (1 shl 17)
+            else buttonsBitmask = buttonsBitmask and (1 shl 17).inv()
+        } else if (actionId == "look_right") {
+            rightStickX = if (isDown) 1.0f else 0.0f
+            if (isDown) buttonsBitmask = buttonsBitmask or (1 shl 18)
+            else buttonsBitmask = buttonsBitmask and (1 shl 18).inv()
+        } else if (actionId == "look_forward") {
+            rightStickY = if (isDown) 1.0f else 0.0f
+            if (isDown) buttonsBitmask = buttonsBitmask or (1 shl 19)
+            else buttonsBitmask = buttonsBitmask and (1 shl 19).inv()
+        } else if (bit != 0) {
+            if (isDown) buttonsBitmask = buttonsBitmask or bit
+            else buttonsBitmask = buttonsBitmask and bit.inv()
+        }
+        syncClient?.testActionInput(actionId, isDown)
+    }
+
+    DisposableEffect(activity, hwVolumeEnabled, hwVolumeUpAction, hwVolumeDownAction) {
+        activity?.onVolumeKeyEvent = { keyCode, isDown ->
+            if (!hwVolumeEnabled) {
+                false
+            } else {
+                val actionId = if (keyCode == android.view.KeyEvent.KEYCODE_VOLUME_UP) hwVolumeUpAction else hwVolumeDownAction
+                if (isDown) {
+                    view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
+                }
+                triggerAction(actionId, isDown)
+                true
+            }
+        }
+        onDispose {
+            activity?.onVolumeKeyEvent = null
+        }
+    }
+
     // Continuously stream inputs to UdpFastStream (120Hz FastStream)
-    LaunchedEffect(steeringAngle, throttlePressure, brakePressure, handbrakeState, buttonsBitmask, rightStickY) {
+    LaunchedEffect(steeringAngle, throttlePressure, brakePressure, handbrakeState, buttonsBitmask, leftStickX, leftStickY, rightStickX, rightStickY) {
         udpClient.updateInputs(
             steering = steeringAngle,
             throttle = throttlePressure,
@@ -252,16 +333,19 @@ fun DrivingScreen(
                             "btn_rs", "horn" -> 1 shl 9
                             "dpad_up", "photo_mode" -> 1 shl 10
                             "dpad_down", "anna" -> 1 shl 11
-                            "dpad_left", "forza_link" -> 1 shl 12
+                            "dpad_left", "forza_link", "radio_prev" -> 1 shl 12
                             "dpad_right", "radio_next" -> 1 shl 13
                             "guide" -> 1 shl 14
                             "auto_drive" -> 1 shl 15
                             "look_back" -> 1 shl 16
+                            "look_left" -> 1 shl 17
+                            "look_right" -> 1 shl 18
+                            "look_forward" -> 1 shl 19
                             else -> 0
                         }
-                        val isTrigger = element.actionId == "aim_weapon" || element.actionId == "fire_weapon"
+                        val isTrigger = element.actionId == "aim_weapon" || element.actionId == "fire_weapon" || element.actionId == "throttle" || element.actionId == "brake"
                         val isPressed = if (isTrigger) {
-                            if (element.actionId == "aim_weapon") brakePressure > 0.5f else throttlePressure > 0.5f
+                            if (element.actionId == "aim_weapon" || element.actionId == "brake") brakePressure > 0.5f else throttlePressure > 0.5f
                         } else if (bit != 0) {
                             ((buttonsBitmask and bit) != 0)
                         } else false
@@ -278,14 +362,21 @@ fun DrivingScreen(
                                 "btn_lb", "clutch" -> "(LB)"
                                 "horn", "btn_rs" -> "(RS)"
                                 "look_back" -> "(RS DOWN)"
+                                "look_left" -> "(RS LEFT)"
+                                "look_right" -> "(RS RIGHT)"
+                                "look_forward" -> "(RS UP)"
                                 "convertible", "btn_ls" -> "(LS)"
                                 "photo_mode", "dpad_up" -> "(D-UP)"
                                 "radio_next", "dpad_right" -> "(D-RIGHT)"
+                                "radio_prev" -> "(D-LEFT)"
                                 "dpad_down", "anna" -> "(ANNA)"
                                 "dpad_left", "forza_link" -> "(LINK)"
                                 "map", "btn_back", "btn_view" -> "(VIEW)"
                                 "pause", "btn_start", "btn_menu" -> "(START)"
                                 "auto_drive" -> "(AUTO)"
+                                "steer" -> "(LS)"
+                                "throttle" -> "(RT)"
+                                "brake" -> "(LT)"
                                 else -> ""
                             },
                             isEditMode = state.isEditMode,
@@ -293,30 +384,8 @@ fun DrivingScreen(
                             onPressedChange = { pressed ->
                                 if (pressed) {
                                     view.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
-                                    syncClient?.testActionInput(element.actionId, true)
-                                    if (element.actionId == "aim_weapon") {
-                                        brakePressure = 1.0f
-                                    } else if (element.actionId == "fire_weapon") {
-                                        throttlePressure = 1.0f
-                                    } else if (element.actionId == "look_back") {
-                                        rightStickY = -1.0f
-                                    }
-                                    if (bit != 0) {
-                                        buttonsBitmask = buttonsBitmask or bit
-                                    }
-                                } else {
-                                    if (element.actionId == "aim_weapon") {
-                                        brakePressure = 0.0f
-                                    } else if (element.actionId == "fire_weapon") {
-                                        throttlePressure = 0.0f
-                                    } else if (element.actionId == "look_back") {
-                                        rightStickY = 0.0f
-                                    }
-                                    if (bit != 0) {
-                                        buttonsBitmask = buttonsBitmask and bit.inv()
-                                    }
-                                    syncClient?.testActionInput(element.actionId, false)
                                 }
+                                triggerAction(element.actionId, pressed)
                             }
                         )
                     }
@@ -835,6 +904,161 @@ fun DrivingScreen(
             }
         }
 
+        // 4b. Dedicated Hardware Volume Key Action Picker Dialog
+        if (pickingVolumeKeyTarget != null) {
+            val targetKey = pickingVolumeKeyTarget!!
+            val allActions = ProfileRepository.ALL_FORZA_ACTIONS
+
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color(0xD0030E0C))
+                    .clickable { pickingVolumeKeyTarget = null },
+                contentAlignment = Alignment.Center
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth(0.65f)
+                        .widthIn(min = 460.dp, max = 560.dp)
+                        .heightIn(max = 330.dp)
+                        .clip(RoundedCornerShape(6.dp))
+                        .background(Color(0xF8051E1C))
+                        .border(1.5.dp, Color(0xFFCCFF00), RoundedCornerShape(6.dp))
+                        .clickable(enabled = false) {}
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(Color(0xFFCCFF00))
+                            .padding(horizontal = 16.dp, vertical = 9.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "SET VOLUME ${if (targetKey == "UP") "UP (+)" else "DOWN (−)"} KEY",
+                                color = Color.Black,
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.Black,
+                                letterSpacing = 1.sp
+                            )
+                            Text(
+                                text = "CLOSE",
+                                color = Color.Black,
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Black,
+                                modifier = Modifier.clickable { pickingVolumeKeyTarget = null }
+                            )
+                        }
+                    }
+
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f, fill = false)
+                    ) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 12.dp, vertical = 8.dp)
+                                .verticalScroll(rememberScrollState()),
+                            verticalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            allActions.forEach { action ->
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .clip(RoundedCornerShape(6.dp))
+                                        .background(Color(0xFF071816))
+                                        .border(1.dp, Color(0x35CCFF00), RoundedCornerShape(6.dp))
+                                        .clickable {
+                                            if (targetKey == "UP") {
+                                                hwVolumeUpAction = action.id
+                                                prefs.edit().putString("hw_volume_up_action", action.id).apply()
+                                            } else {
+                                                hwVolumeDownAction = action.id
+                                                prefs.edit().putString("hw_volume_down_action", action.id).apply()
+                                            }
+                                            view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
+                                            pickingVolumeKeyTarget = null
+                                        }
+                                        .padding(horizontal = 10.dp, vertical = 7.dp),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                                    ) {
+                                        Box(
+                                            modifier = Modifier
+                                                .size(36.dp)
+                                                .clip(RoundedCornerShape(6.dp))
+                                                .background(Color(0xFF030D0C))
+                                                .border(1.dp, Color(0x40FFFFFF), RoundedCornerShape(6.dp))
+                                                .padding(2.dp)
+                                        ) {
+                                            FH6MiniActionPreview(actionId = action.id)
+                                        }
+
+                                        Column {
+                                            Text(
+                                                text = action.name,
+                                                color = Color.White,
+                                                fontWeight = FontWeight.Black,
+                                                fontSize = 11.sp
+                                            )
+                                            Text(
+                                                text = action.description,
+                                                color = Color(0x99FFFFFF),
+                                                fontSize = 9.sp,
+                                                maxLines = 1
+                                            )
+                                        }
+                                    }
+
+                                    Box(
+                                        modifier = Modifier
+                                            .clip(RoundedCornerShape(4.dp))
+                                            .background(Color(0x25CCFF00))
+                                            .border(1.dp, Color(0xFFCCFF00), RoundedCornerShape(4.dp))
+                                            .padding(horizontal = 7.dp, vertical = 3.dp)
+                                    ) {
+                                        Text(
+                                            text = "ASSIGN",
+                                            color = Color(0xFFCCFF00),
+                                            fontWeight = FontWeight.Black,
+                                            fontSize = 9.sp,
+                                            letterSpacing = 0.5.sp
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(Color(0xFF03100E))
+                            .clickable { pickingVolumeKeyTarget = null }
+                            .padding(vertical = 10.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "CANCEL",
+                            color = Color(0xCCFFFFFF),
+                            fontWeight = FontWeight.Black,
+                            fontSize = 11.sp,
+                            letterSpacing = 2.sp
+                        )
+                    }
+                }
+            }
+        }
+
         // 5. Sleek HUD Quick Menu Drawer (Forza Horizon Styling, Fully Scrollable)
         if (isMenuOpen && !state.isEditMode) {
             Box(
@@ -1082,6 +1306,176 @@ fun DrivingScreen(
                                         contentAlignment = Alignment.Center
                                     ) {
                                         Text("+", color = Color.White, fontSize = 14.sp, fontWeight = FontWeight.Bold)
+                                    }
+                                }
+                            }
+                        }
+
+                        // Option 2c: Hardware Volume Buttons Remapping (Physical Phone Keys)
+                        val allForza = ProfileRepository.ALL_FORZA_ACTIONS
+                        val volUpActionObj = allForza.find { it.id == hwVolumeUpAction }
+                        val volDownActionObj = allForza.find { it.id == hwVolumeDownAction }
+
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(6.dp))
+                                .background(Color(0xFF0F1722))
+                                .border(1.5.dp, if (hwVolumeEnabled) Color(0xFFCCFF00) else Color(0x40FFFFFF), RoundedCornerShape(6.dp))
+                                .padding(12.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Column {
+                                    Text("HARDWARE VOLUME BUTTONS", color = if (hwVolumeEnabled) Color(0xFFCCFF00) else Color.White, fontSize = 11.sp, fontWeight = FontWeight.Black)
+                                    Text("Remap physical phone keys to Forza", color = Color(0xB3FFFFFF), fontSize = 9.sp)
+                                }
+                                Box(
+                                    modifier = Modifier
+                                        .clip(RoundedCornerShape(4.dp))
+                                        .background(if (hwVolumeEnabled) Color(0xFFCCFF00) else Color(0x30FFFFFF))
+                                        .clickable {
+                                            hwVolumeEnabled = !hwVolumeEnabled
+                                            prefs.edit().putBoolean("hw_volume_enabled", hwVolumeEnabled).apply()
+                                            view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
+                                        }
+                                        .padding(horizontal = 8.dp, vertical = 4.dp)
+                                ) {
+                                    Text(
+                                        text = if (hwVolumeEnabled) "ACTIVE" else "OFF",
+                                        color = if (hwVolumeEnabled) Color.Black else Color.White,
+                                        fontSize = 10.sp,
+                                        fontWeight = FontWeight.Black
+                                    )
+                                }
+                            }
+
+                            if (hwVolumeEnabled) {
+                                // Volume Up Key Row
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .clip(RoundedCornerShape(4.dp))
+                                        .background(Color(0xFF162334))
+                                        .clickable { pickingVolumeKeyTarget = "UP" }
+                                        .padding(horizontal = 10.dp, vertical = 8.dp),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                    ) {
+                                        Box(
+                                            modifier = Modifier
+                                                .size(24.dp)
+                                                .clip(RoundedCornerShape(4.dp))
+                                                .background(Color(0xFF080D14)),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            FH6MiniActionPreview(actionId = hwVolumeUpAction)
+                                        }
+                                        Column {
+                                            Text("VOL UP (+)", color = Color(0xFFCCFF00), fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                                            Text(volUpActionObj?.name ?: hwVolumeUpAction, color = Color.White, fontSize = 9.sp, fontWeight = FontWeight.Medium)
+                                        }
+                                    }
+                                    Text("CHANGE >", color = Color(0xFFCCFF00), fontSize = 9.sp, fontWeight = FontWeight.Black)
+                                }
+
+                                // Volume Down Key Row
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .clip(RoundedCornerShape(4.dp))
+                                        .background(Color(0xFF162334))
+                                        .clickable { pickingVolumeKeyTarget = "DOWN" }
+                                        .padding(horizontal = 10.dp, vertical = 8.dp),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                    ) {
+                                        Box(
+                                            modifier = Modifier
+                                                .size(24.dp)
+                                                .clip(RoundedCornerShape(4.dp))
+                                                .background(Color(0xFF080D14)),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            FH6MiniActionPreview(actionId = hwVolumeDownAction)
+                                        }
+                                        Column {
+                                            Text("VOL DOWN (−)", color = Color(0xFF00E5FF), fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                                            Text(volDownActionObj?.name ?: hwVolumeDownAction, color = Color.White, fontSize = 9.sp, fontWeight = FontWeight.Medium)
+                                        }
+                                    }
+                                    Text("CHANGE >", color = Color(0xFF00E5FF), fontSize = 9.sp, fontWeight = FontWeight.Black)
+                                }
+
+                                // Quick Presets for Volume Keys
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                ) {
+                                    Box(
+                                        modifier = Modifier
+                                            .weight(1f)
+                                            .clip(RoundedCornerShape(4.dp))
+                                            .background(Color(0x30CCFF00))
+                                            .border(1.dp, Color(0x60CCFF00), RoundedCornerShape(4.dp))
+                                            .clickable {
+                                                hwVolumeUpAction = "shift_up"
+                                                hwVolumeDownAction = "shift_down"
+                                                prefs.edit().putString("hw_volume_up_action", "shift_up").putString("hw_volume_down_action", "shift_down").apply()
+                                                view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
+                                            }
+                                            .padding(vertical = 5.dp),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Text("PADDLES (+/−)", color = Color(0xFFCCFF00), fontSize = 8.sp, fontWeight = FontWeight.Black)
+                                    }
+
+                                    Box(
+                                        modifier = Modifier
+                                            .weight(1f)
+                                            .clip(RoundedCornerShape(4.dp))
+                                            .background(Color(0x30FFFFFF))
+                                            .border(1.dp, Color(0x60FFFFFF), RoundedCornerShape(4.dp))
+                                            .clickable {
+                                                hwVolumeUpAction = "camera"
+                                                hwVolumeDownAction = "btn_lb"
+                                                prefs.edit().putString("hw_volume_up_action", "camera").putString("hw_volume_down_action", "btn_lb").apply()
+                                                view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
+                                            }
+                                            .padding(vertical = 5.dp),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Text("CAR/MENU (RB/LB)", color = Color.White, fontSize = 8.sp, fontWeight = FontWeight.Black)
+                                    }
+
+                                    Box(
+                                        modifier = Modifier
+                                            .weight(1f)
+                                            .clip(RoundedCornerShape(4.dp))
+                                            .background(Color(0x3000E5FF))
+                                            .border(1.dp, Color(0x6000E5FF), RoundedCornerShape(4.dp))
+                                            .clickable {
+                                                hwVolumeUpAction = "radio_next"
+                                                hwVolumeDownAction = "radio_prev"
+                                                prefs.edit().putString("hw_volume_up_action", "radio_next").putString("hw_volume_down_action", "radio_prev").apply()
+                                                view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
+                                            }
+                                            .padding(vertical = 5.dp),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Text("D-PAD (R/L)", color = Color(0xFF00E5FF), fontSize = 8.sp, fontWeight = FontWeight.Black)
                                     }
                                 }
                             }
@@ -1862,6 +2256,198 @@ fun FH6ExactSvgActionButton(
             val r = (minOf(size.width, size.height) / 2f) * 0.88f
 
             when (actionId) {
+                "steer", "move_stick" -> {
+                    // Miniature Motorsport 3-Spoke D-Cut Steering Wheel
+                    val voltLime = Color(0xFFCCFF00)
+                    val wheelCol = if (isPressed) voltLime else Color.White
+                    val rimBg = if (isPressed) voltLime else Color(0xE006121A)
+                    drawCircle(rimBg, radius = r * 0.76f, center = Offset(cx, cy))
+                    drawCircle(wheelCol, radius = r * 0.76f, center = Offset(cx, cy), style = Stroke(width = strokeWidth * 1.3f))
+                    drawCircle(Color(0xFF0F1722), radius = r * 0.26f, center = Offset(cx, cy))
+                    drawCircle(wheelCol, radius = r * 0.26f, center = Offset(cx, cy), style = Stroke(width = thinStroke))
+                    drawLine(wheelCol, Offset(cx - r * 0.72f, cy), Offset(cx - r * 0.26f, cy), strokeWidth = strokeWidth)
+                    drawLine(wheelCol, Offset(cx + r * 0.26f, cy), Offset(cx + r * 0.72f, cy), strokeWidth = strokeWidth)
+                    drawLine(wheelCol, Offset(cx, cy + r * 0.26f), Offset(cx, cy + r * 0.72f), strokeWidth = strokeWidth)
+                    drawArc(voltLime, -100f, 20f, false, topLeft = Offset(cx - r * 0.76f, cy - r * 0.76f), size = Size(r * 1.52f, r * 1.52f), style = Stroke(width = strokeWidth * 2.2f))
+                }
+
+                "throttle", "fire_weapon" -> {
+                    val neonGreen = Color(0xFF00E676)
+                    if (isPressed) {
+                        drawRoundRect(neonGreen, cornerRadius = CornerRadius(cornerRad, cornerRad))
+                    } else {
+                        drawRoundRect(Color(0xE0061A12), cornerRadius = CornerRadius(cornerRad, cornerRad))
+                        drawRoundRect(neonGreen, cornerRadius = CornerRadius(cornerRad, cornerRad), style = Stroke(width = strokeWidth))
+                    }
+                    val col = if (isPressed) Color.Black else neonGreen
+                    val pedalRect = Rect(cx - r * 0.32f, cy - r * 0.60f, cx + r * 0.32f, cy + r * 0.40f)
+                    drawRoundRect(col, pedalRect.topLeft, pedalRect.size, CornerRadius(4.dp.toPx(), 4.dp.toPx()), style = Stroke(width = strokeWidth))
+                    drawLine(col, Offset(cx - r * 0.16f, cy - r * 0.45f), Offset(cx - r * 0.16f, cy + r * 0.25f), strokeWidth = thinStroke * 1.5f, cap = androidx.compose.ui.graphics.StrokeCap.Round)
+                    drawLine(col, Offset(cx, cy - r * 0.45f), Offset(cx, cy + r * 0.25f), strokeWidth = thinStroke * 1.5f, cap = androidx.compose.ui.graphics.StrokeCap.Round)
+                    drawLine(col, Offset(cx + r * 0.16f, cy - r * 0.45f), Offset(cx + r * 0.16f, cy + r * 0.25f), strokeWidth = thinStroke * 1.5f, cap = androidx.compose.ui.graphics.StrokeCap.Round)
+                }
+
+                "brake", "aim_weapon" -> {
+                    val raceRed = Color(0xFFFF1744)
+                    if (isPressed) {
+                        drawRoundRect(raceRed, cornerRadius = CornerRadius(cornerRad, cornerRad))
+                    } else {
+                        drawRoundRect(Color(0xE01A060A), cornerRadius = CornerRadius(cornerRad, cornerRad))
+                        drawRoundRect(raceRed, cornerRadius = CornerRadius(cornerRad, cornerRad), style = Stroke(width = strokeWidth))
+                    }
+                    val col = if (isPressed) Color.Black else raceRed
+                    val brakeRect = Rect(cx - r * 0.48f, cy - r * 0.52f, cx + r * 0.48f, cy + r * 0.35f)
+                    drawRoundRect(col, brakeRect.topLeft, brakeRect.size, CornerRadius(4.dp.toPx(), 4.dp.toPx()), style = Stroke(width = strokeWidth))
+                    drawLine(col, Offset(cx - r * 0.35f, cy - r * 0.28f), Offset(cx + r * 0.35f, cy - r * 0.28f), strokeWidth = thinStroke * 1.5f, cap = androidx.compose.ui.graphics.StrokeCap.Round)
+                    drawLine(col, Offset(cx - r * 0.35f, cy - r * 0.08f), Offset(cx + r * 0.35f, cy - r * 0.08f), strokeWidth = thinStroke * 1.5f, cap = androidx.compose.ui.graphics.StrokeCap.Round)
+                    drawLine(col, Offset(cx - r * 0.35f, cy + r * 0.12f), Offset(cx + r * 0.35f, cy + r * 0.12f), strokeWidth = thinStroke * 1.5f, cap = androidx.compose.ui.graphics.StrokeCap.Round)
+                }
+
+                "handbrake" -> {
+                    val amber = Color(0xFFFFB300)
+                    if (isPressed) {
+                        drawRoundRect(amber, cornerRadius = CornerRadius(cornerRad, cornerRad))
+                    } else {
+                        drawRoundRect(Color(0xE01A1406), cornerRadius = CornerRadius(cornerRad, cornerRad))
+                        drawRoundRect(amber, cornerRadius = CornerRadius(cornerRad, cornerRad), style = Stroke(width = strokeWidth))
+                    }
+                    val col = if (isPressed) Color.Black else amber
+                    drawCircle(col, radius = r * 0.16f, center = Offset(cx - r * 0.26f, cy + r * 0.28f), style = Stroke(width = strokeWidth))
+                    drawLine(col, Offset(cx - r * 0.26f, cy + r * 0.28f), Offset(cx + r * 0.26f, cy - r * 0.42f), strokeWidth = strokeWidth * 1.4f, cap = androidx.compose.ui.graphics.StrokeCap.Round)
+                    drawLine(col, Offset(cx + r * 0.06f, cy - r * 0.18f), Offset(cx + r * 0.26f, cy - r * 0.42f), strokeWidth = strokeWidth * 2.2f, cap = androidx.compose.ui.graphics.StrokeCap.Round)
+                    drawCircle(col, radius = r * 0.06f, center = Offset(cx + r * 0.30f, cy - r * 0.46f))
+                }
+
+                "shift_up" -> {
+                    val red = Color(0xFFFF1744)
+                    if (isPressed) {
+                        drawRoundRect(red, cornerRadius = CornerRadius(cornerRad, cornerRad))
+                    } else {
+                        drawRoundRect(Color(0xE01A060A), cornerRadius = CornerRadius(cornerRad, cornerRad))
+                        drawRoundRect(red, cornerRadius = CornerRadius(cornerRad, cornerRad), style = Stroke(width = strokeWidth))
+                    }
+                    val col = if (isPressed) Color.Black else red
+                    drawLine(col, Offset(cx - r * 0.26f, cy - r * 0.35f), Offset(cx + r * 0.26f, cy - r * 0.35f), strokeWidth = strokeWidth * 1.2f, cap = androidx.compose.ui.graphics.StrokeCap.Round)
+                    drawLine(col, Offset(cx, cy - r * 0.60f), Offset(cx, cy - r * 0.10f), strokeWidth = strokeWidth * 1.2f, cap = androidx.compose.ui.graphics.StrokeCap.Round)
+                    val chevron = Path().apply {
+                        moveTo(cx - r * 0.26f, cy + r * 0.15f)
+                        lineTo(cx, cy)
+                        lineTo(cx + r * 0.26f, cy + r * 0.15f)
+                        moveTo(cx - r * 0.26f, cy + r * 0.32f)
+                        lineTo(cx, cy + r * 0.17f)
+                        lineTo(cx + r * 0.26f, cy + r * 0.32f)
+                    }
+                    drawPath(chevron, col, style = Stroke(width = strokeWidth * 0.9f, cap = androidx.compose.ui.graphics.StrokeCap.Round))
+                }
+
+                "shift_down" -> {
+                    val blue = Color(0xFF00B0FF)
+                    if (isPressed) {
+                        drawRoundRect(blue, cornerRadius = CornerRadius(cornerRad, cornerRad))
+                    } else {
+                        drawRoundRect(Color(0xE006121A), cornerRadius = CornerRadius(cornerRad, cornerRad))
+                        drawRoundRect(blue, cornerRadius = CornerRadius(cornerRad, cornerRad), style = Stroke(width = strokeWidth))
+                    }
+                    val col = if (isPressed) Color.Black else blue
+                    drawLine(col, Offset(cx - r * 0.26f, cy - r * 0.35f), Offset(cx + r * 0.26f, cy - r * 0.35f), strokeWidth = strokeWidth * 1.2f, cap = androidx.compose.ui.graphics.StrokeCap.Round)
+                    val chevron = Path().apply {
+                        moveTo(cx - r * 0.26f, cy + r * 0.05f)
+                        lineTo(cx, cy + r * 0.20f)
+                        lineTo(cx + r * 0.26f, cy + r * 0.05f)
+                        moveTo(cx - r * 0.26f, cy + r * 0.22f)
+                        lineTo(cx, cy + r * 0.37f)
+                        lineTo(cx + r * 0.26f, cy + r * 0.22f)
+                    }
+                    drawPath(chevron, col, style = Stroke(width = strokeWidth * 0.9f, cap = androidx.compose.ui.graphics.StrokeCap.Round))
+                }
+
+                "look_left" -> {
+                    val cyan = Color(0xFF00E5FF)
+                    if (isPressed) drawRoundRect(cyan, cornerRadius = CornerRadius(cornerRad, cornerRad))
+                    else {
+                        drawRoundRect(Color(0xE0051720), cornerRadius = CornerRadius(cornerRad, cornerRad))
+                        drawRoundRect(cyan, cornerRadius = CornerRadius(cornerRad, cornerRad), style = Stroke(width = strokeWidth))
+                    }
+                    val col = if (isPressed) Color.Black else cyan
+                    val arrow = Path().apply {
+                        moveTo(cx - r * 0.32f, cy - r * 0.10f)
+                        lineTo(cx + r * 0.06f, cy - r * 0.36f)
+                        lineTo(cx + r * 0.06f, cy + r * 0.16f)
+                        close()
+                    }
+                    drawPath(arrow, col)
+                }
+
+                "look_right" -> {
+                    val cyan = Color(0xFF00E5FF)
+                    if (isPressed) drawRoundRect(cyan, cornerRadius = CornerRadius(cornerRad, cornerRad))
+                    else {
+                        drawRoundRect(Color(0xE0051720), cornerRadius = CornerRadius(cornerRad, cornerRad))
+                        drawRoundRect(cyan, cornerRadius = CornerRadius(cornerRad, cornerRad), style = Stroke(width = strokeWidth))
+                    }
+                    val col = if (isPressed) Color.Black else cyan
+                    val arrow = Path().apply {
+                        moveTo(cx + r * 0.32f, cy - r * 0.10f)
+                        lineTo(cx - r * 0.06f, cy - r * 0.36f)
+                        lineTo(cx - r * 0.06f, cy + r * 0.16f)
+                        close()
+                    }
+                    drawPath(arrow, col)
+                }
+
+                "look_forward" -> {
+                    val cyan = Color(0xFF00E5FF)
+                    if (isPressed) drawRoundRect(cyan, cornerRadius = CornerRadius(cornerRad, cornerRad))
+                    else {
+                        drawRoundRect(Color(0xE0051720), cornerRadius = CornerRadius(cornerRad, cornerRad))
+                        drawRoundRect(cyan, cornerRadius = CornerRadius(cornerRad, cornerRad), style = Stroke(width = strokeWidth))
+                    }
+                    val col = if (isPressed) Color.Black else cyan
+                    val arrow = Path().apply {
+                        moveTo(cx, cy - r * 0.40f)
+                        lineTo(cx + r * 0.28f, cy - r * 0.05f)
+                        lineTo(cx - r * 0.28f, cy - r * 0.05f)
+                        close()
+                    }
+                    drawPath(arrow, col)
+                }
+
+                "radio_prev" -> {
+                    val pink = Color(0xFFFF4081)
+                    if (isPressed) drawRoundRect(pink, cornerRadius = CornerRadius(cornerRad, cornerRad))
+                    else {
+                        drawRoundRect(Color(0xE0200612), cornerRadius = CornerRadius(cornerRad, cornerRad))
+                        drawRoundRect(pink, cornerRadius = CornerRadius(cornerRad, cornerRad), style = Stroke(width = strokeWidth))
+                    }
+                    val col = if (isPressed) Color.Black else pink
+                    val t1 = Path().apply {
+                        moveTo(cx + r * 0.25f, cy - r * 0.25f)
+                        lineTo(cx, cy - r * 0.05f)
+                        lineTo(cx + r * 0.25f, cy + r * 0.15f)
+                        close()
+                    }
+                    val t2 = Path().apply {
+                        moveTo(cx, cy - r * 0.25f)
+                        lineTo(cx - r * 0.25f, cy - r * 0.05f)
+                        lineTo(cx + r * 0.15f, cy)
+                        close()
+                    }
+                    drawPath(t1, col)
+                    drawPath(t2, col)
+                }
+
+                "aim_stick" -> {
+                    val voltLime = Color(0xFFCCFF00)
+                    val col = if (isPressed) Color.Black else voltLime
+                    if (isPressed) drawRoundRect(voltLime, cornerRadius = CornerRadius(cornerRad, cornerRad))
+                    else {
+                        drawRoundRect(Color(0xE0081418), cornerRadius = CornerRadius(cornerRad, cornerRad))
+                        drawRoundRect(voltLime, cornerRadius = CornerRadius(cornerRad, cornerRad), style = Stroke(width = strokeWidth))
+                    }
+                    drawCircle(col, radius = r * 0.35f, center = Offset(cx, cy - r * 0.05f), style = Stroke(width = strokeWidth))
+                    drawCircle(col, radius = r * 0.10f, center = Offset(cx, cy - r * 0.05f))
+                }
+
                 "auto_drive" -> {
                     // Autonomous Speedometer Arc & AI Guidance Vector
                     val voltLime = Color(0xFFCCFF00)
@@ -2249,16 +2835,15 @@ fun FH6ExactSvgActionButton(
             Color(0xFF080B10)
         } else {
             when (actionId) {
-                "auto_drive", "rewind", "btn_y" -> Color(0xFFCCFF00)
-                "btn_a", "handbrake" -> Color(0xFF00E676)
-                "btn_b", "shift_up" -> Color(0xFFFF1744)
+                "auto_drive", "rewind", "btn_y", "steer", "move_stick" -> Color(0xFFCCFF00)
+                "btn_a", "throttle", "fire_weapon" -> Color(0xFF00E676)
+                "btn_b", "shift_up", "brake", "aim_weapon" -> Color(0xFFFF1744)
                 "btn_x", "activate", "shift_down" -> Color(0xFF00B0FF)
-                "btn_lb", "clutch" -> Color(0xFF00E5FF)
-                "horn", "btn_rs" -> Color(0xFFFFD600)
+                "btn_lb", "clutch", "convertible", "btn_ls", "look_left", "look_right", "look_forward" -> Color(0xFF00E5FF)
+                "horn", "btn_rs", "handbrake" -> Color(0xFFFFD600)
                 "look_back" -> Color(0xFFCCFF00)
-                "convertible", "btn_ls" -> Color(0xFF00E5FF)
                 "photo_mode" -> Color(0xFFE040FB)
-                "radio_next" -> Color(0xFFFF4081)
+                "radio_next", "radio_prev" -> Color(0xFFFF4081)
                 else -> Color.White
             }
         }
@@ -2299,15 +2884,23 @@ fun FH6ExactSvgActionButton(
             ) {
                 Text(
                     text = when (actionId) {
+                        "steer", "move_stick" -> if (label.isNotBlank()) label else "STEER"
+                        "throttle", "fire_weapon" -> if (label.isNotBlank()) label else "GAS"
+                        "brake", "aim_weapon" -> if (label.isNotBlank()) label else "BRAKE"
+                        "handbrake" -> if (label.isNotBlank()) label else "DRIFT"
                         "auto_drive" -> "AUTO"
                         "btn_lb", "clutch" -> "CLUTCH"
                         "horn", "btn_rs" -> "HORN"
                         "look_back" -> "REAR"
+                        "look_left" -> "LEFT"
+                        "look_right" -> "RIGHT"
+                        "look_forward" -> "FRONT"
                         "convertible", "btn_ls" -> "ROOF"
                         "photo_mode" -> "PHOTO"
                         "radio_next" -> "RADIO"
-                        "shift_up" -> "UP"
-                        "shift_down" -> "DOWN"
+                        "radio_prev" -> "PREV"
+                        "shift_up" -> "SHIFT +"
+                        "shift_down" -> "SHIFT -"
                         "camera", "btn_rb" -> "CAM"
                         "map", "btn_back", "btn_view" -> "MAP"
                         "pause", "btn_start", "btn_menu" -> "MENU"
