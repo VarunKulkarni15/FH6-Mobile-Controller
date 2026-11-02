@@ -285,22 +285,12 @@ fun DrivingScreen(
         if (isMenuState) {
             FH6SettingsNavScreen(
                 currentMode = activeMenuMode,
-                onModeChange = { newMode ->
-                    activeMenuMode = newMode
-                    if (newMode == "MAP") {
-                        triggerAction("map", true)
-                        triggerAction("map", false)
-                    } else {
-                        triggerAction("pause", true)
-                        triggerAction("pause", false)
-                    }
-                },
                 onTriggerAction = triggerAction,
                 onAnalogMove = { x, y ->
                     steeringAngle = x
                     leftStickY = y
                 },
-                onReturnToDrive = {
+                onResumeGame = {
                     if (activeMenuMode == "MAP") {
                         triggerAction("map", true)
                         triggerAction("map", false)
@@ -308,6 +298,11 @@ fun DrivingScreen(
                         triggerAction("pause", true)
                         triggerAction("pause", false)
                     }
+                    steeringAngle = 0f
+                    leftStickY = 0f
+                    isMenuState = false
+                },
+                onDirectReturnToDrive = {
                     steeringAngle = 0f
                     leftStickY = 0f
                     isMenuState = false

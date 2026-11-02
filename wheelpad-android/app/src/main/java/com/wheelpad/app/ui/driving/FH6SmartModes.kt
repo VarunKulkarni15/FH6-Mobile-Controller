@@ -38,10 +38,10 @@ import kotlin.math.roundToInt
 @Composable
 fun FH6SettingsNavScreen(
     currentMode: String = "PAUSE", // "PAUSE" or "MAP"
-    onModeChange: (String) -> Unit = {},
     onTriggerAction: (actionId: String, isDown: Boolean) -> Unit,
     onAnalogMove: (x: Float, y: Float) -> Unit,
-    onReturnToDrive: () -> Unit
+    onResumeGame: () -> Unit,
+    onDirectReturnToDrive: () -> Unit = onResumeGame
 ) {
     val view = LocalView.current
     val isMap = currentMode.equals("MAP", ignoreCase = true)
@@ -56,7 +56,7 @@ fun FH6SettingsNavScreen(
             modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.SpaceBetween
         ) {
-            // Top Header: Title + Mode Switcher Tabs + Resume Driving Button
+            // Top Header: Title + Action Buttons
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -92,79 +92,75 @@ fun FH6SettingsNavScreen(
                     )
                 }
 
-                // Middle: Mode Switcher Segmented Tabs
+                // Right: Action Buttons (Resume Game / Direct Driving Rig)
                 Row(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(6.dp))
-                        .background(Color(0xFF0C141C))
-                        .border(1.dp, Color(0x50CCFF00), RoundedCornerShape(6.dp))
-                        .padding(2.dp),
-                    horizontalArrangement = Arrangement.spacedBy(2.dp)
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    // Pause Menu Tab
-                    Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(4.dp))
-                            .background(if (!isMap) Color(0xFFCCFF00) else Color.Transparent)
-                            .clickable {
-                                if (isMap) {
+                    if (isMap) {
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(6.dp))
+                                .background(Color(0xFFCCFF00))
+                                .clickable {
                                     view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
-                                    onModeChange("PAUSE")
+                                    onResumeGame()
                                 }
-                            }
-                            .padding(horizontal = 12.dp, vertical = 6.dp)
-                    ) {
-                        Text(
-                            text = "PAUSE MENU",
-                            color = if (!isMap) Color.Black else Color(0x99FFFFFF),
-                            fontSize = 10.sp,
-                            fontWeight = FontWeight.Black,
-                            fontFamily = ChakraPetch
-                        )
-                    }
-
-                    // World Map Tab
-                    Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(4.dp))
-                            .background(if (isMap) Color(0xFFCCFF00) else Color.Transparent)
-                            .clickable {
-                                if (!isMap) {
-                                    view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
-                                    onModeChange("MAP")
-                                }
-                            }
-                            .padding(horizontal = 12.dp, vertical = 6.dp)
-                    ) {
-                        Text(
-                            text = "WORLD MAP",
-                            color = if (isMap) Color.Black else Color(0x99FFFFFF),
-                            fontSize = 10.sp,
-                            fontWeight = FontWeight.Black,
-                            fontFamily = ChakraPetch
-                        )
-                    }
-                }
-
-                // Right: Resume Driving Button
-                Box(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(6.dp))
-                        .background(Color(0xFFCCFF00))
-                        .clickable {
-                            view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
-                            onReturnToDrive()
+                                .padding(horizontal = 16.dp, vertical = 7.dp)
+                        ) {
+                            Text(
+                                text = "CLOSE MAP",
+                                color = Color.Black,
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Black,
+                                letterSpacing = 0.8.sp,
+                                fontFamily = ChakraPetch
+                            )
                         }
-                        .padding(horizontal = 16.dp, vertical = 7.dp)
-                ) {
-                    Text(
-                        text = if (isMap) "CLOSE MAP [âœ•]" else "RESUME DRIVING [â‰¡]",
-                        color = Color.Black,
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.Black,
-                        letterSpacing = 0.8.sp,
-                        fontFamily = ChakraPetch
-                    )
+                    } else {
+                        // Direct to Driving Rig (Zero PC keystroke, perfect when car cutscene just ended!)
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(6.dp))
+                                .background(Color(0x350A141E))
+                                .border(1.dp, Color(0xFFCCFF00), RoundedCornerShape(6.dp))
+                                .clickable {
+                                    view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
+                                    onDirectReturnToDrive()
+                                }
+                                .padding(horizontal = 12.dp, vertical = 7.dp)
+                        ) {
+                            Text(
+                                text = "DRIVE RIG",
+                                color = Color(0xFFCCFF00),
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Black,
+                                letterSpacing = 0.8.sp,
+                                fontFamily = ChakraPetch
+                            )
+                        }
+
+                        // Unpause Game in Forza
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(6.dp))
+                                .background(Color(0xFFCCFF00))
+                                .clickable {
+                                    view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
+                                    onResumeGame()
+                                }
+                                .padding(horizontal = 16.dp, vertical = 7.dp)
+                        ) {
+                            Text(
+                                text = "RESUME GAME",
+                                color = Color.Black,
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Black,
+                                letterSpacing = 0.8.sp,
+                                fontFamily = ChakraPetch
+                            )
+                        }
+                    }
                 }
             }
 
@@ -292,7 +288,7 @@ fun FH6SettingsNavScreen(
             ) {
                 if (isMap) {
                     Text(
-                        text = "[A] SET ROUTE  â€¢  [B] CLOSE MAP  â€¢  [X] FAST TRAVEL  â€¢  [Y] REVEAL MAP  â€¢  [LB] REGIONS  â€¢  [RB] FILTER",
+                        text = "[A] SET ROUTE   |   [B] CLOSE MAP   |   [X] FAST TRAVEL   |   [Y] REVEAL MAP   |   [LB] REGIONS   |   [RB] FILTER",
                         color = Color(0x99FFFFFF),
                         fontSize = 10.sp,
                         fontWeight = FontWeight.Bold,
@@ -300,7 +296,7 @@ fun FH6SettingsNavScreen(
                     )
                 } else {
                     Text(
-                        text = "[A] SELECT  â€¢  [B] BACK  â€¢  [X] RESET CAR POSITION  â€¢  [Y] CONVOY  â€¢  [LB] PREV TAB  â€¢  [RB] NEXT TAB",
+                        text = "[A] SELECT   |   [B] BACK   |   [X] RESET CAR   |   [Y] CONVOY   |   [LB] PREV TAB   |   [RB] NEXT TAB",
                         color = Color(0x99FFFFFF),
                         fontSize = 10.sp,
                         fontWeight = FontWeight.Bold,
@@ -367,36 +363,20 @@ private fun FH6MotorsportBumper(
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(5.dp)
+                horizontalArrangement = Arrangement.Center
             ) {
-                if (isLeft) {
-                    Text(
-                        text = "â—€",
-                        color = if (isPressed) Color.Black else Color(0xFFCCFF00),
-                        fontSize = 10.sp,
-                        fontWeight = FontWeight.Black
-                    )
-                }
                 Box(
                     modifier = Modifier
                         .clip(RoundedCornerShape(3.dp))
                         .background(if (isPressed) Color.Black else Color(0x35CCFF00))
-                        .padding(horizontal = 7.dp, vertical = 1.dp)
+                        .padding(horizontal = 10.dp, vertical = 2.dp)
                 ) {
                     Text(
                         text = bumperKey,
                         color = if (isPressed) Color(0xFFCCFF00) else Color.White,
-                        fontSize = 10.sp,
+                        fontSize = 11.sp,
                         fontWeight = FontWeight.Black,
                         fontFamily = ChakraPetch
-                    )
-                }
-                if (!isLeft) {
-                    Text(
-                        text = "â–¶",
-                        color = if (isPressed) Color.Black else Color(0xFFCCFF00),
-                        fontSize = 10.sp,
-                        fontWeight = FontWeight.Black
                     )
                 }
             }
@@ -484,19 +464,19 @@ private fun FH6MapCursorPad(
 
         // UP
         Box(modifier = Modifier.align(Alignment.TopCenter).padding(top = 6.dp)) {
-            FH6TactileArrowKey(arrow = "â–²", sub = "UP", actionId = "dpad_up", onTrigger = onTriggerAction)
+            FH6TactileArrowKey(label = "UP", actionId = "dpad_up", onTrigger = onTriggerAction)
         }
         // DOWN
         Box(modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 6.dp)) {
-            FH6TactileArrowKey(arrow = "â–¼", sub = "DOWN", actionId = "dpad_down", onTrigger = onTriggerAction)
+            FH6TactileArrowKey(label = "DOWN", actionId = "dpad_down", onTrigger = onTriggerAction)
         }
         // LEFT
         Box(modifier = Modifier.align(Alignment.CenterStart).padding(start = 6.dp)) {
-            FH6TactileArrowKey(arrow = "â—€", sub = "LEFT", actionId = "dpad_left", onTrigger = onTriggerAction)
+            FH6TactileArrowKey(label = "LEFT", actionId = "dpad_left", onTrigger = onTriggerAction)
         }
         // RIGHT
         Box(modifier = Modifier.align(Alignment.CenterEnd).padding(end = 6.dp)) {
-            FH6TactileArrowKey(arrow = "â–¶", sub = "RIGHT", actionId = "dpad_right", onTrigger = onTriggerAction)
+            FH6TactileArrowKey(label = "RIGHT", actionId = "dpad_right", onTrigger = onTriggerAction)
         }
 
         // Center Reticle Joystick Puck (moves when dragged, renders authentic Forza Map Reticle)
@@ -551,8 +531,7 @@ private fun FH6MapCursorPad(
 
 @Composable
 private fun FH6TactileArrowKey(
-    arrow: String,
-    sub: String,
+    label: String,
     actionId: String,
     onTrigger: (actionId: String, isDown: Boolean) -> Unit
 ) {
@@ -582,24 +561,13 @@ private fun FH6TactileArrowKey(
             },
         contentAlignment = Alignment.Center
     ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            Text(
-                text = arrow,
-                color = if (isPressed) Color.Black else Color.White,
-                fontSize = 15.sp,
-                fontWeight = FontWeight.Black
-            )
-            Text(
-                text = sub,
-                color = if (isPressed) Color(0x99000000) else Color(0x99CCFF00),
-                fontSize = 7.sp,
-                fontWeight = FontWeight.Bold,
-                fontFamily = ChakraPetch
-            )
-        }
+        Text(
+            text = label,
+            color = if (isPressed) Color.Black else Color.White,
+            fontSize = 11.sp,
+            fontWeight = FontWeight.Black,
+            fontFamily = ChakraPetch
+        )
     }
 }
 
