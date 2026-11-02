@@ -114,6 +114,8 @@ fun DrivingScreen(
     var hwVolumeUpAction by remember { mutableStateOf(prefs.getString("hw_volume_up_action", "camera") ?: "camera") }
     var hwVolumeDownAction by remember { mutableStateOf(prefs.getString("hw_volume_down_action", "btn_lb") ?: "btn_lb") }
     var pickingVolumeKeyTarget by remember { mutableStateOf<String?>(null) } // "UP", "DOWN", or null
+    var fhMode by remember { mutableStateOf(FHControllerMode.DRIVE) }
+    var isAutoDriveActive by remember { mutableStateOf(false) }
 
     val triggerAction: (String, Boolean) -> Unit = { actionId, isDown ->
         val bit = when (actionId) {
@@ -140,10 +142,21 @@ fun DrivingScreen(
             else -> 0
         }
 
+        // Context-aware Smart Mode switching
+        if (actionId == "photo_mode" && isDown) {
+            fhMode = if (fhMode == FHControllerMode.PHOTO_MODE) FHControllerMode.DRIVE else FHControllerMode.PHOTO_MODE
+        } else if ((actionId == "pause" || actionId == "btn_menu" || actionId == "map" || actionId == "btn_view") && isDown) {
+            fhMode = FHControllerMode.MENU_NAV
+        } else if (actionId == "auto_drive" && isDown) {
+            isAutoDriveActive = !isAutoDriveActive
+        }
+
         if (actionId == "throttle" || actionId == "fire_weapon") {
             throttlePressure = if (isDown) 1.0f else 0.0f
+            if (isDown && isAutoDriveActive) isAutoDriveActive = false
         } else if (actionId == "brake" || actionId == "aim_weapon") {
             brakePressure = if (isDown) 1.0f else 0.0f
+            if (isDown && isAutoDriveActive) isAutoDriveActive = false
         } else if (actionId == "handbrake") {
             handbrakeState = isDown
             if (isDown) buttonsBitmask = buttonsBitmask or (1 shl 0)
@@ -267,12 +280,45 @@ fun DrivingScreen(
             ) {
                 when (element.shape) {
                     ControlShape.CircleWheel -> {
-                        FH6ExactSvgSteeringWheel(
-                            isEditMode = state.isEditMode,
-                            isGyroActive = isGyroEnabled,
-                            currentAngleNormalized = steeringAngle,
-                            onSteerChange = { if (!isGyroEnabled) steeringAngle = it }
-                        )
+                        when (fhMode) {
+                            FHControllerMode.DRIVE -> {
+                                FH6ExactSvgSteeringWheel(
+                                    isEditMode = state.isEditMode,
+                                    isGyroActive = isGyroEnabled,
+                                    currentAngleNormalized = steeringAngle,
+                                    onSteerChange = {
+                                        if (!isGyroEnabled) {
+                                            steeringAngle = it
+                                            if (isAutoDriveActive && kotlin.math.abs(it) > 0.15f) isAutoDriveActive = false
+                                        }
+                                    }
+                                )
+                            }
+                            FHControllerMode.MENU_NAV -> {
+                                FH6MenuNavPad(
+                                    isEditMode = state.isEditMode,
+                                    onTriggerAction = triggerAction,
+                                    onReturnToDrive = { fhMode = FHControllerMode.DRIVE }
+                                )
+                            }
+                            FHControllerMode.PHOTO_MODE -> {
+                                FH6PhotoModeCockpit(
+                                    isEditMode = state.isEditMode,
+                                    onLeftStickChange = { x, y ->
+                                        leftStickX = x
+                                        leftStickY = y
+                                    },
+                                    onRightStickChange = { x, y ->
+                                        rightStickX = x
+                                        rightStickY = y
+                                    },
+                                    onThrottleChange = { throttlePressure = it },
+                                    onBrakeChange = { brakePressure = it },
+                                    onTriggerAction = triggerAction,
+                                    onReturnToDrive = { fhMode = FHControllerMode.DRIVE }
+                                )
+                            }
+                        }
                     }
                     ControlShape.VerticalPedal -> {
                         val isThrottle = element.actionId == "throttle"
@@ -411,6 +457,29 @@ fun DrivingScreen(
                 drawCircle(Color.White, radius = r, center = Offset(size.width / 2f, size.height / 2f))
                 drawCircle(Color.White, radius = r, center = Offset(size.width / 2f, size.height - 3.dp.toPx()))
             }
+        }
+
+        // 2b. Sleek Top-Center Mode Switcher Pill (DRIVE / MENU NAV / PHOTO MODE)
+        if (!state.isEditMode) {
+            FH6ModeSwitcherPill(
+                currentMode = fhMode,
+                onSelectMode = { fhMode = it },
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .padding(top = 10.dp)
+            )
+
+            // Auto-Drive & Cinematic Camera Overlay Banner
+            FH6AutoDriveCinematicOverlay(
+                isAutoDriveActive = isAutoDriveActive,
+                onCinematicCamPress = { isDown ->
+                    triggerAction("btn_lb", isDown)
+                },
+                onDisengage = { isAutoDriveActive = false },
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(bottom = 12.dp)
+            )
         }
 
         // 3. Edit Mode Floating Bottom Dock (Volt Lime Accents, ZERO OVERLAPS)
@@ -1269,7 +1338,7 @@ fun FH6ExactSvgActionButton(
             "btn_a", "btn_b", "btn_x", "activate", "rewind", "btn_y" -> true
             else -> false
         }
-        val mainFontSize = (minDim.value * (if (isSingleLetter) 0.44f else 0.16f)).coerceIn(5f, 64f).sp
+        val mainFontSize = (minDim.value * (if (isSingleLetter) 0.42f else 0.14f)).coerceIn(5f, 32f).sp
         val subFontSize = (minDim.value * 0.085f).coerceIn(4f, 13f).sp
         val letterSpacingVal = (minDim.value * 0.01f).coerceIn(0.2f, 1.5f).sp
 

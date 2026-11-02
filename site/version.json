@@ -1,14 +1,14 @@
 {
   "android": {
-    "versionCode": 8,
-    "versionName": "1.4.4",
+    "versionCode": 9,
+    "versionName": "1.5.0",
     "apkUrl": "https://raw.githubusercontent.com/VarunKulkarni15/FH6-Mobile-Controller/master/dist-android/HorizonController.apk",
-    "changelog": "Hardware Volume Buttons remapping (Paddle Shifters or Car Selection Menu nav), complete FH6 dedicated action catalog with full miniature SVG vector previews."
+    "changelog": "FH6 Smart Modes: Dynamic Menu/Garage Nav Pad with [LB]/[RB] tab flippers, Pro Photo & Drone Cockpit with dual 360° thumbsticks + altitude triggers, Auto-Drive [LB] Cinematic Camera overlay, and pinned [A][B][X][Y] cluster."
   },
   "windows": {
-    "versionCode": 8,
-    "versionName": "1.4.4",
+    "versionCode": 9,
+    "versionName": "1.5.0",
     "downloadUrl": "https://raw.githubusercontent.com/VarunKulkarni15/FH6-Mobile-Controller/master/dist-windows/fh6-controller-windows.exe",
-    "changelog": "Forza Horizon Sim-Racing Companion v1.4.4: 120Hz FastStream with extended look left/right/forward, radio prev, and paddle shift dispatch."
+    "changelog": "Forza Horizon Sim-Racing Companion v1.5.0: 120Hz FastStream with extended look left/right/forward, radio prev, and paddle shift dispatch."
   }
 }
