@@ -1,4 +1,4 @@
-﻿package com.wheelpad.app.updater
+package com.wheelpad.app.updater
 
 import android.content.Context
 import android.content.Intent
@@ -185,7 +185,7 @@ class AutoUpdateManager(private val context: Context) {
         }
     }
 
-    private fun launchInstaller(apkFile: File) {
+    fun launchInstaller(apkFile: File) {
         try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 if (!context.packageManager.canRequestPackageInstalls()) {
