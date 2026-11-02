@@ -223,6 +223,15 @@ namespace WheelPad.Core.Services
                         }
                         break;
 
+                    case "SET_PAUSE_STATE":
+                        if (root.TryGetProperty("isPaused", out var pauseProp))
+                        {
+                            bool isPaused = pauseProp.GetBoolean();
+                            string mode = root.TryGetProperty("menuMode", out var modeProp) ? (modeProp.GetString() ?? "PAUSE") : "PAUSE";
+                            _inputDispatcher.GameDetector?.SetPauseState(isPaused, mode);
+                        }
+                        break;
+
                     case "PING":
                         var pong = new { type = "PONG", timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() };
                         await writer.WriteLineAsync(JsonSerializer.Serialize(pong, _jsonOptions));

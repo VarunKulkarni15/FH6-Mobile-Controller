@@ -81,6 +81,15 @@ namespace WheelPad.Core.Services
         {
             normalizedValue = Math.Clamp(normalizedValue, -1.0f, 1.0f);
 
+            // Driving input detection: If player uses throttle/gas or brake while paused, game is driving
+            if ((actionId == "throttle" || actionId == "brake") && normalizedValue > 0.15f)
+            {
+                if (GameDetector?.IsGamePaused == true)
+                {
+                    GameDetector?.SetPauseState(false, "PAUSE");
+                }
+            }
+
             // Fast path for direct analog axes
             if (_xboxController != null && _xboxController.IsConnected)
             {
@@ -178,6 +187,15 @@ namespace WheelPad.Core.Services
 
         public void DispatchDigitalInput(string actionId, bool isPressed)
         {
+            if (actionId == "exit_menu_silent" || actionId == "drive_rig_mode")
+            {
+                if (isPressed)
+                {
+                    GameDetector?.SetPauseState(false, "PAUSE");
+                }
+                return;
+            }
+
             if (actionId == "auto_drive")
             {
                 if (isPressed)

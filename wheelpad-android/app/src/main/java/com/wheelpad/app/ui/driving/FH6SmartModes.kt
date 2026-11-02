@@ -45,6 +45,15 @@ fun FH6SettingsNavScreen(
 ) {
     val view = LocalView.current
     val isMap = currentMode.equals("MAP", ignoreCase = true)
+    var pendingCutsceneTransition by remember { mutableStateOf(false) }
+
+    LaunchedEffect(pendingCutsceneTransition) {
+        if (pendingCutsceneTransition) {
+            kotlinx.coroutines.delay(2200)
+            pendingCutsceneTransition = false
+            onDirectReturnToDrive()
+        }
+    }
 
     Box(
         modifier = Modifier
@@ -164,6 +173,40 @@ fun FH6SettingsNavScreen(
                 }
             }
 
+            if (pendingCutsceneTransition) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(6.dp))
+                        .background(Color(0x33CCFF00))
+                        .border(1.dp, Color(0xFFCCFF00), RoundedCornerShape(6.dp))
+                        .padding(horizontal = 12.dp, vertical = 6.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "CAR SELECTED // CUTSCENE PLAYING... ENTERING COCKPIT RIG",
+                        color = Color(0xFFCCFF00),
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Black,
+                        letterSpacing = 0.8.sp,
+                        fontFamily = ChakraPetch
+                    )
+                    Text(
+                        text = "CANCEL",
+                        color = Color.White,
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Bold,
+                        fontFamily = ChakraPetch,
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(4.dp))
+                            .background(Color(0x55FFFFFF))
+                            .clickable { pendingCutsceneTransition = false }
+                            .padding(horizontal = 8.dp, vertical = 2.dp)
+                    )
+                }
+            }
+
             // Main Content Area: Left Arrow / Map Cursor Pad + Right Action Face Buttons
             Row(
                 modifier = Modifier
@@ -188,17 +231,23 @@ fun FH6SettingsNavScreen(
                             bumperKey = "LB",
                             title = if (isMap) "REGIONS" else "PREV TAB",
                             isLeft = true,
-                            onPress = { isDown -> onTriggerAction("btn_lb", isDown) }
+                            onPress = { isDown ->
+                                if (isDown) pendingCutsceneTransition = false
+                                onTriggerAction("btn_lb", isDown)
+                            }
                         )
                         FH6MotorsportBumper(
                             bumperKey = "RB",
                             title = if (isMap) "FILTER" else "NEXT TAB",
                             isLeft = false,
-                            onPress = { isDown -> onTriggerAction("btn_rb", isDown) }
+                            onPress = { isDown ->
+                                if (isDown) pendingCutsceneTransition = false
+                                onTriggerAction("btn_rb", isDown)
+                            }
                         )
                     }
 
-                    // Combined Tactile 4-Way Arrow Pad + 360Â° Map Cursor Glide
+                    // Combined Tactile 4-Way Arrow Pad + 360-degree Map Cursor Glide
                     FH6MapCursorPad(
                         isMap = isMap,
                         onTriggerAction = onTriggerAction,
@@ -260,7 +309,10 @@ fun FH6SettingsNavScreen(
                                 sub = if (isMap) "CLOSE MAP" else "BACK",
                                 color = Color(0xFFFF1744),
                                 actionId = "btn_b",
-                                onTrigger = onTriggerAction
+                                onTrigger = { id, down ->
+                                    if (down) pendingCutsceneTransition = false
+                                    onTriggerAction(id, down)
+                                }
                             )
                         }
                         // A Button (Bottom, Green)
@@ -271,7 +323,12 @@ fun FH6SettingsNavScreen(
                                 sub = if (isMap) "SET ROUTE" else "SELECT",
                                 color = Color(0xFF00E676),
                                 actionId = "btn_a",
-                                onTrigger = onTriggerAction
+                                onTrigger = { id, down ->
+                                    if (down && !isMap) {
+                                        pendingCutsceneTransition = true
+                                    }
+                                    onTriggerAction(id, down)
+                                }
                             )
                         }
                     }
@@ -393,7 +450,7 @@ private fun FH6MotorsportBumper(
 }
 
 /**
- * Combined 4-Way Arrow Key Pad with 360Â° Map Reticle Pan Cursor
+ * Combined 4-Way Arrow Key Pad with 360-degree Map Reticle Pan Cursor
  */
 @Composable
 private fun FH6MapCursorPad(

@@ -306,6 +306,8 @@ fun DrivingScreen(
                     steeringAngle = 0f
                     leftStickY = 0f
                     isMenuState = false
+                    triggerAction("exit_menu_silent", true)
+                    triggerAction("exit_menu_silent", false)
                 }
             )
         } else {

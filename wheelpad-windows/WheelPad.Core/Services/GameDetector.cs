@@ -211,6 +211,11 @@ namespace WheelPad.Core.Services
                     {
                         _menuDepth--;
                     }
+                    else
+                    {
+                        _menuDepth = 0;
+                        SetPauseState(false, "PAUSE");
+                    }
                 }
             }
         }
@@ -306,10 +311,11 @@ namespace WheelPad.Core.Services
                                 _menuDepth = Math.Min(_menuDepth + 1, 5);
                             }
                         }
-                        else if ((wDown && !_lastWDown) || (sDown && !_lastSDown))
+                        else if ((wDown && !_lastWDown) || (sDown && !_lastSDown) || (spaceDown && !_lastSpaceDown))
                         {
-                            if (_isGamePaused && _menuDepth == 0)
+                            if (_isGamePaused)
                             {
+                                _menuDepth = 0;
                                 SetPauseState(false, "PAUSE");
                             }
                         }
