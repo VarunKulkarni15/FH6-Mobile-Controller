@@ -42,12 +42,21 @@ namespace WheelPad.Core.Services
         public void Start()
         {
             _cts = new CancellationTokenSource();
-            _udpClient = new UdpClient(new IPEndPoint(IPAddress.Any, _port));
+            try
+            {
+                _udpClient = new UdpClient();
+                _udpClient.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
+                _udpClient.Client.Bind(new IPEndPoint(IPAddress.Any, _port));
 
-            LogMessage?.Invoke(this, $"[UdpReceiver] FastStream listening on UDP port {_port}...");
-            _watchdogTimer.Change(WatchdogTimeoutMs, WatchdogTimeoutMs);
+                LogMessage?.Invoke(this, $"[UdpReceiver] FastStream listening on UDP port {_port}...");
+                _watchdogTimer.Change(WatchdogTimeoutMs, WatchdogTimeoutMs);
 
-            _ = ReceiveLoopAsync(_cts.Token);
+                _ = ReceiveLoopAsync(_cts.Token);
+            }
+            catch (Exception ex)
+            {
+                LogMessage?.Invoke(this, $"[UdpReceiver] Could not bind UDP port {_port}: {ex.Message}");
+            }
         }
 
         private async Task ReceiveLoopAsync(CancellationToken token)

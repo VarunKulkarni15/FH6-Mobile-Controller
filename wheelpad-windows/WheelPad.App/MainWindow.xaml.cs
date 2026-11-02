@@ -29,9 +29,28 @@ namespace WheelPad.App
         private bool _isExplicitExit = false;
         private string? _pendingUpdateUrl;
 
+        private static void Log(string msg)
+        {
+            try
+            {
+                App.Log($"[MainWindow] {msg}");
+            }
+            catch { }
+        }
+
         public MainWindow()
         {
-            InitializeComponent();
+            Log("Constructor start");
+            try
+            {
+                InitializeComponent();
+                Log("InitializeComponent done");
+            }
+            catch (Exception ex)
+            {
+                Log($"InitializeComponent FAILED: {ex}");
+                throw;
+            }
 
             string localIp = GetLocalIpAddress();
 
@@ -200,6 +219,17 @@ namespace WheelPad.App
 
             // Check for updates in background
             _ = CheckForUpdatesSilentlyAsync();
+            Log("Constructor finished successfully!");
+        }
+
+        private void BtnCopyIp_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                System.Windows.Clipboard.SetText(TxtLocalIp.Text);
+                TxtFooter.Text = $"Host IP '{TxtLocalIp.Text}' copied to clipboard!";
+            }
+            catch { }
         }
 
         private async Task CheckForUpdatesSilentlyAsync()

@@ -66,11 +66,19 @@ namespace WheelPad.Core.Services
         public void Start()
         {
             _cts = new CancellationTokenSource();
-            _listener = new TcpListener(IPAddress.Any, _port);
-            _listener.Start();
+            try
+            {
+                _listener = new TcpListener(IPAddress.Any, _port);
+                _listener.Server.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
+                _listener.Start();
 
-            LogMessage?.Invoke(this, $"[SyncServer] Listening for Android companion on port {_port}...");
-            _ = AcceptClientsAsync(_cts.Token);
+                LogMessage?.Invoke(this, $"[SyncServer] Listening for Android companion on port {_port}...");
+                _ = AcceptClientsAsync(_cts.Token);
+            }
+            catch (Exception ex)
+            {
+                LogMessage?.Invoke(this, $"[SyncServer] Could not bind TCP port {_port}: {ex.Message}");
+            }
         }
 
         private async Task AcceptClientsAsync(CancellationToken token)

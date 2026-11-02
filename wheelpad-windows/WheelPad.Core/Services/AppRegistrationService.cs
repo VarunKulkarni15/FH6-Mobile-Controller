@@ -23,7 +23,7 @@ public static class AppRegistrationService
         try
         {
             string? currentExe = Process.GetCurrentProcess().MainModule?.FileName;
-            if (string.IsNullOrEmpty(currentExe) || !File.Exists(currentExe))
+            if (string.IsNullOrEmpty(currentExe) || !File.Exists(currentExe) || currentExe.EndsWith("dotnet.exe", StringComparison.OrdinalIgnoreCase))
                 return;
 
             string exeDir = Path.GetDirectoryName(currentExe) ?? "";
