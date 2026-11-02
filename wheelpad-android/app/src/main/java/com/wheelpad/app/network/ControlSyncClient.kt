@@ -39,6 +39,9 @@ class ControlSyncClient(
     private val _isGamePaused = MutableStateFlow(false)
     val isGamePaused: StateFlow<Boolean> = _isGamePaused
 
+    private val _currentMenuMode = MutableStateFlow("PAUSE")
+    val currentMenuMode: StateFlow<String> = _currentMenuMode
+
     private val _statusMessage = MutableStateFlow("Disconnected")
     val statusMessage: StateFlow<String> = _statusMessage
 
@@ -133,6 +136,7 @@ class ControlSyncClient(
                 }
                 "PAUSE_STATE_CHANGED" -> {
                     _isGamePaused.value = root.optBoolean("isPaused", false)
+                    _currentMenuMode.value = root.optString("menuMode", "PAUSE")
                 }
                 "SPOTIFY_STATE_CHANGED" -> {
                     val trackObj = root.optJSONObject("track")

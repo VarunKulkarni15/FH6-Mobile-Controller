@@ -116,6 +116,12 @@ fun DrivingScreen(
     var pickingVolumeKeyTarget by remember { mutableStateOf<String?>(null) } // "UP", "DOWN", or null
     var isMenuState by remember { mutableStateOf(false) }
     val syncGamePaused by (syncClient?.isGamePaused?.collectAsState() ?: remember { mutableStateOf(false) })
+    val syncMenuMode by (syncClient?.currentMenuMode?.collectAsState() ?: remember { mutableStateOf("PAUSE") })
+    var activeMenuMode by remember { mutableStateOf("PAUSE") }
+
+    LaunchedEffect(syncMenuMode) {
+        activeMenuMode = syncMenuMode
+    }
 
     LaunchedEffect(syncGamePaused) {
         if (isMenuState != syncGamePaused) {
@@ -149,10 +155,17 @@ fun DrivingScreen(
             else -> 0
         }
 
-        // Smart Auto-Detection for Pause Menu / Car Selection / Settings
-        if ((actionId == "pause" || actionId == "btn_menu" || actionId == "btn_start" || actionId == "map" || actionId == "btn_view") && isDown) {
-            isMenuState = !isMenuState
-        } else if (actionId == "auto_drive" && isDown) {
+        // Smart Auto-Detection for Pause Menu vs World Map
+        if (isDown) {
+            if (actionId == "map" || actionId == "btn_view") {
+                activeMenuMode = "MAP"
+                isMenuState = true
+            } else if (actionId == "pause" || actionId == "btn_menu" || actionId == "btn_start") {
+                activeMenuMode = "PAUSE"
+                isMenuState = !isMenuState
+            }
+        }
+        if (actionId == "auto_drive" && isDown) {
             isAutoDriveActive = !isAutoDriveActive
         }
 
@@ -251,6 +264,17 @@ fun DrivingScreen(
         // 1. Render Screen Based on Menu/Driving State
         if (isMenuState) {
             FH6SettingsNavScreen(
+                currentMode = activeMenuMode,
+                onModeChange = { newMode ->
+                    activeMenuMode = newMode
+                    if (newMode == "MAP") {
+                        triggerAction("map", true)
+                        triggerAction("map", false)
+                    } else {
+                        triggerAction("pause", true)
+                        triggerAction("pause", false)
+                    }
+                },
                 onTriggerAction = triggerAction,
                 onAnalogMove = { x, y ->
                     steeringAngle = x

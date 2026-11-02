@@ -16,48 +16,51 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.unit.IntOffset
-import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.graphics.PathEffect
-import kotlin.math.roundToInt
 import com.wheelpad.app.ui.theme.ChakraPetch
+import kotlin.math.roundToInt
 
 /**
- * Authentic Forza Horizon Dedicated Settings, Pause & World Map Navigation Screen
- * Displays tactical Arrow Keys + 360° Map Cursor Glide on the Left,
- * Tab Bumpers [LB]/[RB] at Top,
- * and Face Buttons [A] Select/Set Route, [B] Back/Close Map, [X] Enter/Fast Travel, [Y] Reset/Reveal.
- * Dispatches both Xbox Controller and PC Keyboard/Mouse so it works with 100% responsiveness.
+ * Authentic Forza Horizon Dedicated Settings, Pause & World Map Navigation Screen.
+ * Mode-aware: Dynamically switches layout labels, headers, and actions between
+ * PAUSE MENU (Campaign/Cars/Settings tabs, Convoy, Reset Car, Select, Back)
+ * and WORLD MAP (Regions, Filters, Fast Travel, Reveal Map, Set Route, Close Map).
  */
 @Composable
 fun FH6SettingsNavScreen(
+    currentMode: String = "PAUSE", // "PAUSE" or "MAP"
+    onModeChange: (String) -> Unit = {},
     onTriggerAction: (actionId: String, isDown: Boolean) -> Unit,
     onAnalogMove: (x: Float, y: Float) -> Unit,
     onReturnToDrive: () -> Unit
 ) {
     val view = LocalView.current
+    val isMap = currentMode.equals("MAP", ignoreCase = true)
 
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(Color(0xF5050A0E))
-            .padding(16.dp)
+            .padding(14.dp)
     ) {
         Column(
             modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.SpaceBetween
         ) {
-            // Top Header: Title + Resume Button
+            // Top Header: Title + Mode Toggle Tabs + Resume Button
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
+                // Left: Horizon Logo & Mode Title
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -65,46 +68,100 @@ fun FH6SettingsNavScreen(
                     // Xbox 3-horizontal lines Menu icon [≡]
                     Box(
                         modifier = Modifier
-                            .size(26.dp)
+                            .size(24.dp)
                             .clip(RoundedCornerShape(4.dp))
                             .background(Color(0xFFCCFF00)),
                         contentAlignment = Alignment.Center
                     ) {
-                        Canvas(modifier = Modifier.size(14.dp)) {
-                            val stroke = 2.2f
-                            drawLine(Color.Black, Offset(1f, 3f), Offset(size.width - 1f, 3f), strokeWidth = stroke)
+                        Canvas(modifier = Modifier.size(12.dp)) {
+                            val stroke = 2f
+                            drawLine(Color.Black, Offset(1f, 2.5f), Offset(size.width - 1f, 2.5f), strokeWidth = stroke)
                             drawLine(Color.Black, Offset(1f, size.height / 2f), Offset(size.width - 1f, size.height / 2f), strokeWidth = stroke)
-                            drawLine(Color.Black, Offset(1f, size.height - 3f), Offset(size.width - 1f, size.height - 3f), strokeWidth = stroke)
+                            drawLine(Color.Black, Offset(1f, size.height - 2.5f), Offset(size.width - 1f, size.height - 2.5f), strokeWidth = stroke)
                         }
                     }
 
                     Text(
-                        text = "FORZA HORIZON // PAUSE & WORLD MAP",
+                        text = if (isMap) "FORZA HORIZON // WORLD MAP" else "FORZA HORIZON // PAUSE MENU",
                         color = Color(0xFFCCFF00),
                         fontSize = 13.sp,
                         fontWeight = FontWeight.Black,
-                        letterSpacing = 1.5.sp,
+                        letterSpacing = 1.2.sp,
                         fontFamily = ChakraPetch
                     )
                 }
 
-                // Resume Driving Button (unpauses game on PC and returns to driving rig)
+                // Middle: Mode Switcher Segmented Tabs
+                Row(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(6.dp))
+                        .background(Color(0xFF0C141C))
+                        .border(1.dp, Color(0x50CCFF00), RoundedCornerShape(6.dp))
+                        .padding(2.dp),
+                    horizontalArrangement = Arrangement.spacedBy(2.dp)
+                ) {
+                    // Pause Menu Tab
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(4.dp))
+                            .background(if (!isMap) Color(0xFFCCFF00) else Color.Transparent)
+                            .clickable {
+                                if (isMap) {
+                                    view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
+                                    onModeChange("PAUSE")
+                                }
+                            }
+                            .padding(horizontal = 12.dp, vertical = 6.dp)
+                    ) {
+                        Text(
+                            text = "PAUSE MENU",
+                            color = if (!isMap) Color.Black else Color(0x99FFFFFF),
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Black,
+                            fontFamily = ChakraPetch
+                        )
+                    }
+
+                    // World Map Tab
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(4.dp))
+                            .background(if (isMap) Color(0xFFCCFF00) else Color.Transparent)
+                            .clickable {
+                                if (!isMap) {
+                                    view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
+                                    onModeChange("MAP")
+                                }
+                            }
+                            .padding(horizontal = 12.dp, vertical = 6.dp)
+                    ) {
+                        Text(
+                            text = "WORLD MAP",
+                            color = if (isMap) Color.Black else Color(0x99FFFFFF),
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Black,
+                            fontFamily = ChakraPetch
+                        )
+                    }
+                }
+
+                // Right: Resume Driving Button
                 Box(
                     modifier = Modifier
-                        .clip(RoundedCornerShape(8.dp))
+                        .clip(RoundedCornerShape(6.dp))
                         .background(Color(0xFFCCFF00))
                         .clickable {
                             view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
                             onReturnToDrive()
                         }
-                        .padding(horizontal = 18.dp, vertical = 8.dp)
+                        .padding(horizontal = 16.dp, vertical = 7.dp)
                 ) {
                     Text(
                         text = "RESUME DRIVING [≡]",
                         color = Color.Black,
                         fontSize = 11.sp,
                         fontWeight = FontWeight.Black,
-                        letterSpacing = 1.sp,
+                        letterSpacing = 0.8.sp,
                         fontFamily = ChakraPetch
                     )
                 }
@@ -115,7 +172,7 @@ fun FH6SettingsNavScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f)
-                    .padding(vertical = 12.dp),
+                    .padding(vertical = 8.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -123,22 +180,22 @@ fun FH6SettingsNavScreen(
                 Column(
                     modifier = Modifier.weight(1f),
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(10.dp)
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    // Top Category Bumpers
+                    // Top Category Bumpers (Context-Aware!)
                     Row(
                         modifier = Modifier.fillMaxWidth(0.85f),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         FH6NavBumperTab(
-                            label = "◀ PREV [LB]",
+                            label = if (isMap) "◀ REGIONS [LB]" else "◀ PREV TAB [LB]",
                             onPress = { isDown ->
                                 if (isDown) view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
                                 onTriggerAction("btn_lb", isDown)
                             }
                         )
                         FH6NavBumperTab(
-                            label = "[RB] NEXT ▶",
+                            label = if (isMap) "[RB] FILTER ▶" else "[RB] NEXT TAB ▶",
                             onPress = { isDown ->
                                 if (isDown) view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
                                 onTriggerAction("btn_rb", isDown)
@@ -148,6 +205,7 @@ fun FH6SettingsNavScreen(
 
                     // Combined Tactile 4-Way Arrow Pad + 360° Map Cursor Glide
                     FH6MapCursorPad(
+                        isMap = isMap,
                         onTriggerAction = onTriggerAction,
                         onAnalogMove = onAnalogMove,
                         onCenterClick = {
@@ -157,14 +215,14 @@ fun FH6SettingsNavScreen(
                     )
                 }
 
-                // Right Side: Standard Xbox Diamond [Y, X, B, A] with authentic Xbox Colors
+                // Right Side: Standard Xbox Diamond [Y, X, B, A] with authentic Xbox Colors & Context Labels
                 Column(
                     modifier = Modifier.weight(1f),
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                    verticalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
                     Text(
-                        text = "ACTIONS & SELECTION",
+                        text = if (isMap) "MAP CONTROLS" else "MENU ACTIONS",
                         color = Color(0x99FFFFFF),
                         fontSize = 10.sp,
                         fontWeight = FontWeight.Bold,
@@ -178,26 +236,54 @@ fun FH6SettingsNavScreen(
                         contentAlignment = Alignment.Center
                     ) {
                         // Y Button (Top, Yellow/Volt Lime)
+                        // In Map: Reveal Treasure Map | In Pause Menu: Convoy
                         Box(modifier = Modifier.align(Alignment.TopCenter)) {
-                            FH6NavActionButton(label = "Y", sub = "REVEAL / CONVOY", color = Color(0xFFCCFF00), actionId = "rewind", onTrigger = onTriggerAction)
+                            FH6NavActionButton(
+                                label = "Y",
+                                sub = if (isMap) "REVEAL MAP" else "CONVOY",
+                                color = Color(0xFFCCFF00),
+                                actionId = "rewind",
+                                onTrigger = onTriggerAction
+                            )
                         }
                         // X Button (Left, Authentic Xbox Blue!)
+                        // In Map: Fast Travel | In Pause Menu: Reset Car Position
                         Box(modifier = Modifier.align(Alignment.CenterStart)) {
-                            FH6NavActionButton(label = "X", sub = "FAST TRAVEL", color = Color(0xFF00B0FF), actionId = "btn_x", onTrigger = onTriggerAction)
+                            FH6NavActionButton(
+                                label = "X",
+                                sub = if (isMap) "FAST TRAVEL" else "RESET CAR",
+                                color = Color(0xFF00B0FF),
+                                actionId = "btn_x",
+                                onTrigger = onTriggerAction
+                            )
                         }
                         // B Button (Right, Red)
+                        // In Map: Close Map | In Pause Menu: Back
                         Box(modifier = Modifier.align(Alignment.CenterEnd)) {
-                            FH6NavActionButton(label = "B", sub = "BACK / CLOSE", color = Color(0xFFFF1744), actionId = "btn_b", onTrigger = onTriggerAction)
+                            FH6NavActionButton(
+                                label = "B",
+                                sub = if (isMap) "CLOSE MAP" else "BACK",
+                                color = Color(0xFFFF1744),
+                                actionId = "btn_b",
+                                onTrigger = onTriggerAction
+                            )
                         }
                         // A Button (Bottom, Green)
+                        // In Map: Set Route | In Pause Menu: Select
                         Box(modifier = Modifier.align(Alignment.BottomCenter)) {
-                            FH6NavActionButton(label = "A", sub = "SELECT / ROUTE", color = Color(0xFF00E676), actionId = "btn_a", onTrigger = onTriggerAction)
+                            FH6NavActionButton(
+                                label = "A",
+                                sub = if (isMap) "SET ROUTE" else "SELECT",
+                                color = Color(0xFF00E676),
+                                actionId = "btn_a",
+                                onTrigger = onTriggerAction
+                            )
                         }
                     }
                 }
             }
 
-            // Footer Tips
+            // Footer Legend matching exact in-game prompts
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -205,8 +291,23 @@ fun FH6SettingsNavScreen(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(text = "[A] SET ROUTE  •  [B] CLOSE MAP  •  [X] FAST TRAVEL  •  [Y] REVEAL", color = Color(0x99FFFFFF), fontSize = 10.sp, fontWeight = FontWeight.Bold, fontFamily = ChakraPetch)
-                
+                if (isMap) {
+                    Text(
+                        text = "[A] SET ROUTE  •  [B] CLOSE MAP  •  [X] FAST TRAVEL  •  [Y] REVEAL MAP  •  [LB] REGIONS  •  [RB] FILTER",
+                        color = Color(0x99FFFFFF),
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Bold,
+                        fontFamily = ChakraPetch
+                    )
+                } else {
+                    Text(
+                        text = "[A] SELECT  •  [B] BACK  •  [X] RESET CAR POSITION  •  [Y] CONVOY  •  [LB] PREV TAB  •  [RB] NEXT TAB",
+                        color = Color(0x99FFFFFF),
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Bold,
+                        fontFamily = ChakraPetch
+                    )
+                }
             }
         }
     }
@@ -217,6 +318,7 @@ fun FH6SettingsNavScreen(
  */
 @Composable
 private fun FH6MapCursorPad(
+    isMap: Boolean,
     onTriggerAction: (actionId: String, isDown: Boolean) -> Unit,
     onAnalogMove: (x: Float, y: Float) -> Unit,
     onCenterClick: () -> Unit
@@ -230,7 +332,7 @@ private fun FH6MapCursorPad(
             .size(190.dp)
             .clip(CircleShape)
             .background(Color(0xFF071016))
-            .border(2.dp, Color(0x60CCFF00), CircleShape)
+            .border(2.dp, if (isMap) Color(0xFFCCFF00) else Color(0x60CCFF00), CircleShape)
             .pointerInput(Unit) {
                 detectDragGestures(
                     onDragStart = { offset ->

@@ -198,7 +198,7 @@ namespace WheelPad.Core.Services
             {
                 if (isPressed && GameDetector != null)
                 {
-                    GameDetector.SetPauseState(!GameDetector.IsGamePaused);
+                    GameDetector.SetPauseState(!GameDetector.IsGamePaused, "PAUSE");
                 }
                 if (_xboxController != null && _xboxController.IsConnected) _xboxController.SetButton(XboxButton.Start, isPressed);
                 SendWindowsKey(27, isPressed); // ESC
@@ -208,7 +208,7 @@ namespace WheelPad.Core.Services
             {
                 if (isPressed && GameDetector != null)
                 {
-                    GameDetector.SetPauseState(true);
+                    GameDetector.SetPauseState(true, "MAP");
                 }
                 if (_xboxController != null && _xboxController.IsConnected) _xboxController.SetButton(XboxButton.Back, isPressed);
                 SendWindowsKey(0x4D, isPressed); // M (World Map)

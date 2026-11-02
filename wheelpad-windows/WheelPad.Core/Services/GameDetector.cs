@@ -84,6 +84,8 @@ namespace WheelPad.Core.Services
 
         public bool IsGameRunning => _isGameRunning;
         public bool IsGamePaused => _isGamePaused;
+        public string CurrentMenuMode => _currentMenuMode;
+        private string _currentMenuMode = "PAUSE";
         public int CurrentProcessId => _lastProcessId;
         public string? CurrentGameName { get; private set; }
         public bool AutoProfileSwitchEnabled { get; set; } = true;
@@ -156,13 +158,24 @@ namespace WheelPad.Core.Services
 
                         if (isGameActive)
                         {
-                            _isGamePaused = !_isGamePaused;
+                            if (mDown && !_lastMDown)
+                            {
+                                _isGamePaused = true;
+                                _currentMenuMode = "MAP";
+                            }
+                            else
+                            {
+                                _isGamePaused = !_isGamePaused;
+                                _currentMenuMode = "PAUSE";
+                            }
+
                             _syncServer?.BroadcastEvent(new
                             {
                                 type = "PAUSE_STATE_CHANGED",
-                                isPaused = _isGamePaused
+                                isPaused = _isGamePaused,
+                                menuMode = _currentMenuMode
                             });
-                            LogMessage?.Invoke(this, $"[GameDetector] Laptop key pressed. Pause/Map state: {_isGamePaused}");
+                            LogMessage?.Invoke(this, $"[GameDetector] Laptop key pressed. Mode: {_currentMenuMode}, Pause state: {_isGamePaused}");
                         }
                     }
                 }
@@ -172,17 +185,16 @@ namespace WheelPad.Core.Services
             catch { }
         }
 
-        public void SetPauseState(bool isPaused)
+        public void SetPauseState(bool isPaused, string menuMode = "PAUSE")
         {
-            if (_isGamePaused != isPaused)
+            _isGamePaused = isPaused;
+            _currentMenuMode = menuMode;
+            _syncServer?.BroadcastEvent(new
             {
-                _isGamePaused = isPaused;
-                _syncServer?.BroadcastEvent(new
-                {
-                    type = "PAUSE_STATE_CHANGED",
-                    isPaused = _isGamePaused
-                });
-            }
+                type = "PAUSE_STATE_CHANGED",
+                isPaused = _isGamePaused,
+                menuMode = _currentMenuMode
+            });
         }
 
         public void CheckImmediately()
