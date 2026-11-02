@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.wheelpad.app.ui.theme.ChakraPetch
+import kotlin.math.pow
 import kotlin.math.roundToInt
 
 /**
@@ -157,7 +158,7 @@ fun FH6SettingsNavScreen(
                         .padding(horizontal = 16.dp, vertical = 7.dp)
                 ) {
                     Text(
-                        text = "RESUME DRIVING [≡]",
+                        text = if (isMap) "CLOSE MAP [âœ•]" else "RESUME DRIVING [â‰¡]",
                         color = Color.Black,
                         fontSize = 11.sp,
                         fontWeight = FontWeight.Black,
@@ -201,7 +202,7 @@ fun FH6SettingsNavScreen(
                         )
                     }
 
-                    // Combined Tactile 4-Way Arrow Pad + 360° Map Cursor Glide
+                    // Combined Tactile 4-Way Arrow Pad + 360Â° Map Cursor Glide
                     FH6MapCursorPad(
                         isMap = isMap,
                         onTriggerAction = onTriggerAction,
@@ -263,12 +264,7 @@ fun FH6SettingsNavScreen(
                                 sub = if (isMap) "CLOSE MAP" else "BACK",
                                 color = Color(0xFFFF1744),
                                 actionId = "btn_b",
-                                onTrigger = { act, isDown ->
-                                    onTriggerAction(act, isDown)
-                                    if (isDown) {
-                                        onReturnToDrive()
-                                    }
-                                }
+                                onTrigger = onTriggerAction
                             )
                         }
                         // A Button (Bottom, Green)
@@ -296,7 +292,7 @@ fun FH6SettingsNavScreen(
             ) {
                 if (isMap) {
                     Text(
-                        text = "[A] SET ROUTE  •  [B] CLOSE MAP  •  [X] FAST TRAVEL  •  [Y] REVEAL MAP  •  [LB] REGIONS  •  [RB] FILTER",
+                        text = "[A] SET ROUTE  â€¢  [B] CLOSE MAP  â€¢  [X] FAST TRAVEL  â€¢  [Y] REVEAL MAP  â€¢  [LB] REGIONS  â€¢  [RB] FILTER",
                         color = Color(0x99FFFFFF),
                         fontSize = 10.sp,
                         fontWeight = FontWeight.Bold,
@@ -304,7 +300,7 @@ fun FH6SettingsNavScreen(
                     )
                 } else {
                     Text(
-                        text = "[A] SELECT  •  [B] BACK  •  [X] RESET CAR POSITION  •  [Y] CONVOY  •  [LB] PREV TAB  •  [RB] NEXT TAB",
+                        text = "[A] SELECT  â€¢  [B] BACK  â€¢  [X] RESET CAR POSITION  â€¢  [Y] CONVOY  â€¢  [LB] PREV TAB  â€¢  [RB] NEXT TAB",
                         color = Color(0x99FFFFFF),
                         fontSize = 10.sp,
                         fontWeight = FontWeight.Bold,
@@ -375,7 +371,7 @@ private fun FH6MotorsportBumper(
             ) {
                 if (isLeft) {
                     Text(
-                        text = "◀",
+                        text = "â—€",
                         color = if (isPressed) Color.Black else Color(0xFFCCFF00),
                         fontSize = 10.sp,
                         fontWeight = FontWeight.Black
@@ -397,7 +393,7 @@ private fun FH6MotorsportBumper(
                 }
                 if (!isLeft) {
                     Text(
-                        text = "▶",
+                        text = "â–¶",
                         color = if (isPressed) Color.Black else Color(0xFFCCFF00),
                         fontSize = 10.sp,
                         fontWeight = FontWeight.Black
@@ -417,7 +413,7 @@ private fun FH6MotorsportBumper(
 }
 
 /**
- * Combined 4-Way Arrow Key Pad with 360° Map Reticle Pan Cursor
+ * Combined 4-Way Arrow Key Pad with 360Â° Map Reticle Pan Cursor
  */
 @Composable
 private fun FH6MapCursorPad(
@@ -437,6 +433,19 @@ private fun FH6MapCursorPad(
             .background(Color(0xFF071016))
             .border(2.dp, if (isMap) Color(0xFFCCFF00) else Color(0x60CCFF00), CircleShape)
             .pointerInput(Unit) {
+                val deadzonePx = 5f
+                fun computeCurvedMove(clamped: Offset, dist: Float) {
+                    if (dist > deadzonePx) {
+                        val normMag = ((dist.coerceAtMost(maxRadiusPx) - deadzonePx) / (maxRadiusPx - deadzonePx)).coerceIn(0f, 1f)
+                        val curvedMag = Math.pow(normMag.toDouble(), 1.8).toFloat() * 0.40f
+                        val angleX = clamped.x / dist
+                        val angleY = -clamped.y / dist
+                        onAnalogMove(angleX * curvedMag, angleY * curvedMag)
+                    } else {
+                        onAnalogMove(0f, 0f)
+                    }
+                }
+
                 detectDragGestures(
                     onDragStart = { offset ->
                         val center = Offset(size.width / 2f, size.height / 2f)
@@ -444,7 +453,7 @@ private fun FH6MapCursorPad(
                         val dist = kotlin.math.sqrt(raw.x * raw.x + raw.y * raw.y)
                         val clamped = if (dist > maxRadiusPx) Offset(raw.x * (maxRadiusPx / dist), raw.y * (maxRadiusPx / dist)) else raw
                         thumbOffset = clamped
-                        onAnalogMove(clamped.x / maxRadiusPx, -clamped.y / maxRadiusPx)
+                        computeCurvedMove(clamped, dist)
                     },
                     onDrag = { change, dragAmount ->
                         change.consume()
@@ -452,7 +461,7 @@ private fun FH6MapCursorPad(
                         val dist = kotlin.math.sqrt(next.x * next.x + next.y * next.y)
                         val clamped = if (dist > maxRadiusPx) Offset(next.x * (maxRadiusPx / dist), next.y * (maxRadiusPx / dist)) else next
                         thumbOffset = clamped
-                        onAnalogMove(clamped.x / maxRadiusPx, -clamped.y / maxRadiusPx)
+                        computeCurvedMove(clamped, dist)
                     },
                     onDragEnd = {
                         thumbOffset = Offset.Zero
@@ -475,19 +484,19 @@ private fun FH6MapCursorPad(
 
         // UP
         Box(modifier = Modifier.align(Alignment.TopCenter).padding(top = 6.dp)) {
-            FH6TactileArrowKey(arrow = "▲", sub = "UP", actionId = "dpad_up", onTrigger = onTriggerAction)
+            FH6TactileArrowKey(arrow = "â–²", sub = "UP", actionId = "dpad_up", onTrigger = onTriggerAction)
         }
         // DOWN
         Box(modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 6.dp)) {
-            FH6TactileArrowKey(arrow = "▼", sub = "DOWN", actionId = "dpad_down", onTrigger = onTriggerAction)
+            FH6TactileArrowKey(arrow = "â–¼", sub = "DOWN", actionId = "dpad_down", onTrigger = onTriggerAction)
         }
         // LEFT
         Box(modifier = Modifier.align(Alignment.CenterStart).padding(start = 6.dp)) {
-            FH6TactileArrowKey(arrow = "◀", sub = "LEFT", actionId = "dpad_left", onTrigger = onTriggerAction)
+            FH6TactileArrowKey(arrow = "â—€", sub = "LEFT", actionId = "dpad_left", onTrigger = onTriggerAction)
         }
         // RIGHT
         Box(modifier = Modifier.align(Alignment.CenterEnd).padding(end = 6.dp)) {
-            FH6TactileArrowKey(arrow = "▶", sub = "RIGHT", actionId = "dpad_right", onTrigger = onTriggerAction)
+            FH6TactileArrowKey(arrow = "â–¶", sub = "RIGHT", actionId = "dpad_right", onTrigger = onTriggerAction)
         }
 
         // Center Reticle Joystick Puck (moves when dragged, renders authentic Forza Map Reticle)

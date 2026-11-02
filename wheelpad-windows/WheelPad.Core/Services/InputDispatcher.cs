@@ -86,14 +86,34 @@ namespace WheelPad.Core.Services
             {
                 if (actionId == "left_stick_x" || (actionId == "steer" && (GameDetector?.IsGamePaused == true)))
                 {
-                    short raw = (short)(normalizedValue * 32767f);
-                    _xboxController.SetAxis(XboxButton.LeftThumbX, raw);
+                    float mag = Math.Abs(normalizedValue);
+                    if (mag < 0.04f)
+                    {
+                        _xboxController.SetAxis(XboxButton.LeftThumbX, 0);
+                    }
+                    else
+                    {
+                        float sign = Math.Sign(normalizedValue);
+                        float scaled = (float)(Math.Pow(mag, 1.6) * 0.45f);
+                        short raw = (short)(sign * scaled * 32767f);
+                        _xboxController.SetAxis(XboxButton.LeftThumbX, raw);
+                    }
                     return;
                 }
                 else if (actionId == "left_stick_y")
                 {
-                    short raw = (short)(normalizedValue * 32767f);
-                    _xboxController.SetAxis(XboxButton.LeftThumbY, raw);
+                    float mag = Math.Abs(normalizedValue);
+                    if (mag < 0.04f)
+                    {
+                        _xboxController.SetAxis(XboxButton.LeftThumbY, 0);
+                    }
+                    else
+                    {
+                        float sign = Math.Sign(normalizedValue);
+                        float scaled = (float)(Math.Pow(mag, 1.6) * 0.45f);
+                        short raw = (short)(sign * scaled * 32767f);
+                        _xboxController.SetAxis(XboxButton.LeftThumbY, raw);
+                    }
                     return;
                 }
                 else if (actionId == "right_stick_x")
@@ -217,16 +237,14 @@ namespace WheelPad.Core.Services
             {
                 if (isPressed)
                 {
-                    if (GameDetector != null)
-                    {
-                        GameDetector.SetPauseState(!GameDetector.IsGamePaused, "PAUSE");
-                    }
+                    bool newPausedState = !(GameDetector?.IsGamePaused ?? false);
+                    GameDetector?.SetPauseState(newPausedState, "PAUSE");
                     if (_xboxController != null && _xboxController.IsConnected)
                     {
                         _xboxController.SetButton(XboxButton.Start, true);
                         Task.Delay(60).ContinueWith(_ => _xboxController.SetButton(XboxButton.Start, false));
                     }
-                    if (isFg)
+                    else if (isFg)
                     {
                         SendWindowsKey(27, true);
                         Task.Delay(60).ContinueWith(_ => SendWindowsKey(27, false));
@@ -238,16 +256,18 @@ namespace WheelPad.Core.Services
             {
                 if (isPressed)
                 {
-                    if (GameDetector != null)
+                    bool newPaused = true;
+                    if (GameDetector?.IsGamePaused == true && GameDetector.CurrentMenuMode == "MAP")
                     {
-                        GameDetector.SetPauseState(true, "MAP");
+                        newPaused = false;
                     }
+                    GameDetector?.SetPauseState(newPaused, newPaused ? "MAP" : "PAUSE");
                     if (_xboxController != null && _xboxController.IsConnected)
                     {
                         _xboxController.SetButton(XboxButton.Back, true);
                         Task.Delay(60).ContinueWith(_ => _xboxController.SetButton(XboxButton.Back, false));
                     }
-                    if (isFg)
+                    else if (isFg)
                     {
                         SendWindowsKey(0x4D, true);
                         Task.Delay(60).ContinueWith(_ => SendWindowsKey(0x4D, false));
@@ -257,30 +277,46 @@ namespace WheelPad.Core.Services
             }
             if (actionId == "btn_b")
             {
-                if (isPressed && GameDetector != null && GameDetector.IsGamePaused)
+                if (isPressed)
                 {
-                    GameDetector.SetPauseState(false, "PAUSE");
+                    GameDetector?.HandleMenuBack();
                 }
-                if (_xboxController != null && _xboxController.IsConnected) _xboxController.SetButton(XboxButton.B, isPressed);
-                if (isFg) SendWindowsKey(27, isPressed); // ESC / Back
+                if (_xboxController != null && _xboxController.IsConnected)
+                {
+                    _xboxController.SetButton(XboxButton.B, isPressed);
+                }
+                else if (isFg)
+                {
+                    SendWindowsKey(27, isPressed); // ESC / Back fallback
+                }
                 return;
             }
             if (actionId == "btn_a")
             {
-                if (_xboxController != null && _xboxController.IsConnected) _xboxController.SetButton(XboxButton.A, isPressed);
-                if (isFg) SendWindowsKey(13, isPressed); // Enter / Set Route
+                if (isPressed)
+                {
+                    GameDetector?.HandleMenuSelect();
+                }
+                if (_xboxController != null && _xboxController.IsConnected)
+                {
+                    _xboxController.SetButton(XboxButton.A, isPressed);
+                }
+                else if (isFg)
+                {
+                    SendWindowsKey(13, isPressed); // Enter / Set Route fallback
+                }
                 return;
             }
             if (actionId == "btn_x")
             {
                 if (_xboxController != null && _xboxController.IsConnected) _xboxController.SetButton(XboxButton.X, isPressed);
-                if (isFg) SendWindowsKey(0x58, isPressed); // X / Fast Travel
+                else if (isFg) SendWindowsKey(0x58, isPressed); // X / Fast Travel
                 return;
             }
             if (actionId == "btn_y" || actionId == "rewind")
             {
                 if (_xboxController != null && _xboxController.IsConnected) _xboxController.SetButton(XboxButton.Y, isPressed);
-                if (isFg)
+                else if (isFg)
                 {
                     SendWindowsKey(0x59, isPressed); // Y / Reveal Map
                     SendWindowsKey(0x52, isPressed); // R / Rewind
@@ -290,7 +326,13 @@ namespace WheelPad.Core.Services
             if (actionId == "btn_lb" || actionId == "clutch")
             {
                 if (_xboxController != null && _xboxController.IsConnected) _xboxController.SetButton(XboxButton.LeftBumper, isPressed);
-                if (isFg) SendWindowsKey(33, isPressed); // Page Up
+                else if (isFg) SendWindowsKey(33, isPressed); // Page Up
+                return;
+            }
+            if (actionId == "camera" || actionId == "btn_rb")
+            {
+                if (_xboxController != null && _xboxController.IsConnected) _xboxController.SetButton(XboxButton.RightBumper, isPressed);
+                else if (isFg) SendWindowsKey(34, isPressed); // Page Down
                 return;
             }
             if (actionId == "camera" || actionId == "btn_rb")

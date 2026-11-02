@@ -3,6 +3,8 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Net;
+using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -70,6 +72,15 @@ namespace WheelPad.Core.Services
         private bool _isGamePaused;
         private bool _lastEscDown;
         private bool _lastMDown;
+        private bool _lastEnterDown;
+        private bool _lastSpaceDown;
+        private bool _lastWDown;
+        private bool _lastSDown;
+        private int _menuDepth = 0;
+
+        private UdpClient? _telemetryClient;
+        private CancellationTokenSource? _telemetryCts;
+        private long _lastTelemetryTicks = 0;
 
         [DllImport("user32.dll")]
         private static extern short GetAsyncKeyState(int vKey);
@@ -85,6 +96,7 @@ namespace WheelPad.Core.Services
         public bool IsGameRunning => _isGameRunning;
         public bool IsGamePaused => _isGamePaused;
         public string CurrentMenuMode => _currentMenuMode;
+        public int MenuDepth => _menuDepth;
         private string _currentMenuMode = "PAUSE";
         public int CurrentProcessId => _lastProcessId;
         public string? CurrentGameName { get; private set; }
@@ -123,88 +135,202 @@ namespace WheelPad.Core.Services
             // Poll process table immediately and then every 2 seconds
             _pollTimer = new Timer(PollCallback, null, 100, 2000);
 
-            // High-frequency key monitor (50ms) to detect ESC/M on laptop keyboard
+            // High-frequency key monitor (50ms) to detect ESC/M/Enter/Space on laptop keyboard
             _keyStateTimer = new Timer(KeyPollCallback, null, 200, 50);
+
+            // Background telemetry listener for Forza Horizon 60Hz Data Out (Port 5300)
+            StartTelemetryListener();
+        }
+
+        private void StartTelemetryListener()
+        {
+            try
+            {
+                _telemetryCts = new CancellationTokenSource();
+                _telemetryClient = new UdpClient(new IPEndPoint(IPAddress.Any, 5300));
+                _ = Task.Run(async () =>
+                {
+                    while (!_telemetryCts.Token.IsCancellationRequested && _telemetryClient != null)
+                    {
+                        try
+                        {
+                            var res = await _telemetryClient.ReceiveAsync(_telemetryCts.Token);
+                            if (res.Buffer.Length >= 4)
+                            {
+                                int isRaceOn = BitConverter.ToInt32(res.Buffer, 0);
+                                Interlocked.Exchange(ref _lastTelemetryTicks, DateTime.UtcNow.Ticks);
+                                if (isRaceOn == 1 && _isGamePaused)
+                                {
+                                    _menuDepth = 0;
+                                    SetPauseState(false, "PAUSE");
+                                }
+                                else if (isRaceOn == 0 && !_isGamePaused)
+                                {
+                                    SetPauseState(true, _currentMenuMode);
+                                }
+                            }
+                        }
+                        catch (OperationCanceledException) { break; }
+                        catch { }
+                    }
+                });
+                LogMessage?.Invoke(this, "[GameDetector] Listening for Forza Telemetry Data Out on UDP 5300...");
+            }
+            catch (Exception ex)
+            {
+                LogMessage?.Invoke(this, $"[GameDetector] Telemetry listener not started: {ex.Message}");
+            }
+        }
+
+        public void HandleMenuSelect()
+        {
+            if (_isGamePaused)
+            {
+                _menuDepth = Math.Min(_menuDepth + 1, 5);
+            }
+        }
+
+        public void HandleMenuBack()
+        {
+            if (_isGamePaused)
+            {
+                if (_currentMenuMode == "MAP")
+                {
+                    if (_menuDepth > 0)
+                    {
+                        _menuDepth--;
+                    }
+                    else
+                    {
+                        SetPauseState(false, "PAUSE");
+                    }
+                }
+                else
+                {
+                    if (_menuDepth > 0)
+                    {
+                        _menuDepth--;
+                    }
+                }
+            }
         }
 
         private void KeyPollCallback(object? state)
         {
             try
             {
-                // 0x1B = VK_ESCAPE, 0x4D = 'M' (World Map)
+                // 0x1B = VK_ESCAPE, 0x4D = 'M', 0x0D = ENTER, 0x20 = SPACE, 0x57 = 'W', 0x53 = 'S'
                 bool escDown = (GetAsyncKeyState(0x1B) & 0x8000) != 0;
                 bool mDown = (GetAsyncKeyState(0x4D) & 0x8000) != 0;
+                bool enterDown = (GetAsyncKeyState(0x0D) & 0x8000) != 0;
+                bool spaceDown = (GetAsyncKeyState(0x20) & 0x8000) != 0;
+                bool wDown = (GetAsyncKeyState(0x57) & 0x8000) != 0;
+                bool sDown = (GetAsyncKeyState(0x53) & 0x8000) != 0;
 
-                if ((escDown && !_lastEscDown) || (mDown && !_lastMDown))
+                // If real-time telemetry arrived recently (last 1000ms), let telemetry dictate driving/pause
+                bool hasRecentTelemetry = (DateTime.UtcNow.Ticks - Interlocked.Read(ref _lastTelemetryTicks)) < TimeSpan.FromSeconds(1).Ticks;
+
+                if (_isGameRunning && !hasRecentTelemetry)
                 {
-                    if (_isGameRunning)
+                    IntPtr fg = GetForegroundWindow();
+                    GetWindowThreadProcessId(fg, out uint fgPid);
+                    bool isGameActive = (fgPid == (uint)_lastProcessId || fg == IntPtr.Zero);
+                    if (!isGameActive)
                     {
-                        IntPtr fg = GetForegroundWindow();
-                        GetWindowThreadProcessId(fg, out uint fgPid);
-                        bool isGameActive = (fgPid == (uint)_lastProcessId || fg == IntPtr.Zero);
-                        if (!isGameActive)
+                        try
                         {
-                            try
+                            var proc = Process.GetProcessById((int)fgPid);
+                            string pName = proc.ProcessName.ToLowerInvariant();
+                            if (pName.Contains("forza") || pName.Contains("applicationframehost") || pName.Contains("fh"))
                             {
-                                var proc = Process.GetProcessById((int)fgPid);
-                                string pName = proc.ProcessName.ToLowerInvariant();
-                                if (pName.Contains("forza") || pName.Contains("applicationframehost") || pName.Contains("fh"))
-                                {
-                                    isGameActive = true;
-                                }
+                                isGameActive = true;
                             }
-                            catch { }
                         }
+                        catch { }
+                    }
 
-                        if (isGameActive)
+                    if (isGameActive)
+                    {
+                        if (mDown && !_lastMDown)
                         {
-                            if (mDown && !_lastMDown)
+                            if (_isGamePaused && _currentMenuMode == "MAP")
                             {
-                                // In Forza, 'M' toggles World Map
-                                if (_isGamePaused && _currentMenuMode == "MAP")
+                                _menuDepth = 0;
+                                SetPauseState(false, "PAUSE");
+                            }
+                            else
+                            {
+                                _menuDepth = 0;
+                                SetPauseState(true, "MAP");
+                            }
+                        }
+                        else if (escDown && !_lastEscDown)
+                        {
+                            if (!_isGamePaused)
+                            {
+                                _menuDepth = 0;
+                                SetPauseState(true, "PAUSE");
+                            }
+                            else
+                            {
+                                if (_currentMenuMode == "MAP")
                                 {
-                                    _isGamePaused = false;
-                                    _currentMenuMode = "PAUSE";
+                                    if (_menuDepth > 0)
+                                    {
+                                        _menuDepth--;
+                                    }
+                                    else
+                                    {
+                                        _menuDepth = 0;
+                                        SetPauseState(false, "PAUSE");
+                                    }
                                 }
                                 else
                                 {
-                                    _isGamePaused = true;
-                                    _currentMenuMode = "MAP";
+                                    if (_menuDepth > 0)
+                                    {
+                                        _menuDepth--;
+                                    }
+                                    else
+                                    {
+                                        _menuDepth = 0;
+                                        SetPauseState(false, "PAUSE");
+                                    }
                                 }
                             }
-                            else if (escDown && !_lastEscDown)
+                        }
+                        else if ((enterDown && !_lastEnterDown) || (spaceDown && !_lastSpaceDown))
+                        {
+                            if (_isGamePaused)
                             {
-                                // In Forza, ESC closes World Map or toggles Pause Menu
-                                if (_isGamePaused)
-                                {
-                                    _isGamePaused = false;
-                                    _currentMenuMode = "PAUSE";
-                                }
-                                else
-                                {
-                                    _isGamePaused = true;
-                                    _currentMenuMode = "PAUSE";
-                                }
+                                _menuDepth = Math.Min(_menuDepth + 1, 5);
                             }
-
-                            _syncServer?.BroadcastEvent(new
+                        }
+                        else if ((wDown && !_lastWDown) || (sDown && !_lastSDown))
+                        {
+                            if (_isGamePaused && _menuDepth == 0)
                             {
-                                type = "PAUSE_STATE_CHANGED",
-                                isPaused = _isGamePaused,
-                                menuMode = _currentMenuMode
-                            });
-                            LogMessage?.Invoke(this, $"[GameDetector] Laptop key pressed. Mode: {_currentMenuMode}, Pause state: {_isGamePaused}");
+                                SetPauseState(false, "PAUSE");
+                            }
                         }
                     }
                 }
                 _lastEscDown = escDown;
                 _lastMDown = mDown;
+                _lastEnterDown = enterDown;
+                _lastSpaceDown = spaceDown;
+                _lastWDown = wDown;
+                _lastSDown = sDown;
             }
             catch { }
         }
 
         public void SetPauseState(bool isPaused, string menuMode = "PAUSE")
         {
+            if (!isPaused)
+            {
+                _menuDepth = 0;
+            }
             _isGamePaused = isPaused;
             _currentMenuMode = menuMode;
             _syncServer?.BroadcastEvent(new
@@ -213,6 +339,7 @@ namespace WheelPad.Core.Services
                 isPaused = _isGamePaused,
                 menuMode = _currentMenuMode
             });
+            LogMessage?.Invoke(this, $"[GameDetector] State updated: Mode={_currentMenuMode}, Paused={_isGamePaused}, Depth={_menuDepth}");
         }
 
         public void CheckImmediately()
@@ -304,6 +431,13 @@ namespace WheelPad.Core.Services
         {
             _pollTimer.Dispose();
             _keyStateTimer?.Dispose();
+            try
+            {
+                _telemetryCts?.Cancel();
+                _telemetryClient?.Close();
+                _telemetryClient?.Dispose();
+            }
+            catch { }
         }
     }
 }

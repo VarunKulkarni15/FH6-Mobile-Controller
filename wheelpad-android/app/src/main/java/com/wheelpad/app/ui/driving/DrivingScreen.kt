@@ -131,6 +131,13 @@ fun DrivingScreen(
             isMenuState = syncGamePaused
         }
     }
+
+    LaunchedEffect(isMenuState) {
+        if (!isMenuState) {
+            steeringAngle = 0f
+            leftStickY = 0f
+        }
+    }
     var isAutoDriveActive by remember { mutableStateOf(false) }
 
     val triggerAction: (String, Boolean) -> Unit = { actionId, isDown ->
@@ -294,8 +301,15 @@ fun DrivingScreen(
                     leftStickY = y
                 },
                 onReturnToDrive = {
-                    triggerAction("pause", true)
-                    triggerAction("pause", false)
+                    if (activeMenuMode == "MAP") {
+                        triggerAction("map", true)
+                        triggerAction("map", false)
+                    } else {
+                        triggerAction("pause", true)
+                        triggerAction("pause", false)
+                    }
+                    steeringAngle = 0f
+                    leftStickY = 0f
                     isMenuState = false
                 }
             )
@@ -1614,7 +1628,7 @@ fun FH6ExactSvgActionButton(
                         drawCircle(blue, radius = r, center = Offset(cx, cy), style = Stroke(width = strokeWidth))
                         drawCircle(Color(0x6000B0FF), radius = r * 0.78f, center = Offset(cx, cy), style = Stroke(width = thinStroke))
                     }
-                    // Paddle Shift Down (−) Top Accent
+                    // Paddle Shift Down (âˆ’) Top Accent
                     val minusColor = if (isPressed) Color.Black else blue
                     drawLine(minusColor, Offset(cx - r * 0.24f, cy - r * 0.50f), Offset(cx + r * 0.24f, cy - r * 0.50f), strokeWidth = strokeWidth * 1.2f, cap = androidx.compose.ui.graphics.StrokeCap.Round)
                 }
@@ -2035,7 +2049,7 @@ fun FH6MiniActionPreview(actionId: String) {
 }
 
 /**
- * High-Precision 360° Analog Thumbstick for Character Movement and Camera Aiming
+ * High-Precision 360Â° Analog Thumbstick for Character Movement and Camera Aiming
  */
 @Composable
 fun FH6AnalogJoystick(

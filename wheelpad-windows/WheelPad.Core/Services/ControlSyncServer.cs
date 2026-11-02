@@ -113,7 +113,9 @@ namespace WheelPad.Core.Services
                     serverVersion = "1.0.0",
                     deviceType = "Windows Companion",
                     activeProfile = _profileManager.ActiveProfile,
-                    allProfiles = _profileManager.Profiles
+                    allProfiles = _profileManager.Profiles,
+                    isPaused = _inputDispatcher.GameDetector?.IsGamePaused ?? false,
+                    menuMode = _inputDispatcher.GameDetector?.CurrentMenuMode ?? "PAUSE"
                 };
 
                 string handshakeJson = JsonSerializer.Serialize(handshakePayload, _jsonOptions);

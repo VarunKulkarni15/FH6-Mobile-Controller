@@ -1,4 +1,4 @@
-﻿package com.wheelpad.app.network
+package com.wheelpad.app.network
 
 import com.wheelpad.app.data.model.ControllerProfile
 import com.wheelpad.app.data.repository.ProfileRepository
@@ -115,6 +115,12 @@ class ControlSyncClient(
                             _syncedProfile.value = remoteProfile
                             _statusMessage.value = "Profile '${remoteProfile.profileName}' synced from Windows"
                         }
+                    }
+                    if (root.has("isPaused")) {
+                        _isGamePaused.value = root.optBoolean("isPaused", false)
+                    }
+                    if (root.has("menuMode")) {
+                        _currentMenuMode.value = root.optString("menuMode", "PAUSE")
                     }
                 }
                 "SET_ACTIVE_PROFILE_ACK" -> {
