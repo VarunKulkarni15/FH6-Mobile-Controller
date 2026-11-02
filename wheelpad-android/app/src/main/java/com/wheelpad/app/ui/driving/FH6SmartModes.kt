@@ -78,22 +78,14 @@ fun FH6SettingsNavScreen(
                         }
                     }
 
-                    Column {
-                        Text(
-                            text = "FORZA HORIZON // PAUSE & WORLD MAP",
-                            color = Color(0xFFCCFF00),
-                            fontSize = 13.sp,
-                            fontWeight = FontWeight.Black,
-                            letterSpacing = 1.5.sp,
-                            fontFamily = ChakraPetch
-                        )
-                        Text(
-                            text = "Drag left pad to pan map cursor • Tap arrows for menus • Vol buttons flip [LB]/[RB]",
-                            color = Color(0x99FFFFFF),
-                            fontSize = 9.sp,
-                            fontFamily = ChakraPetch
-                        )
-                    }
+                    Text(
+                        text = "FORZA HORIZON // PAUSE & WORLD MAP",
+                        color = Color(0xFFCCFF00),
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.Black,
+                        letterSpacing = 1.5.sp,
+                        fontFamily = ChakraPetch
+                    )
                 }
 
                 // Resume Driving Button (unpauses game on PC and returns to driving rig)
@@ -214,7 +206,7 @@ fun FH6SettingsNavScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(text = "[A] SET ROUTE  •  [B] CLOSE MAP  •  [X] FAST TRAVEL  •  [Y] REVEAL", color = Color(0x99FFFFFF), fontSize = 10.sp, fontWeight = FontWeight.Bold, fontFamily = ChakraPetch)
-                Text(text = "VOL BUTTONS / [LB]/[RB] FLIP TABS  •  DRAG LEFT PAD TO PAN MAP", color = Color(0xFFCCFF00), fontSize = 10.sp, fontWeight = FontWeight.Black, fontFamily = ChakraPetch)
+                
             }
         }
     }
