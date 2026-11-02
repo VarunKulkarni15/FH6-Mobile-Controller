@@ -215,22 +215,44 @@ namespace WheelPad.Core.Services
             bool isFg = IsGameForeground();
             if (actionId == "pause" || actionId == "btn_start" || actionId == "btn_menu")
             {
-                if (isPressed && GameDetector != null)
+                if (isPressed)
                 {
-                    GameDetector.SetPauseState(!GameDetector.IsGamePaused, "PAUSE");
+                    if (GameDetector != null)
+                    {
+                        GameDetector.SetPauseState(!GameDetector.IsGamePaused, "PAUSE");
+                    }
+                    if (_xboxController != null && _xboxController.IsConnected)
+                    {
+                        _xboxController.SetButton(XboxButton.Start, true);
+                        Task.Delay(60).ContinueWith(_ => _xboxController.SetButton(XboxButton.Start, false));
+                    }
+                    if (isFg)
+                    {
+                        SendWindowsKey(27, true);
+                        Task.Delay(60).ContinueWith(_ => SendWindowsKey(27, false));
+                    }
                 }
-                if (_xboxController != null && _xboxController.IsConnected) _xboxController.SetButton(XboxButton.Start, isPressed);
-                if (isFg) SendWindowsKey(27, isPressed); // ESC
                 return;
             }
             if (actionId == "map" || actionId == "btn_back" || actionId == "btn_view")
             {
-                if (isPressed && GameDetector != null)
+                if (isPressed)
                 {
-                    GameDetector.SetPauseState(true, "MAP");
+                    if (GameDetector != null)
+                    {
+                        GameDetector.SetPauseState(true, "MAP");
+                    }
+                    if (_xboxController != null && _xboxController.IsConnected)
+                    {
+                        _xboxController.SetButton(XboxButton.Back, true);
+                        Task.Delay(60).ContinueWith(_ => _xboxController.SetButton(XboxButton.Back, false));
+                    }
+                    if (isFg)
+                    {
+                        SendWindowsKey(0x4D, true);
+                        Task.Delay(60).ContinueWith(_ => SendWindowsKey(0x4D, false));
+                    }
                 }
-                if (_xboxController != null && _xboxController.IsConnected) _xboxController.SetButton(XboxButton.Back, isPressed);
-                if (isFg) SendWindowsKey(0x4D, isPressed); // M (World Map)
                 return;
             }
             if (actionId == "btn_b")

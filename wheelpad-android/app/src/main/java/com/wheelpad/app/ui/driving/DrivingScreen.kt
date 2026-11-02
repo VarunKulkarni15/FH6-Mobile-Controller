@@ -48,6 +48,8 @@ import com.wheelpad.app.network.ControlSyncClient
 import com.wheelpad.app.network.UdpFastStreamClient
 import com.wheelpad.app.ui.controls.ControlEditorViewModel
 import com.wheelpad.app.ui.theme.ChakraPetch
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlin.math.atan2
 
 /**
@@ -65,6 +67,7 @@ fun DrivingScreen(
 ) {
     val state by viewModel.uiState.collectAsState()
     val view = LocalView.current
+    val coroutineScope = rememberCoroutineScope()
     val context = androidx.compose.ui.platform.LocalContext.current
 
     // Live continuous driving inputs
@@ -160,9 +163,19 @@ fun DrivingScreen(
             if (actionId == "map" || actionId == "btn_view") {
                 activeMenuMode = "MAP"
                 isMenuState = true
+                coroutineScope.launch {
+                    buttonsBitmask = buttonsBitmask or (1 shl 3)
+                    delay(60)
+                    buttonsBitmask = buttonsBitmask and (1 shl 3).inv()
+                }
             } else if (actionId == "pause" || actionId == "btn_menu" || actionId == "btn_start") {
                 activeMenuMode = "PAUSE"
                 isMenuState = !isMenuState
+                coroutineScope.launch {
+                    buttonsBitmask = buttonsBitmask or (1 shl 4)
+                    delay(60)
+                    buttonsBitmask = buttonsBitmask and (1 shl 4).inv()
+                }
             }
         }
         if (actionId == "auto_drive" && isDown) {
@@ -1184,31 +1197,16 @@ fun FH6ExactSvgHandbrake(
             .fillMaxSize()
             .pointerInput(isEditMode) {
                 if (!isEditMode) {
-                    awaitPointerEventScope {
-                        var trackedId: androidx.compose.ui.input.pointer.PointerId? = null
-                        while (true) {
-                            val event = awaitPointerEvent()
-                            if (trackedId == null) {
-                                val down = event.changes.firstOrNull { it.pressed && !it.isConsumed }
-                                if (down != null) {
-                                    trackedId = down.id
-                                    down.consume()
-                                    onPressedChange(true)
-                                }
-                            } else {
-                                val change = event.changes.firstOrNull { it.id == trackedId }
-                                if (change != null) {
-                                    if (change.pressed) {
-                                        change.consume()
-                                    } else {
-                                        change.consume()
-                                        trackedId = null
-                                        onPressedChange(false)
-                                    }
-                                }
+                    detectTapGestures(
+                        onPress = {
+                            onPressedChange(true)
+                            try {
+                                tryAwaitRelease()
+                            } finally {
+                                onPressedChange(false)
                             }
                         }
-                    }
+                    )
                 }
             }
     ) {
@@ -1307,31 +1305,16 @@ fun FH6ExactSvgActionButton(
             .fillMaxSize()
             .pointerInput(isEditMode) {
                 if (!isEditMode) {
-                    awaitPointerEventScope {
-                        var trackedId: androidx.compose.ui.input.pointer.PointerId? = null
-                        while (true) {
-                            val event = awaitPointerEvent()
-                            if (trackedId == null) {
-                                val down = event.changes.firstOrNull { it.pressed && !it.isConsumed }
-                                if (down != null) {
-                                    trackedId = down.id
-                                    down.consume()
-                                    onPressedChange(true)
-                                }
-                            } else {
-                                val change = event.changes.firstOrNull { it.id == trackedId }
-                                if (change != null) {
-                                    if (change.pressed) {
-                                        change.consume()
-                                    } else {
-                                        change.consume()
-                                        trackedId = null
-                                        onPressedChange(false)
-                                    }
-                                }
+                    detectTapGestures(
+                        onPress = {
+                            onPressedChange(true)
+                            try {
+                                tryAwaitRelease()
+                            } finally {
+                                onPressedChange(false)
                             }
                         }
-                    }
+                    )
                 }
             }
     ) {

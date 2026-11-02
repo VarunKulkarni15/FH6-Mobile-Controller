@@ -157,15 +157,11 @@ namespace WheelPad.Core.Services
                 {
                     bool s = (buttons & (1 << 3)) != 0;
                     _inputDispatcher.DispatchDigitalInput("map", s);
-                    _inputDispatcher.DispatchDigitalInput("btn_back", s);
-                    _inputDispatcher.DispatchDigitalInput("btn_view", s);
                 }
                 if ((changed & (1 << 4)) != 0)
                 {
                     bool s = (buttons & (1 << 4)) != 0;
                     _inputDispatcher.DispatchDigitalInput("pause", s);
-                    _inputDispatcher.DispatchDigitalInput("btn_start", s);
-                    _inputDispatcher.DispatchDigitalInput("btn_menu", s);
                 }
                 if ((changed & (1 << 5)) != 0)
                 {
