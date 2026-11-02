@@ -1,4 +1,4 @@
-﻿package com.wheelpad.app.ui.driving
+package com.wheelpad.app.ui.driving
 
 import android.view.HapticFeedbackConstants
 import androidx.compose.animation.core.animateFloatAsState
@@ -114,7 +114,7 @@ fun DrivingScreen(
     var hwVolumeUpAction by remember { mutableStateOf(prefs.getString("hw_volume_up_action", "camera") ?: "camera") }
     var hwVolumeDownAction by remember { mutableStateOf(prefs.getString("hw_volume_down_action", "btn_lb") ?: "btn_lb") }
     var pickingVolumeKeyTarget by remember { mutableStateOf<String?>(null) } // "UP", "DOWN", or null
-    var activeGamePage by remember { mutableStateOf("DRIVE") } // "DRIVE", "SETTINGS", "PHOTO"
+    var isMenuState by remember { mutableStateOf(false) }
     var isAutoDriveActive by remember { mutableStateOf(false) }
 
     val triggerAction: (String, Boolean) -> Unit = { actionId, isDown ->
@@ -142,13 +142,11 @@ fun DrivingScreen(
             else -> 0
         }
 
-        // Smart Auto-Detection for Game Screens (Driving vs Menu/Settings vs Photo Mode)
-        if (actionId == "photo_mode" && isDown) {
-            activeGamePage = if (activeGamePage == "PHOTO") "DRIVE" else "PHOTO"
-        } else if ((actionId == "pause" || actionId == "btn_menu" || actionId == "btn_start" || actionId == "map" || actionId == "btn_view") && isDown) {
-            activeGamePage = if (activeGamePage == "SETTINGS") "DRIVE" else "SETTINGS"
-        } else if (actionId == "btn_b" && isDown && activeGamePage != "DRIVE") {
-            activeGamePage = "DRIVE"
+        // Smart Auto-Detection for Pause Menu / Car Selection / Settings
+        if ((actionId == "pause" || actionId == "btn_menu" || actionId == "btn_start" || actionId == "map" || actionId == "btn_view") && isDown) {
+            isMenuState = !isMenuState
+        } else if (actionId == "btn_b" && isDown && isMenuState) {
+            isMenuState = false
         } else if (actionId == "auto_drive" && isDown) {
             isAutoDriveActive = !isAutoDriveActive
         }
@@ -157,13 +155,13 @@ fun DrivingScreen(
             throttlePressure = if (isDown) 1.0f else 0.0f
             if (isDown) {
                 if (isAutoDriveActive) isAutoDriveActive = false
-                if (activeGamePage == "SETTINGS") activeGamePage = "DRIVE"
+                if (isMenuState) isMenuState = false
             }
         } else if (actionId == "brake" || actionId == "aim_weapon") {
             brakePressure = if (isDown) 1.0f else 0.0f
             if (isDown) {
                 if (isAutoDriveActive) isAutoDriveActive = false
-                if (activeGamePage == "SETTINGS") activeGamePage = "DRIVE"
+                if (isMenuState) isMenuState = false
             }
         } else if (actionId == "handbrake") {
             handbrakeState = isDown
@@ -192,12 +190,18 @@ fun DrivingScreen(
         syncClient?.testActionInput(actionId, isDown)
     }
 
-    DisposableEffect(activity, hwVolumeEnabled, hwVolumeUpAction, hwVolumeDownAction) {
+    DisposableEffect(activity, hwVolumeEnabled, hwVolumeUpAction, hwVolumeDownAction, isMenuState) {
         activity?.onVolumeKeyEvent = { keyCode, isDown ->
             if (!hwVolumeEnabled) {
                 false
             } else {
-                val actionId = if (keyCode == android.view.KeyEvent.KEYCODE_VOLUME_UP) hwVolumeUpAction else hwVolumeDownAction
+                val actionId = if (isMenuState) {
+                    // In Settings / Garage / Car Selection / Menus:
+                    // Volume UP = [LB] (Left / Prev Tab), Volume DOWN = [RB] (Right / Next Tab)
+                    if (keyCode == android.view.KeyEvent.KEYCODE_VOLUME_UP) "btn_lb" else "camera"
+                } else {
+                    if (keyCode == android.view.KeyEvent.KEYCODE_VOLUME_UP) hwVolumeUpAction else hwVolumeDownAction
+                }
                 if (isDown) {
                     view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
                 }
@@ -239,30 +243,8 @@ fun DrivingScreen(
         val screenWidthPx = with(density) { screenWidth.toPx() }
         val screenHeightPx = with(density) { screenHeight.toPx() }
 
-        // 1. Render Screen Based on Detected Game Page
-        if (activeGamePage == "PHOTO") {
-            FH6PhotoModeScreen(
-                onLeftStickChange = { x, y ->
-                    leftStickX = x
-                    leftStickY = y
-                },
-                onRightStickChange = { x, y ->
-                    rightStickX = x
-                    rightStickY = y
-                },
-                onThrottleChange = { throttlePressure = it },
-                onBrakeChange = { brakePressure = it },
-                onTriggerAction = triggerAction,
-                onExitPhoto = { activeGamePage = "DRIVE" }
-            )
-        } else if (activeGamePage == "SETTINGS") {
-            FH6SettingsNavScreen(
-                onTriggerAction = triggerAction,
-                onReturnToDrive = { activeGamePage = "DRIVE" }
-            )
-        } else {
-            // Standard Driving Sim-Racing Rig
-            state.currentProfile.layout.forEach { element ->
+        // 1. Render all HUD controls from active profile (Driving controls ALWAYS present)
+        state.currentProfile.layout.forEach { element ->
             val elementX = screenWidth * element.normalizedX
             val elementY = screenHeight * element.normalizedY
             val elementW = screenWidth * element.normalizedWidth
@@ -318,6 +300,7 @@ fun DrivingScreen(
                                 if (!isGyroEnabled) {
                                     steeringAngle = it
                                     if (isAutoDriveActive && kotlin.math.abs(it) > 0.15f) isAutoDriveActive = false
+                                    if (isMenuState && kotlin.math.abs(it) > 0.15f) isMenuState = false
                                 }
                             }
                         )
@@ -440,7 +423,26 @@ fun DrivingScreen(
                 }
             }
         }
-        } // End of Driving Screen else branch
+
+        // 1b. Discreet Menu Tab Indicator when user is browsing Pause Menu / Car Selection
+        if (isMenuState) {
+            Box(
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .padding(top = 10.dp)
+                    .clip(RoundedCornerShape(6.dp))
+                    .background(Color(0xE0061218))
+                    .border(1.dp, Color(0xFFCCFF00), RoundedCornerShape(6.dp))
+                    .padding(horizontal = 14.dp, vertical = 6.dp)
+            ) {
+                Text(
+                    text = "MENU TABS ACTIVE  •  VOL UP: [LB] ◀   VOL DOWN: ▶ [RB]",
+                    color = Color(0xFFCCFF00),
+                    fontSize = 10.sp,
+                    fontWeight = FontWeight.Black
+                )
+            }
+        }
 
         // 2. Discreet 3-Dots Corner Menu Button (Crisp Vector Canvas)
         Box(

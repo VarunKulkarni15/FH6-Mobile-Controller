@@ -71,16 +71,16 @@ namespace WheelPad.Core.Services
                 {
                     short raw = (short)(normalizedValue * 32767f);
                     _xboxController.SetAxis(XboxButton.RightThumbX, raw);
-                    if (normalizedValue < -0.35f) SendVirtualKey(37, true); else SendVirtualKey(37, false);
-                    if (normalizedValue > 0.35f) SendVirtualKey(39, true); else SendVirtualKey(39, false);
+                    if (normalizedValue < -0.35f) SendWindowsKey(37, true); else SendWindowsKey(37, false);
+                    if (normalizedValue > 0.35f) SendWindowsKey(39, true); else SendWindowsKey(39, false);
                     return;
                 }
                 else if (actionId == "right_stick_y")
                 {
                     short raw = (short)(normalizedValue * 32767f);
                     _xboxController.SetAxis(XboxButton.RightThumbY, raw);
-                    if (normalizedValue > 0.35f) SendVirtualKey(38, true); else SendVirtualKey(38, false);
-                    if (normalizedValue < -0.35f) SendVirtualKey(40, true); else SendVirtualKey(40, false);
+                    if (normalizedValue > 0.35f) SendWindowsKey(38, true); else SendWindowsKey(38, false);
+                    if (normalizedValue < -0.35f) SendWindowsKey(40, true); else SendWindowsKey(40, false);
                     return;
                 }
             }
@@ -145,7 +145,7 @@ namespace WheelPad.Core.Services
                 {
                     _xboxController.SetAxis(XboxButton.RightThumbY, isPressed ? (short)-32767 : (short)0);
                 }
-                SendVirtualKey(40, isPressed);
+                SendWindowsKey(40, isPressed);
                 return;
             }
 
@@ -156,7 +156,7 @@ namespace WheelPad.Core.Services
                 {
                     _xboxController.SetAxis(XboxButton.RightThumbX, isPressed ? (short)-32767 : (short)0);
                 }
-                SendVirtualKey(37, isPressed);
+                SendWindowsKey(37, isPressed);
                 return;
             }
 
@@ -167,7 +167,7 @@ namespace WheelPad.Core.Services
                 {
                     _xboxController.SetAxis(XboxButton.RightThumbX, isPressed ? (short)32767 : (short)0);
                 }
-                SendVirtualKey(39, isPressed);
+                SendWindowsKey(39, isPressed);
                 return;
             }
 
@@ -178,7 +178,29 @@ namespace WheelPad.Core.Services
                 {
                     _xboxController.SetAxis(XboxButton.RightThumbY, isPressed ? (short)32767 : (short)0);
                 }
-                SendVirtualKey(38, isPressed);
+                SendWindowsKey(38, isPressed);
+                return;
+            }
+
+            if (actionId == "btn_lb" || actionId == "clutch")
+            {
+                // In Forza Horizon: Left Bumper (Xbox) + PC Left Arrow (VK_LEFT = 37) for category tabs
+                if (_xboxController != null && _xboxController.IsConnected)
+                {
+                    _xboxController.SetButton(XboxButton.LeftBumper, isPressed);
+                }
+                SendWindowsKey(37, isPressed);
+                return;
+            }
+
+            if (actionId == "camera" || actionId == "btn_rb")
+            {
+                // In Forza Horizon: Right Bumper (Xbox) + PC Right Arrow (VK_RIGHT = 39) for category tabs
+                if (_xboxController != null && _xboxController.IsConnected)
+                {
+                    _xboxController.SetButton(XboxButton.RightBumper, isPressed);
+                }
+                SendWindowsKey(39, isPressed);
                 return;
             }
 
