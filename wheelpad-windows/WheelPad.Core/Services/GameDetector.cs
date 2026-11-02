@@ -160,13 +160,31 @@ namespace WheelPad.Core.Services
                         {
                             if (mDown && !_lastMDown)
                             {
-                                _isGamePaused = true;
-                                _currentMenuMode = "MAP";
+                                // In Forza, 'M' toggles World Map
+                                if (_isGamePaused && _currentMenuMode == "MAP")
+                                {
+                                    _isGamePaused = false;
+                                    _currentMenuMode = "PAUSE";
+                                }
+                                else
+                                {
+                                    _isGamePaused = true;
+                                    _currentMenuMode = "MAP";
+                                }
                             }
-                            else
+                            else if (escDown && !_lastEscDown)
                             {
-                                _isGamePaused = !_isGamePaused;
-                                _currentMenuMode = "PAUSE";
+                                // In Forza, ESC closes World Map or toggles Pause Menu
+                                if (_isGamePaused)
+                                {
+                                    _isGamePaused = false;
+                                    _currentMenuMode = "PAUSE";
+                                }
+                                else
+                                {
+                                    _isGamePaused = true;
+                                    _currentMenuMode = "PAUSE";
+                                }
                             }
 
                             _syncServer?.BroadcastEvent(new

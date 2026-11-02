@@ -6,6 +6,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -54,7 +55,7 @@ fun FH6SettingsNavScreen(
             modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.SpaceBetween
         ) {
-            // Top Header: Title + Mode Toggle Tabs + Resume Button
+            // Top Header: Title + Mode Switcher Tabs + Resume Driving Button
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -65,7 +66,6 @@ fun FH6SettingsNavScreen(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    // Xbox 3-horizontal lines Menu icon [≡]
                     Box(
                         modifier = Modifier
                             .size(24.dp)
@@ -182,24 +182,22 @@ fun FH6SettingsNavScreen(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    // Top Category Bumpers (Context-Aware!)
+                    // Top Category Bumpers (Redesigned Motorsport Wing Styling)
                     Row(
-                        modifier = Modifier.fillMaxWidth(0.85f),
+                        modifier = Modifier.fillMaxWidth(0.88f),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        FH6NavBumperTab(
-                            label = if (isMap) "◀ REGIONS [LB]" else "◀ PREV TAB [LB]",
-                            onPress = { isDown ->
-                                if (isDown) view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
-                                onTriggerAction("btn_lb", isDown)
-                            }
+                        FH6MotorsportBumper(
+                            bumperKey = "LB",
+                            title = if (isMap) "REGIONS" else "PREV TAB",
+                            isLeft = true,
+                            onPress = { isDown -> onTriggerAction("btn_lb", isDown) }
                         )
-                        FH6NavBumperTab(
-                            label = if (isMap) "[RB] FILTER ▶" else "[RB] NEXT TAB ▶",
-                            onPress = { isDown ->
-                                if (isDown) view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
-                                onTriggerAction("btn_rb", isDown)
-                            }
+                        FH6MotorsportBumper(
+                            bumperKey = "RB",
+                            title = if (isMap) "FILTER" else "NEXT TAB",
+                            isLeft = false,
+                            onPress = { isDown -> onTriggerAction("btn_rb", isDown) }
                         )
                     }
 
@@ -258,14 +256,19 @@ fun FH6SettingsNavScreen(
                             )
                         }
                         // B Button (Right, Red)
-                        // In Map: Close Map | In Pause Menu: Back
+                        // In Map: Close Map | In Pause Menu: Back -> Returns directly to driving rig!
                         Box(modifier = Modifier.align(Alignment.CenterEnd)) {
                             FH6NavActionButton(
                                 label = "B",
                                 sub = if (isMap) "CLOSE MAP" else "BACK",
                                 color = Color(0xFFFF1744),
                                 actionId = "btn_b",
-                                onTrigger = onTriggerAction
+                                onTrigger = { act, isDown ->
+                                    onTriggerAction(act, isDown)
+                                    if (isDown) {
+                                        onReturnToDrive()
+                                    }
+                                }
                             )
                         }
                         // A Button (Bottom, Green)
@@ -309,6 +312,106 @@ fun FH6SettingsNavScreen(
                     )
                 }
             }
+        }
+    }
+}
+
+/**
+ * Redesigned Ergonomic Motorsport Shoulder Bumper Wing (LB / RB)
+ */
+@Composable
+private fun FH6MotorsportBumper(
+    bumperKey: String, // "LB" or "RB"
+    title: String,     // "PREV TAB" or "REGIONS", "NEXT TAB" or "FILTER"
+    isLeft: Boolean,
+    onPress: (Boolean) -> Unit
+) {
+    var isPressed by remember { mutableStateOf(false) }
+    val view = LocalView.current
+
+    val shape = RoundedCornerShape(
+        topStart = if (isLeft) 16.dp else 4.dp,
+        topEnd = if (!isLeft) 16.dp else 4.dp,
+        bottomStart = 4.dp,
+        bottomEnd = 4.dp
+    )
+
+    Box(
+        modifier = Modifier
+            .width(134.dp)
+            .height(46.dp)
+            .clip(shape)
+            .background(if (isPressed) Color(0xFFCCFF00) else Color(0x350A141E))
+            .border(
+                width = 1.5.dp,
+                color = if (isPressed) Color.White else Color(0xFFCCFF00),
+                shape = shape
+            )
+            .pointerInput(bumperKey) {
+                detectTapGestures(
+                    onPress = {
+                        isPressed = true
+                        view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
+                        onPress(true)
+                        try {
+                            tryAwaitRelease()
+                        } finally {
+                            isPressed = false
+                            onPress(false)
+                        }
+                    }
+                )
+            }
+            .padding(horizontal = 8.dp, vertical = 4.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(5.dp)
+            ) {
+                if (isLeft) {
+                    Text(
+                        text = "◀",
+                        color = if (isPressed) Color.Black else Color(0xFFCCFF00),
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Black
+                    )
+                }
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(3.dp))
+                        .background(if (isPressed) Color.Black else Color(0x35CCFF00))
+                        .padding(horizontal = 7.dp, vertical = 1.dp)
+                ) {
+                    Text(
+                        text = bumperKey,
+                        color = if (isPressed) Color(0xFFCCFF00) else Color.White,
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Black,
+                        fontFamily = ChakraPetch
+                    )
+                }
+                if (!isLeft) {
+                    Text(
+                        text = "▶",
+                        color = if (isPressed) Color.Black else Color(0xFFCCFF00),
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Black
+                    )
+                }
+            }
+            Text(
+                text = title,
+                color = if (isPressed) Color.Black else Color(0xCCFFFFFF),
+                fontSize = 9.sp,
+                fontWeight = FontWeight.Bold,
+                letterSpacing = 0.5.sp,
+                fontFamily = ChakraPetch
+            )
         }
     }
 }
@@ -438,43 +541,6 @@ private fun FH6MapCursorPad(
 }
 
 @Composable
-private fun FH6NavBumperTab(
-    label: String,
-    onPress: (Boolean) -> Unit
-) {
-    var isPressed by remember { mutableStateOf(false) }
-
-    Box(
-        modifier = Modifier
-            .clip(RoundedCornerShape(6.dp))
-            .background(if (isPressed) Color(0xFFCCFF00) else Color(0x25CCFF00))
-            .border(1.2.dp, Color(0xFFCCFF00), RoundedCornerShape(6.dp))
-            .pointerInput(Unit) {
-                awaitPointerEventScope {
-                    while (true) {
-                        val event = awaitPointerEvent()
-                        val down = event.changes.any { it.pressed }
-                        if (down != isPressed) {
-                            isPressed = down
-                            onPress(down)
-                        }
-                    }
-                }
-            }
-            .padding(horizontal = 14.dp, vertical = 7.dp)
-    ) {
-        Text(
-            text = label,
-            color = if (isPressed) Color.Black else Color(0xFFCCFF00),
-            fontSize = 11.sp,
-            fontWeight = FontWeight.Black,
-            letterSpacing = 0.5.sp,
-            fontFamily = ChakraPetch
-        )
-    }
-}
-
-@Composable
 private fun FH6TactileArrowKey(
     arrow: String,
     sub: String,
@@ -491,17 +557,19 @@ private fun FH6TactileArrowKey(
             .background(if (isPressed) Color(0xFFCCFF00) else Color(0xF50D1822))
             .border(1.5.dp, if (isPressed) Color.White else Color(0x60CCFF00), RoundedCornerShape(8.dp))
             .pointerInput(actionId) {
-                awaitPointerEventScope {
-                    while (true) {
-                        val event = awaitPointerEvent()
-                        val down = event.changes.any { it.pressed }
-                        if (down != isPressed) {
-                            isPressed = down
-                            if (down) view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
-                            onTrigger(actionId, down)
+                detectTapGestures(
+                    onPress = {
+                        isPressed = true
+                        view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
+                        onTrigger(actionId, true)
+                        try {
+                            tryAwaitRelease()
+                        } finally {
+                            isPressed = false
+                            onTrigger(actionId, false)
                         }
                     }
-                }
+                )
             },
         contentAlignment = Alignment.Center
     ) {
@@ -544,17 +612,19 @@ private fun FH6NavActionButton(
             .background(if (isPressed) color else Color(0xF50E1820))
             .border(1.5.dp, color, CircleShape)
             .pointerInput(actionId) {
-                awaitPointerEventScope {
-                    while (true) {
-                        val event = awaitPointerEvent()
-                        val down = event.changes.any { it.pressed }
-                        if (down != isPressed) {
-                            isPressed = down
-                            if (down) view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
-                            onTrigger(actionId, down)
+                detectTapGestures(
+                    onPress = {
+                        isPressed = true
+                        view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
+                        onTrigger(actionId, true)
+                        try {
+                            tryAwaitRelease()
+                        } finally {
+                            isPressed = false
+                            onTrigger(actionId, false)
                         }
                     }
-                }
+                )
             },
         contentAlignment = Alignment.Center
     ) {
