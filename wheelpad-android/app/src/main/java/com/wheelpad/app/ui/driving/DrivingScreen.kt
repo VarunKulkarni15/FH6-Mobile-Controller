@@ -114,7 +114,7 @@ fun DrivingScreen(
     var hwVolumeUpAction by remember { mutableStateOf(prefs.getString("hw_volume_up_action", "camera") ?: "camera") }
     var hwVolumeDownAction by remember { mutableStateOf(prefs.getString("hw_volume_down_action", "btn_lb") ?: "btn_lb") }
     var pickingVolumeKeyTarget by remember { mutableStateOf<String?>(null) } // "UP", "DOWN", or null
-    var fhMode by remember { mutableStateOf(FHControllerMode.DRIVE) }
+    var isMenuNavActive by remember { mutableStateOf(false) }
     var isAutoDriveActive by remember { mutableStateOf(false) }
 
     val triggerAction: (String, Boolean) -> Unit = { actionId, isDown ->
@@ -142,21 +142,27 @@ fun DrivingScreen(
             else -> 0
         }
 
-        // Context-aware Smart Mode switching
-        if (actionId == "photo_mode" && isDown) {
-            fhMode = if (fhMode == FHControllerMode.PHOTO_MODE) FHControllerMode.DRIVE else FHControllerMode.PHOTO_MODE
-        } else if ((actionId == "pause" || actionId == "btn_menu" || actionId == "map" || actionId == "btn_view") && isDown) {
-            fhMode = FHControllerMode.MENU_NAV
+        // Smart Auto-Detection for Pause Menu [≡] and World Map [⧉]
+        if ((actionId == "pause" || actionId == "btn_menu" || actionId == "btn_start" || actionId == "map" || actionId == "btn_view") && isDown) {
+            isMenuNavActive = !isMenuNavActive
+        } else if (actionId == "btn_b" && isDown && isMenuNavActive) {
+            isMenuNavActive = false
         } else if (actionId == "auto_drive" && isDown) {
             isAutoDriveActive = !isAutoDriveActive
         }
 
         if (actionId == "throttle" || actionId == "fire_weapon") {
             throttlePressure = if (isDown) 1.0f else 0.0f
-            if (isDown && isAutoDriveActive) isAutoDriveActive = false
+            if (isDown) {
+                if (isAutoDriveActive) isAutoDriveActive = false
+                if (isMenuNavActive) isMenuNavActive = false
+            }
         } else if (actionId == "brake" || actionId == "aim_weapon") {
             brakePressure = if (isDown) 1.0f else 0.0f
-            if (isDown && isAutoDriveActive) isAutoDriveActive = false
+            if (isDown) {
+                if (isAutoDriveActive) isAutoDriveActive = false
+                if (isMenuNavActive) isMenuNavActive = false
+            }
         } else if (actionId == "handbrake") {
             handbrakeState = isDown
             if (isDown) buttonsBitmask = buttonsBitmask or (1 shl 0)
@@ -280,45 +286,18 @@ fun DrivingScreen(
             ) {
                 when (element.shape) {
                     ControlShape.CircleWheel -> {
-                        when (fhMode) {
-                            FHControllerMode.DRIVE -> {
-                                FH6ExactSvgSteeringWheel(
-                                    isEditMode = state.isEditMode,
-                                    isGyroActive = isGyroEnabled,
-                                    currentAngleNormalized = steeringAngle,
-                                    onSteerChange = {
-                                        if (!isGyroEnabled) {
-                                            steeringAngle = it
-                                            if (isAutoDriveActive && kotlin.math.abs(it) > 0.15f) isAutoDriveActive = false
-                                        }
-                                    }
-                                )
+                        FH6ExactSvgSteeringWheel(
+                            isEditMode = state.isEditMode,
+                            isGyroActive = isGyroEnabled,
+                            currentAngleNormalized = steeringAngle,
+                            onSteerChange = {
+                                if (!isGyroEnabled) {
+                                    steeringAngle = it
+                                    if (isAutoDriveActive && kotlin.math.abs(it) > 0.15f) isAutoDriveActive = false
+                                    if (isMenuNavActive && kotlin.math.abs(it) > 0.20f) isMenuNavActive = false
+                                }
                             }
-                            FHControllerMode.MENU_NAV -> {
-                                FH6MenuNavPad(
-                                    isEditMode = state.isEditMode,
-                                    onTriggerAction = triggerAction,
-                                    onReturnToDrive = { fhMode = FHControllerMode.DRIVE }
-                                )
-                            }
-                            FHControllerMode.PHOTO_MODE -> {
-                                FH6PhotoModeCockpit(
-                                    isEditMode = state.isEditMode,
-                                    onLeftStickChange = { x, y ->
-                                        leftStickX = x
-                                        leftStickY = y
-                                    },
-                                    onRightStickChange = { x, y ->
-                                        rightStickX = x
-                                        rightStickY = y
-                                    },
-                                    onThrottleChange = { throttlePressure = it },
-                                    onBrakeChange = { brakePressure = it },
-                                    onTriggerAction = triggerAction,
-                                    onReturnToDrive = { fhMode = FHControllerMode.DRIVE }
-                                )
-                            }
-                        }
+                        )
                     }
                     ControlShape.VerticalPedal -> {
                         val isThrottle = element.actionId == "throttle"
@@ -459,26 +438,15 @@ fun DrivingScreen(
             }
         }
 
-        // 2b. Sleek Top-Center Mode Switcher Pill (DRIVE / MENU NAV / PHOTO MODE)
+        // 2b. Authentic Forza Horizon Live Controller Prompt Bar for OBS / Viewers
         if (!state.isEditMode) {
-            FH6ModeSwitcherPill(
-                currentMode = fhMode,
-                onSelectMode = { fhMode = it },
+            FH6LiveViewerPromptBar(
+                buttonsBitmask = buttonsBitmask,
+                isMenuNavActive = isMenuNavActive,
+                isAutoDriveActive = isAutoDriveActive,
                 modifier = Modifier
                     .align(Alignment.TopCenter)
-                    .padding(top = 10.dp)
-            )
-
-            // Auto-Drive & Cinematic Camera Overlay Banner
-            FH6AutoDriveCinematicOverlay(
-                isAutoDriveActive = isAutoDriveActive,
-                onCinematicCamPress = { isDown ->
-                    triggerAction("btn_lb", isDown)
-                },
-                onDisengage = { isAutoDriveActive = false },
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .padding(bottom = 12.dp)
+                    .padding(top = 8.dp)
             )
         }
 
@@ -599,6 +567,14 @@ fun DrivingScreen(
             FH6ActionCatalogDialog(
                 onDismiss = { viewModel.setActionCatalogVisible(false) },
                 onSelectAction = { viewModel.addActionToLayout(it) }
+            )
+        }
+
+        // 4c. Authentic Forza Horizon Menu & Car Selection Navigation Modal
+        if (isMenuNavActive) {
+            FH6MenuNavDialog(
+                onDismiss = { isMenuNavActive = false },
+                onTriggerAction = triggerAction
             )
         }
 
@@ -1433,7 +1409,7 @@ fun FH6ExactSvgActionButton(
                 }
 
                 "shift_down" -> {
-                    val blue = Color(0xFF00B0FF)
+                    val blue = Color(0xFFCCFF00)
                     if (isPressed) {
                         drawRoundRect(blue, cornerRadius = CornerRadius(cornerRad, cornerRad))
                     } else {
@@ -1610,7 +1586,7 @@ fun FH6ExactSvgActionButton(
                 }
 
                 "btn_x", "activate" -> {
-                    val blue = Color(0xFF00B0FF)
+                    val blue = Color(0xFFCCFF00)
                     if (isPressed) {
                         drawCircle(blue, radius = r, center = Offset(cx, cy))
                     } else {
@@ -1930,7 +1906,7 @@ fun FH6ExactSvgActionButton(
                 "auto_drive", "rewind", "btn_y", "steer", "move_stick" -> Color(0xFFCCFF00)
                 "btn_a", "throttle", "fire_weapon" -> Color(0xFF00E676)
                 "btn_b", "shift_up", "brake", "aim_weapon" -> Color(0xFFFF1744)
-                "btn_x", "activate", "shift_down" -> Color(0xFF00B0FF)
+                "btn_x", "activate", "shift_down" -> Color(0xFFCCFF00)
                 "btn_lb", "clutch", "convertible", "btn_ls", "look_left", "look_right", "look_forward" -> Color(0xFF00E5FF)
                 "horn", "btn_rs", "handbrake" -> Color(0xFFFFD600)
                 "look_back" -> Color(0xFFCCFF00)
@@ -2044,7 +2020,7 @@ fun FH6MiniActionPreview(actionId: String) {
 @Composable
 fun FH6AnalogJoystick(
     label: String,
-    accentColor: Color = Color(0xFF00E5FF),
+    accentColor: Color = Color(0xFFCCFF00),
     isEditMode: Boolean = false,
     onValueChange: (x: Float, y: Float) -> Unit
 ) {

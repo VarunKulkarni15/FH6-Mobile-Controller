@@ -71,12 +71,16 @@ namespace WheelPad.Core.Services
                 {
                     short raw = (short)(normalizedValue * 32767f);
                     _xboxController.SetAxis(XboxButton.RightThumbX, raw);
+                    if (normalizedValue < -0.35f) SendVirtualKey(37, true); else SendVirtualKey(37, false);
+                    if (normalizedValue > 0.35f) SendVirtualKey(39, true); else SendVirtualKey(39, false);
                     return;
                 }
                 else if (actionId == "right_stick_y")
                 {
                     short raw = (short)(normalizedValue * 32767f);
                     _xboxController.SetAxis(XboxButton.RightThumbY, raw);
+                    if (normalizedValue > 0.35f) SendVirtualKey(38, true); else SendVirtualKey(38, false);
+                    if (normalizedValue < -0.35f) SendVirtualKey(40, true); else SendVirtualKey(40, false);
                     return;
                 }
             }
@@ -136,38 +140,45 @@ namespace WheelPad.Core.Services
 
             if (actionId == "look_back")
             {
-                // In Forza Horizon, Look Back is RS Down (pull Right Thumb Stick down)
+                // In Forza Horizon: Right Stick Down + PC Arrow Down (VK_DOWN = 40)
                 if (_xboxController != null && _xboxController.IsConnected)
                 {
                     _xboxController.SetAxis(XboxButton.RightThumbY, isPressed ? (short)-32767 : (short)0);
                 }
+                SendVirtualKey(40, isPressed);
                 return;
             }
 
             if (actionId == "look_left")
             {
+                // In Forza Horizon: Right Stick Left + PC Arrow Left (VK_LEFT = 37)
                 if (_xboxController != null && _xboxController.IsConnected)
                 {
                     _xboxController.SetAxis(XboxButton.RightThumbX, isPressed ? (short)-32767 : (short)0);
                 }
+                SendVirtualKey(37, isPressed);
                 return;
             }
 
             if (actionId == "look_right")
             {
+                // In Forza Horizon: Right Stick Right + PC Arrow Right (VK_RIGHT = 39)
                 if (_xboxController != null && _xboxController.IsConnected)
                 {
                     _xboxController.SetAxis(XboxButton.RightThumbX, isPressed ? (short)32767 : (short)0);
                 }
+                SendVirtualKey(39, isPressed);
                 return;
             }
 
             if (actionId == "look_forward")
             {
+                // In Forza Horizon: Right Stick Up + PC Arrow Up (VK_UP = 38)
                 if (_xboxController != null && _xboxController.IsConnected)
                 {
                     _xboxController.SetAxis(XboxButton.RightThumbY, isPressed ? (short)32767 : (short)0);
                 }
+                SendVirtualKey(38, isPressed);
                 return;
             }
 
