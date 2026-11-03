@@ -10,11 +10,11 @@ android {
     buildToolsVersion "34.0.0"
 
     defaultConfig {
-        applicationId "com.varunkulkarni.horizoncontroller"
+        applicationId "com.varunkulkarni.hrzncontroller"
         minSdk 26
         targetSdk 34
-        versionCode 9
-        versionName "1.5.0"
+        versionCode 10
+        versionName "1.6.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -30,6 +30,8 @@ android {
             keyPassword 'fh6controller2026'
             v1SigningEnabled true
             v2SigningEnabled true
+            enableV3Signing true
+            enableV4Signing true
         }
     }
 

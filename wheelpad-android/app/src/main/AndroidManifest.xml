@@ -20,7 +20,7 @@
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
-        android:label="Horizon Controller"
+        android:label="HRZN Controller"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@android:style/Theme.Material.NoActionBar">
@@ -40,6 +40,8 @@
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https" android:host="hrzncontroller.varunkulkarni.dpdns.org" />
+                <data android:scheme="http" android:host="hrzncontroller.varunkulkarni.dpdns.org" />
                 <data android:scheme="https" android:host="horizoncontro.varunkulkarni.dpdns.org" />
                 <data android:scheme="http" android:host="horizoncontro.varunkulkarni.dpdns.org" />
                 <data android:scheme="https" android:host="fh6controller.vercel.app" />
