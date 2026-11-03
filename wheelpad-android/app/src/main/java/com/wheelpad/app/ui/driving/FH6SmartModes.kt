@@ -241,7 +241,11 @@ fun FH6SettingsNavScreen(
                                 color = Color(0xFFFF1744),
                                 actionId = "btn_b",
                                 onTrigger = { id, down ->
-                                    onTriggerAction(id, down)
+                                    if (down && isMap) {
+                                        onResumeGame()
+                                    } else {
+                                        onTriggerAction(id, down)
+                                    }
                                 }
                             )
                         }

@@ -176,16 +176,26 @@ fun DrivingScreen(
                 isMenuState = true
                 coroutineScope.launch {
                     buttonsBitmask = buttonsBitmask or (1 shl 3)
-                    delay(60)
+                    delay(100)
                     buttonsBitmask = buttonsBitmask and (1 shl 3).inv()
+                }
+                syncClient?.testActionInput("map", true)
+                coroutineScope.launch {
+                    delay(100)
+                    syncClient?.testActionInput("map", false)
                 }
             } else if (actionId == "pause" || actionId == "btn_menu" || actionId == "btn_start") {
                 activeMenuMode = "PAUSE"
                 isMenuState = !isMenuState
                 coroutineScope.launch {
                     buttonsBitmask = buttonsBitmask or (1 shl 4)
-                    delay(60)
+                    delay(100)
                     buttonsBitmask = buttonsBitmask and (1 shl 4).inv()
+                }
+                syncClient?.testActionInput("pause", true)
+                coroutineScope.launch {
+                    delay(100)
+                    syncClient?.testActionInput("pause", false)
                 }
             }
         }
