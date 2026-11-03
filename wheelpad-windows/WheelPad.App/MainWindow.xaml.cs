@@ -139,7 +139,7 @@ namespace WheelPad.App
             TxtLocalIp.Text = localIp;
             try
             {
-                string qrPayload = $"https://horizoncontro.varunkulkarni.dpdns.org/?ip={localIp}&tcp=4243&udp=4242";
+                string qrPayload = $"https://hrzncontroller.varunkulkarni.dpdns.org/?ip={localIp}&tcp=4243&udp=4242";
                 ImgQrCode.Source = QrCodeHelper.GenerateQrCode(qrPayload);
             }
             catch { }

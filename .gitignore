@@ -38,3 +38,8 @@ site-media/
 
 
 site/releases/
+ 
+docs/security/
+*credentials*.txt
+*.keystore_backup*
+
