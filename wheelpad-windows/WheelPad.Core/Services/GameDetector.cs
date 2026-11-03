@@ -186,40 +186,12 @@ namespace WheelPad.Core.Services
 
         public void HandleMenuSelect()
         {
-            if (_isGamePaused)
-            {
-                _menuDepth = Math.Min(_menuDepth + 1, 5);
-            }
+            // Pure pass-through, no artificial depth guessing
         }
 
         public void HandleMenuBack()
         {
-            if (_isGamePaused)
-            {
-                if (_currentMenuMode == "MAP")
-                {
-                    if (_menuDepth > 0)
-                    {
-                        _menuDepth--;
-                    }
-                    else
-                    {
-                        SetPauseState(false, "PAUSE");
-                    }
-                }
-                else
-                {
-                    if (_menuDepth > 0)
-                    {
-                        _menuDepth--;
-                    }
-                    else
-                    {
-                        _menuDepth = 0;
-                        SetPauseState(false, "PAUSE");
-                    }
-                }
-            }
+            // Pure pass-through, no artificial depth guessing
         }
 
         private void KeyPollCallback(object? state)
@@ -309,21 +281,7 @@ namespace WheelPad.Core.Services
                                 }
                             }
                         }
-                        else if ((enterDown && !_lastEnterDown) || (spaceDown && !_lastSpaceDown))
-                        {
-                            if (_isGamePaused)
-                            {
-                                _menuDepth = Math.Min(_menuDepth + 1, 5);
-                            }
-                        }
-                        else if ((wDown && !_lastWDown) || (sDown && !_lastSDown) || (spaceDown && !_lastSpaceDown))
-                        {
-                            if (_isGamePaused)
-                            {
-                                _menuDepth = 0;
-                                SetPauseState(false, "PAUSE");
-                            }
-                        }
+                        // No random auto-guessing from W/S/Space/Enter
                     }
                 }
                 _lastEscDown = escDown;

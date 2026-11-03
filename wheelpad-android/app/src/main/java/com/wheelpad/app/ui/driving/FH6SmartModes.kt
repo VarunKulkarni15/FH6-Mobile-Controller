@@ -45,15 +45,7 @@ fun FH6SettingsNavScreen(
 ) {
     val view = LocalView.current
     val isMap = currentMode.equals("MAP", ignoreCase = true)
-    var pendingCutsceneTransition by remember { mutableStateOf(false) }
 
-    LaunchedEffect(pendingCutsceneTransition) {
-        if (pendingCutsceneTransition) {
-            kotlinx.coroutines.delay(2200)
-            pendingCutsceneTransition = false
-            onDirectReturnToDrive()
-        }
-    }
 
     Box(
         modifier = Modifier
@@ -101,111 +93,57 @@ fun FH6SettingsNavScreen(
                     )
                 }
 
-                // Right: Action Buttons (Resume Game / Direct Driving Rig)
+                // Right: Action Buttons (Direct Drive Cockpit [✕] + Resume/Close Map)
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    if (isMap) {
-                        Box(
-                            modifier = Modifier
-                                .clip(RoundedCornerShape(6.dp))
-                                .background(Color(0xFFCCFF00))
-                                .clickable {
-                                    view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
-                                    onResumeGame()
-                                }
-                                .padding(horizontal = 16.dp, vertical = 7.dp)
-                        ) {
-                            Text(
-                                text = "CLOSE MAP",
-                                color = Color.Black,
-                                fontSize = 11.sp,
-                                fontWeight = FontWeight.Black,
-                                letterSpacing = 0.8.sp,
-                                fontFamily = ChakraPetch
-                            )
-                        }
-                    } else {
-                        // Direct to Driving Rig (Zero PC keystroke, perfect when car cutscene just ended!)
-                        Box(
-                            modifier = Modifier
-                                .clip(RoundedCornerShape(6.dp))
-                                .background(Color(0x350A141E))
-                                .border(1.dp, Color(0xFFCCFF00), RoundedCornerShape(6.dp))
-                                .clickable {
-                                    view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
-                                    onDirectReturnToDrive()
-                                }
-                                .padding(horizontal = 12.dp, vertical = 7.dp)
-                        ) {
-                            Text(
-                                text = "DRIVE RIG",
-                                color = Color(0xFFCCFF00),
-                                fontSize = 11.sp,
-                                fontWeight = FontWeight.Black,
-                                letterSpacing = 0.8.sp,
-                                fontFamily = ChakraPetch
-                            )
-                        }
+                    // Direct Instant Return to Cockpit (Zero PC keystroke - perfect if game is already unpaused on PC)
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(6.dp))
+                            .background(Color(0x350A141E))
+                            .border(1.dp, Color(0x90CCFF00), RoundedCornerShape(6.dp))
+                            .clickable {
+                                view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
+                                onDirectReturnToDrive()
+                            }
+                            .padding(horizontal = 12.dp, vertical = 7.dp)
+                    ) {
+                        Text(
+                            text = "DRIVE COCKPIT [✕]",
+                            color = Color(0xFFCCFF00),
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Black,
+                            letterSpacing = 0.8.sp,
+                            fontFamily = ChakraPetch
+                        )
+                    }
 
-                        // Unpause Game in Forza
-                        Box(
-                            modifier = Modifier
-                                .clip(RoundedCornerShape(6.dp))
-                                .background(Color(0xFFCCFF00))
-                                .clickable {
-                                    view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
-                                    onResumeGame()
-                                }
-                                .padding(horizontal = 16.dp, vertical = 7.dp)
-                        ) {
-                            Text(
-                                text = "RESUME GAME",
-                                color = Color.Black,
-                                fontSize = 11.sp,
-                                fontWeight = FontWeight.Black,
-                                letterSpacing = 0.8.sp,
-                                fontFamily = ChakraPetch
-                            )
-                        }
+                    // Primary Action: Unpause game in Forza & return to driving
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(6.dp))
+                            .background(Color(0xFFCCFF00))
+                            .clickable {
+                                view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
+                                onResumeGame()
+                            }
+                            .padding(horizontal = 16.dp, vertical = 7.dp)
+                    ) {
+                        Text(
+                            text = if (isMap) "CLOSE MAP" else "RESUME GAME",
+                            color = Color.Black,
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Black,
+                            letterSpacing = 0.8.sp,
+                            fontFamily = ChakraPetch
+                        )
                     }
                 }
             }
 
-            if (pendingCutsceneTransition) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(6.dp))
-                        .background(Color(0x33CCFF00))
-                        .border(1.dp, Color(0xFFCCFF00), RoundedCornerShape(6.dp))
-                        .padding(horizontal = 12.dp, vertical = 6.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = "CAR SELECTED // CUTSCENE PLAYING... ENTERING COCKPIT RIG",
-                        color = Color(0xFFCCFF00),
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.Black,
-                        letterSpacing = 0.8.sp,
-                        fontFamily = ChakraPetch
-                    )
-                    Text(
-                        text = "CANCEL",
-                        color = Color.White,
-                        fontSize = 10.sp,
-                        fontWeight = FontWeight.Bold,
-                        fontFamily = ChakraPetch,
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(4.dp))
-                            .background(Color(0x55FFFFFF))
-                            .clickable { pendingCutsceneTransition = false }
-                            .padding(horizontal = 8.dp, vertical = 2.dp)
-                    )
-                }
-            }
+
 
             // Main Content Area: Left Arrow / Map Cursor Pad + Right Action Face Buttons
             Row(
@@ -232,7 +170,6 @@ fun FH6SettingsNavScreen(
                             title = if (isMap) "REGIONS" else "PREV TAB",
                             isLeft = true,
                             onPress = { isDown ->
-                                if (isDown) pendingCutsceneTransition = false
                                 onTriggerAction("btn_lb", isDown)
                             }
                         )
@@ -241,21 +178,15 @@ fun FH6SettingsNavScreen(
                             title = if (isMap) "FILTER" else "NEXT TAB",
                             isLeft = false,
                             onPress = { isDown ->
-                                if (isDown) pendingCutsceneTransition = false
                                 onTriggerAction("btn_rb", isDown)
                             }
                         )
                     }
 
-                    // Combined Tactile 4-Way Arrow Pad + 360-degree Map Cursor Glide
-                    FH6MapCursorPad(
+                    // Precision 4-Way Motorsport Directional D-Pad
+                    FH6TactileDpad(
                         isMap = isMap,
-                        onTriggerAction = onTriggerAction,
-                        onAnalogMove = onAnalogMove,
-                        onCenterClick = {
-                            onTriggerAction("btn_a", true)
-                            onTriggerAction("btn_a", false)
-                        }
+                        onTriggerAction = onTriggerAction
                     )
                 }
 
@@ -310,7 +241,6 @@ fun FH6SettingsNavScreen(
                                 color = Color(0xFFFF1744),
                                 actionId = "btn_b",
                                 onTrigger = { id, down ->
-                                    if (down) pendingCutsceneTransition = false
                                     onTriggerAction(id, down)
                                 }
                             )
@@ -323,12 +253,7 @@ fun FH6SettingsNavScreen(
                                 sub = if (isMap) "SET ROUTE" else "SELECT",
                                 color = Color(0xFF00E676),
                                 actionId = "btn_a",
-                                onTrigger = { id, down ->
-                                    if (down && !isMap) {
-                                        pendingCutsceneTransition = true
-                                    }
-                                    onTriggerAction(id, down)
-                                }
+                                onTrigger = onTriggerAction
                             )
                         }
                     }
@@ -450,66 +375,20 @@ private fun FH6MotorsportBumper(
 }
 
 /**
- * Combined 4-Way Arrow Key Pad with 360-degree Map Reticle Pan Cursor
+ * Precision 4-Way Motorsport Directional D-Pad for Menu & Map Navigation
+ * Dedicated touch targets for UP, DOWN, LEFT, RIGHT with zero drag interference.
  */
 @Composable
-private fun FH6MapCursorPad(
+private fun FH6TactileDpad(
     isMap: Boolean,
-    onTriggerAction: (actionId: String, isDown: Boolean) -> Unit,
-    onAnalogMove: (x: Float, y: Float) -> Unit,
-    onCenterClick: () -> Unit
+    onTriggerAction: (actionId: String, isDown: Boolean) -> Unit
 ) {
-    val view = LocalView.current
-    var thumbOffset by remember { mutableStateOf(Offset.Zero) }
-    val maxRadiusPx = 75f
-
     Box(
         modifier = Modifier
             .size(190.dp)
             .clip(CircleShape)
             .background(Color(0xFF071016))
-            .border(2.dp, if (isMap) Color(0xFFCCFF00) else Color(0x60CCFF00), CircleShape)
-            .pointerInput(Unit) {
-                val deadzonePx = 5f
-                fun computeCurvedMove(clamped: Offset, dist: Float) {
-                    if (dist > deadzonePx) {
-                        val normMag = ((dist.coerceAtMost(maxRadiusPx) - deadzonePx) / (maxRadiusPx - deadzonePx)).coerceIn(0f, 1f)
-                        val curvedMag = Math.pow(normMag.toDouble(), 1.8).toFloat() * 0.40f
-                        val angleX = clamped.x / dist
-                        val angleY = -clamped.y / dist
-                        onAnalogMove(angleX * curvedMag, angleY * curvedMag)
-                    } else {
-                        onAnalogMove(0f, 0f)
-                    }
-                }
-
-                detectDragGestures(
-                    onDragStart = { offset ->
-                        val center = Offset(size.width / 2f, size.height / 2f)
-                        val raw = offset - center
-                        val dist = kotlin.math.sqrt(raw.x * raw.x + raw.y * raw.y)
-                        val clamped = if (dist > maxRadiusPx) Offset(raw.x * (maxRadiusPx / dist), raw.y * (maxRadiusPx / dist)) else raw
-                        thumbOffset = clamped
-                        computeCurvedMove(clamped, dist)
-                    },
-                    onDrag = { change, dragAmount ->
-                        change.consume()
-                        val next = thumbOffset + dragAmount
-                        val dist = kotlin.math.sqrt(next.x * next.x + next.y * next.y)
-                        val clamped = if (dist > maxRadiusPx) Offset(next.x * (maxRadiusPx / dist), next.y * (maxRadiusPx / dist)) else next
-                        thumbOffset = clamped
-                        computeCurvedMove(clamped, dist)
-                    },
-                    onDragEnd = {
-                        thumbOffset = Offset.Zero
-                        onAnalogMove(0f, 0f)
-                    },
-                    onDragCancel = {
-                        thumbOffset = Offset.Zero
-                        onAnalogMove(0f, 0f)
-                    }
-                )
-            },
+            .border(2.dp, if (isMap) Color(0xFFCCFF00) else Color(0x60CCFF00), CircleShape),
         contentAlignment = Alignment.Center
     ) {
         Canvas(modifier = Modifier.fillMaxSize()) {
@@ -517,6 +396,7 @@ private fun FH6MapCursorPad(
             val cy = size.height / 2f
             drawLine(Color(0x25CCFF00), Offset(cx, 10f), Offset(cx, size.height - 10f), strokeWidth = 1.5f)
             drawLine(Color(0x25CCFF00), Offset(10f, cy), Offset(size.width - 10f, cy), strokeWidth = 1.5f)
+            drawCircle(Color(0x30CCFF00), radius = 28f, style = Stroke(width = 1.5f))
         }
 
         // UP
@@ -536,51 +416,22 @@ private fun FH6MapCursorPad(
             FH6TactileArrowKey(label = "RIGHT", actionId = "dpad_right", onTrigger = onTriggerAction)
         }
 
-        // Center Reticle Joystick Puck (moves when dragged, renders authentic Forza Map Reticle)
+        // Static Center Motorsport Emblem (No moving cursor, zero interference)
         Box(
             modifier = Modifier
-                .offset { IntOffset(thumbOffset.x.roundToInt(), thumbOffset.y.roundToInt()) }
-                .size(54.dp)
-                .clickable {
-                    view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
-                    onCenterClick()
-                },
+                .size(50.dp)
+                .clip(CircleShape)
+                .background(Color(0xE608121A))
+                .border(1.5.dp, Color(0xFFCCFF00), CircleShape),
             contentAlignment = Alignment.Center
         ) {
             Canvas(modifier = Modifier.fillMaxSize()) {
                 val cx = size.width / 2f
                 val cy = size.height / 2f
-                val r = (minOf(size.width, size.height) / 2f) * 0.92f
-                val voltLime = Color(0xFFCCFF00)
-
-                // Background puck
-                drawCircle(Color(0xF008121A), radius = r)
-                drawCircle(voltLime, radius = r, style = Stroke(width = 2.4f))
-
-                // Inner concentric ring
-                drawCircle(
-                    Color.White.copy(alpha = 0.5f),
-                    radius = r * 0.58f,
-                    style = Stroke(width = 1.2f, pathEffect = PathEffect.dashPathEffect(floatArrayOf(6f, 6f), 0f))
-                )
-
-                // Crosshair tick marks at 0, 90, 180, 270 degrees
-                val tickLen = r * 0.28f
-                drawLine(voltLime, Offset(cx, cy - r), Offset(cx, cy - r + tickLen), strokeWidth = 2.5f)
-                drawLine(voltLime, Offset(cx, cy + r - tickLen), Offset(cx, cy + r), strokeWidth = 2.5f)
-                drawLine(voltLime, Offset(cx - r, cy), Offset(cx - r + tickLen, cy), strokeWidth = 2.5f)
-                drawLine(voltLime, Offset(cx + r - tickLen, cy), Offset(cx + r, cy), strokeWidth = 2.5f)
-
-                // Center navigation pointer arrow / reticle point
-                drawCircle(Color.White, radius = 2.5f, center = Offset(cx, cy))
-                val pointer = androidx.compose.ui.graphics.Path().apply {
-                    moveTo(cx, cy - r * 0.35f)
-                    lineTo(cx + r * 0.24f, cy + r * 0.24f)
-                    lineTo(cx, cy + r * 0.10f)
-                    lineTo(cx - r * 0.24f, cy + r * 0.24f)
-                    close()
-                }
-                drawPath(pointer, voltLime)
+                val r = size.width / 2f
+                drawCircle(Color(0xFFCCFF00), radius = 3f, center = Offset(cx, cy))
+                drawLine(Color(0xFFCCFF00), Offset(cx - 8f, cy), Offset(cx + 8f, cy), strokeWidth = 1.5f)
+                drawLine(Color(0xFFCCFF00), Offset(cx, cy - 8f), Offset(cx, cy + 8f), strokeWidth = 1.5f)
             }
         }
     }
@@ -597,7 +448,7 @@ private fun FH6TactileArrowKey(
 
     Box(
         modifier = Modifier
-            .size(46.dp)
+            .size(50.dp)
             .clip(RoundedCornerShape(8.dp))
             .background(if (isPressed) Color(0xFFCCFF00) else Color(0xF50D1822))
             .border(1.5.dp, if (isPressed) Color.White else Color(0x60CCFF00), RoundedCornerShape(8.dp))
