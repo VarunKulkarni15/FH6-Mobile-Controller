@@ -1,3 +1,7 @@
 {
-  "cleanUrls": true
+  "cleanUrls": true,
+  "rewrites": [
+    { "source": "/HorizonController.apk", "destination": "/HRZNController.apk" },
+    { "source": "/releases/fh6-controller-windows.exe", "destination": "/releases/fh6-controller-windows.exe" }
+  ]
 }

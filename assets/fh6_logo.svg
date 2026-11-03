@@ -154,30 +154,30 @@
   </g>
 
   <!-- ======================================================== -->
-  <!-- FOOTER BADGE: CRISP FORZA MOTORSPORT TYPOGRAPHY          -->
+  <!-- FOOTER BADGE: CRISP MOTORSPORT TYPOGRAPHY              -->
   <!-- ======================================================== -->
   <g transform="translate(256, 440) skewX(-12)">
     <!-- High-Impact Bold Racing Monogram -->
     <text x="0" y="0" 
           font-family="'Montserrat', 'Arial Black', -apple-system, sans-serif" 
-          font-size="30" 
+          font-size="32" 
           font-weight="900" 
           font-style="italic" 
-          letter-spacing="6" 
+          letter-spacing="8" 
           text-anchor="middle" 
           fill="#FFFFFF">
-      FORZA <tspan fill="#CCFF00">H6</tspan>
+      HRZN
     </text>
     
     <text x="0" y="18" 
           font-family="'Montserrat', 'Arial Black', sans-serif" 
-          font-size="10" 
+          font-size="9" 
           font-weight="800" 
-          letter-spacing="8" 
+          letter-spacing="6" 
           text-anchor="middle" 
           fill="#CCFF00" 
           opacity="0.9">
-      CONTROLLER SUITE
+      MOBILE CONTROLLER
     </text>
   </g>
 </svg>

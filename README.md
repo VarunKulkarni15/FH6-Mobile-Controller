@@ -43,7 +43,7 @@ Authentic captures running directly on hardware (Android 14 on Google Pixel & Sa
 - **Progressive Throttle & Braking**: Linear analog modulation for accelerator and brake/reverse with visual pressure readouts.
 - **Live In-App Cockpit Editor**: Move, resize, add, or delete buttons in real time while maintaining full landscape driving ergonomics.
 - **Launcher Auto-Detection**: Companion status monitors Steam, Xbox / Microsoft Store, and Epic Games launchers with driver-readiness badges.
-- **100% Clean Security Verification**: Verified 0/68 detections across all major antivirus engines on [VirusTotal](https://www.virustotal.com/gui/file/9c8484d12cc2db2975fa4892f9833d3b3614838a25137d3b95f5fae739701d4d). Signed with modern V2/V3 cryptographic schemes.
+- **Verified Clean Security Profile**: 0/68 detections across all major antivirus scanners (including Microsoft, Google, and Kaspersky) on [VirusTotal](https://www.virustotal.com/gui/file/9c8484d12cc2db2975fa4892f9833d3b3614838a25137d3b95f5fae739701d4d). Signed with standard Android V1+V2+V3 cryptographic schemes.
 
 ---
 
@@ -57,7 +57,7 @@ HRZN Controller supports both wireless Wi-Fi and wired USB connections:
 3. Open **HRZN Controller** on your phone and tap **Scan QR** (or let it auto-discover your PC in <50ms).
 4. *Tip:* You can charge your phone from any wall adapter, battery bank, or PC USB port while playing wirelessly.
 
-### Mode 2: USB Cable / Tethering (0ms Tournament-Grade Latency)
+### Mode 2: USB Cable / Tethering (Ultra-Low Sub-Millisecond Latency)
 1. Connect your phone to your PC via a USB cable.
 2. On Android, go to **Settings &rarr; Network & internet &rarr; Hotspot & tethering** and toggle **USB tethering** ON.
 3. Launch the PC companion and mobile app. They will establish a direct, zero-jitter link over the cable, **charging your phone continuously while you race**.
@@ -70,7 +70,7 @@ HRZN Controller supports both wireless Wi-Fi and wired USB connections:
 1. Download [**fh6-controller-windows.exe**](releases/fh6-controller-windows.exe) (Standalone 1MB single-file executable, zero DLL setup required).
 2. Launch the companion. On first run, it automatically:
    - Registers into the Windows Start Menu and Windows Search (`HRZN Mobile Controller`).
-   - Checks for the kernel `ViGEmBus` driver and installs it silently if missing.
+   - Checks for the open-source Virtual Gamepad Emulation Bus (ViGEmBus) driver and prompts standard Windows UAC permission to configure the Xbox 360 virtual device if not already present.
 3. Open your racing title (Forza Horizon 5, FH4, FH3, Motorsport). The virtual controller is automatically active on Xbox Slot 1.
 
 > **Windows SmartScreen Note**: Because this is an open-source community release without an expensive enterprise EV certificate, Windows SmartScreen may show a security prompt. Click **More info** &rarr; **Run anyway**.
