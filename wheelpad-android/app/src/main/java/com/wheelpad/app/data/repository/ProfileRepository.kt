@@ -48,6 +48,11 @@ class ProfileRepository(private val context: Context) {
                         modified = true
                     }
                 }
+                if (profile.profileId == "profile_standard" && profile.layout.size < 10) {
+                    profile.layout.clear()
+                    profile.layout.addAll(createDefaultProfiles().first().layout)
+                    modified = true
+                }
                 if (modified) {
                     saveProfile(profile)
                 }
@@ -228,12 +233,32 @@ class ProfileRepository(private val context: Context) {
         ).apply {
             actions.addAll(ALL_FORZA_ACTIONS)
 
-            layout.add(TouchControlElement(elementId = "wheel", actionId = "steer", label = "STEER", shape = ControlShape.CircleWheel, normalizedX = 0.04f, normalizedY = 0.12f, normalizedWidth = 0.44f, normalizedHeight = 0.78f, accentColorHex = "#FFFFFF"))
-            layout.add(TouchControlElement(elementId = "brake", actionId = "brake", label = "BRAKE", shape = ControlShape.VerticalPedal, normalizedX = 0.68f, normalizedY = 0.12f, normalizedWidth = 0.13f, normalizedHeight = 0.58f, accentColorHex = "#FF1744"))
-            layout.add(TouchControlElement(elementId = "gas", actionId = "throttle", label = "GAS", shape = ControlShape.VerticalPedal, normalizedX = 0.83f, normalizedY = 0.12f, normalizedWidth = 0.13f, normalizedHeight = 0.58f, accentColorHex = "#00E676"))
-            layout.add(TouchControlElement(elementId = "handbrake", actionId = "handbrake", label = "HANDBRAKE", shape = ControlShape.WideBar, normalizedX = 0.66f, normalizedY = 0.74f, normalizedWidth = 0.30f, normalizedHeight = 0.18f, accentColorHex = "#FFFFFF"))
-            layout.add(TouchControlElement(elementId = "auto_drive", actionId = "auto_drive", label = "AUTO DRIVE", shape = ControlShape.RoundedButton, normalizedX = 0.51f, normalizedY = 0.76f, normalizedWidth = 0.12f, normalizedHeight = 0.16f, accentColorHex = "#CCFF00"))
-            layout.add(TouchControlElement(elementId = "rewind", actionId = "rewind", label = "REWIND", shape = ControlShape.RoundedButton, normalizedX = 0.51f, normalizedY = 0.14f, normalizedWidth = 0.12f, normalizedHeight = 0.16f, accentColorHex = "#FFB300"))
+            // 1. Steering Wheel (Left)
+            layout.add(TouchControlElement(elementId = "ctrl_wheel", actionId = "steer", label = "STEER", shape = ControlShape.CircleWheel, normalizedX = 0.092f, normalizedY = 0.267f, normalizedWidth = 0.268f, normalizedHeight = 0.589f, opacity = 1.0f, accentColorHex = "#FFFFFF"))
+
+            // 2. Top Bar Left (Menu, Map, Cam, Horn)
+            layout.add(TouchControlElement(elementId = "ctrl_menu", actionId = "pause", label = "MENU", shape = ControlShape.RoundedButton, normalizedX = 0.030f, normalizedY = 0.021f, normalizedWidth = 0.108f, normalizedHeight = 0.174f, accentColorHex = "#FFFFFF"))
+            layout.add(TouchControlElement(elementId = "ctrl_map", actionId = "map", label = "MAP", shape = ControlShape.RoundedButton, normalizedX = 0.154f, normalizedY = 0.038f, normalizedWidth = 0.089f, normalizedHeight = 0.138f, accentColorHex = "#FFFFFF"))
+            layout.add(TouchControlElement(elementId = "ctrl_camera", actionId = "camera", label = "CAM", shape = ControlShape.RoundedButton, normalizedX = 0.245f, normalizedY = 0.032f, normalizedWidth = 0.094f, normalizedHeight = 0.150f, accentColorHex = "#FFFFFF"))
+            layout.add(TouchControlElement(elementId = "ctrl_horn", actionId = "horn", label = "HORN", shape = ControlShape.RoundedButton, normalizedX = 0.343f, normalizedY = 0.034f, normalizedWidth = 0.094f, normalizedHeight = 0.146f, accentColorHex = "#FFD600"))
+
+            // 3. Top Bar Right (Photo, Rearview)
+            layout.add(TouchControlElement(elementId = "ctrl_photo", actionId = "photo_mode", label = "PHOTO", shape = ControlShape.RoundedButton, normalizedX = 0.676f, normalizedY = 0.032f, normalizedWidth = 0.093f, normalizedHeight = 0.148f, accentColorHex = "#E040FB"))
+            layout.add(TouchControlElement(elementId = "ctrl_rear", actionId = "look_back", label = "REAR", shape = ControlShape.RoundedButton, normalizedX = 0.775f, normalizedY = 0.032f, normalizedWidth = 0.094f, normalizedHeight = 0.146f, accentColorHex = "#CCFF00"))
+
+            // 4. Center ABXY Diamond Cluster
+            layout.add(TouchControlElement(elementId = "ctrl_btn_a", actionId = "btn_a", label = "A", shape = ControlShape.RoundedButton, normalizedX = 0.429f, normalizedY = 0.390f, normalizedWidth = 0.070f, normalizedHeight = 0.153f, accentColorHex = "#00E676"))
+            layout.add(TouchControlElement(elementId = "ctrl_btn_y", actionId = "rewind", label = "Y", shape = ControlShape.RoundedButton, normalizedX = 0.511f, normalizedY = 0.248f, normalizedWidth = 0.068f, normalizedHeight = 0.148f, accentColorHex = "#CCFF00"))
+            layout.add(TouchControlElement(elementId = "ctrl_btn_b", actionId = "btn_b", label = "B", shape = ControlShape.RoundedButton, normalizedX = 0.584f, normalizedY = 0.388f, normalizedWidth = 0.069f, normalizedHeight = 0.150f, accentColorHex = "#FF1744"))
+            layout.add(TouchControlElement(elementId = "ctrl_btn_x", actionId = "btn_x", label = "X", shape = ControlShape.RoundedButton, normalizedX = 0.505f, normalizedY = 0.532f, normalizedWidth = 0.070f, normalizedHeight = 0.153f, accentColorHex = "#00E5FF"))
+
+            // 5. Center Bottom Auto Drive
+            layout.add(TouchControlElement(elementId = "auto_drive_btn", actionId = "auto_drive", label = "AUTO", shape = ControlShape.RoundedButton, normalizedX = 0.486f, normalizedY = 0.750f, normalizedWidth = 0.094f, normalizedHeight = 0.127f, accentColorHex = "#CCFF00"))
+
+            // 6. Right Pedals & Handbrake
+            layout.add(TouchControlElement(elementId = "ctrl_brake", actionId = "brake", label = "BRAKE", shape = ControlShape.VerticalPedal, normalizedX = 0.730f, normalizedY = 0.299f, normalizedWidth = 0.095f, normalizedHeight = 0.417f, accentColorHex = "#FFFFFF"))
+            layout.add(TouchControlElement(elementId = "ctrl_throttle", actionId = "throttle", label = "ACCEL", shape = ControlShape.VerticalPedal, normalizedX = 0.850f, normalizedY = 0.233f, normalizedWidth = 0.101f, normalizedHeight = 0.483f, accentColorHex = "#FFFFFF"))
+            layout.add(TouchControlElement(elementId = "ctrl_handbrake", actionId = "handbrake", label = "HANDBRAKE", shape = ControlShape.WideBar, normalizedX = 0.736f, normalizedY = 0.748f, normalizedWidth = 0.234f, normalizedHeight = 0.138f, accentColorHex = "#FFFFFF"))
         }
 
         return listOf(standard)
