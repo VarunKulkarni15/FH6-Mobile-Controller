@@ -43,3 +43,6 @@ docs/security/
 *credentials*.txt
 *.keystore_backup*
 
+
+# Personal recording and screen capture scripts
+recordings/
