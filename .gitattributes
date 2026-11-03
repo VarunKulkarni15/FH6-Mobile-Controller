@@ -1,0 +1,10 @@
+# Hide PowerShell scripts and build artifacts from GitHub Linguist language statistics
+*.ps1 linguist-detectable=false
+*.cer linguist-detectable=false
+*.bat linguist-detectable=false
+*.py linguist-detectable=false
+releases/** linguist-vendored
+dist-android/** linguist-vendored
+dist-windows/** linguist-vendored
+site/** linguist-documentation
+docs/** linguist-documentation
