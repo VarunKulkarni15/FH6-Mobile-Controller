@@ -126,8 +126,12 @@ fun DrivingScreen(
         activeMenuMode = syncMenuMode
     }
 
+    var lastMenuToggleTime by remember { mutableStateOf(0L) }
+
     LaunchedEffect(syncGamePaused) {
-        if (isMenuState != syncGamePaused) {
+        val now = System.currentTimeMillis()
+        if (isMenuState != syncGamePaused && (now - lastMenuToggleTime) > 300) {
+            lastMenuToggleTime = now
             isMenuState = syncGamePaused
         }
     }
@@ -225,7 +229,9 @@ fun DrivingScreen(
             if (isDown) buttonsBitmask = buttonsBitmask or bit
             else buttonsBitmask = buttonsBitmask and bit.inv()
         }
-        syncClient?.testActionInput(actionId, isDown)
+        if (bit == 0) {
+            syncClient?.testActionInput(actionId, isDown)
+        }
     }
 
     DisposableEffect(activity, hwVolumeEnabled, hwVolumeUpAction, hwVolumeDownAction, isMenuState) {
@@ -293,10 +299,8 @@ fun DrivingScreen(
                 onResumeGame = {
                     if (activeMenuMode == "MAP") {
                         triggerAction("map", true)
-                        triggerAction("map", false)
                     } else {
                         triggerAction("pause", true)
-                        triggerAction("pause", false)
                     }
                     steeringAngle = 0f
                     leftStickY = 0f
@@ -959,12 +963,12 @@ fun FH6ExactSvgAccelPedal(
             close()
         }
 
-        // 1. CLIPPED DYNAMIC FILL (Electric Cyan / White fluid rise from bottom to top)
+        // 1. CLIPPED DYNAMIC FILL (FH6 Volt Lime fluid rise from bottom to top)
         if (animatedPressure > 0.005f) {
             clipPath(outerContour) {
                 val fillTop = size.height * (1.0f - animatedPressure)
                 drawRect(
-                    color = Color(0x3500F0FF),
+                    color = Color(0x40CCFF00),
                     topLeft = Offset(0f, fillTop),
                     size = Size(size.width, size.height * animatedPressure)
                 )
@@ -1008,33 +1012,45 @@ fun FH6ExactSvgAccelPedal(
     }
 
     // Minimalist Typography Labels
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(bottom = 14.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Bottom
+    BoxWithConstraints(
+        modifier = Modifier.fillMaxSize()
     ) {
-        Text(
-            text = "${(pressure * 100).toInt()}%",
-            color = Color(0xFF00F0FF),
-            fontSize = 11.sp,
-            fontWeight = FontWeight.Bold
-        )
-        Text(
-            text = "ACCEL",
-            color = Color.White,
-            fontSize = 16.sp,
-            fontWeight = FontWeight.Black,
-            letterSpacing = 4.sp
-        )
-        Text(
-            text = "RT",
-            color = Color(0xD9FFFFFF),
-            fontSize = 10.sp,
-            fontWeight = FontWeight.Bold,
-            letterSpacing = 1.5.sp
-        )
+        val scale = (maxWidth / 100.dp).coerceIn(0.65f, 1.25f)
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(bottom = (12.dp * scale).coerceAtLeast(6.dp)),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Bottom
+        ) {
+            Text(
+                text = "${(pressure * 100).toInt()}%",
+                color = Color(0xFFCCFF00),
+                fontSize = (11 * scale).sp,
+                fontWeight = FontWeight.Bold,
+                fontFamily = ChakraPetch
+            )
+            Text(
+                text = "ACCEL",
+                color = Color.White,
+                fontSize = (15 * scale).sp,
+                fontWeight = FontWeight.Black,
+                letterSpacing = (2.5 * scale).sp,
+                maxLines = 1,
+                softWrap = false,
+                fontFamily = ChakraPetch
+            )
+            Text(
+                text = "RT",
+                color = Color(0xD9FFFFFF),
+                fontSize = (10 * scale).sp,
+                fontWeight = FontWeight.Bold,
+                letterSpacing = (1.5 * scale).sp,
+                maxLines = 1,
+                softWrap = false,
+                fontFamily = ChakraPetch
+            )
+        }
     }
 }
 
@@ -1161,33 +1177,46 @@ fun FH6ExactSvgBrakePedal(
     }
 
     // Clean Bold Typography
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(bottom = 14.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Bottom
+    BoxWithConstraints(
+        modifier = Modifier.fillMaxSize()
     ) {
-        Text(
-            text = "${(pressure * 100).toInt()}%",
-            color = Color(0xFFFF0055),
-            fontSize = 11.sp,
-            fontWeight = FontWeight.Bold
-        )
-        Text(
-            text = "BRAKE",
-            color = Color.White,
-            fontSize = 16.sp,
-            fontWeight = FontWeight.Black,
-            letterSpacing = 4.sp
-        )
-        Text(
-            text = "LT / REVERSE",
-            color = Color(0xD9FFFFFF),
-            fontSize = 10.sp,
-            fontWeight = FontWeight.Bold,
-            letterSpacing = 1.5.sp
-        )
+        val scale = (maxWidth / 100.dp).coerceIn(0.65f, 1.25f)
+        val isNarrow = maxWidth < 85.dp
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(bottom = (12.dp * scale).coerceAtLeast(6.dp)),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Bottom
+        ) {
+            Text(
+                text = "${(pressure * 100).toInt()}%",
+                color = Color(0xFFFF0055),
+                fontSize = (11 * scale).sp,
+                fontWeight = FontWeight.Bold,
+                fontFamily = ChakraPetch
+            )
+            Text(
+                text = "BRAKE",
+                color = Color.White,
+                fontSize = (15 * scale).sp,
+                fontWeight = FontWeight.Black,
+                letterSpacing = (2.5 * scale).sp,
+                maxLines = 1,
+                softWrap = false,
+                fontFamily = ChakraPetch
+            )
+            Text(
+                text = if (isNarrow) "LT // REV" else "LT / REVERSE",
+                color = Color(0xD9FFFFFF),
+                fontSize = (10 * scale).sp,
+                fontWeight = FontWeight.Bold,
+                letterSpacing = (1.0 * scale).sp,
+                maxLines = 1,
+                softWrap = false,
+                fontFamily = ChakraPetch
+            )
+        }
     }
 }
 

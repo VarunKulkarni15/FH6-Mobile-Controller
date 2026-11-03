@@ -77,6 +77,8 @@ namespace WheelPad.Core.Services
         private bool _lastWDown;
         private bool _lastSDown;
         private int _menuDepth = 0;
+        private long _lastMenuToggleTicks = 0;
+        public long LastMenuToggleTicks => Interlocked.Read(ref _lastMenuToggleTicks);
 
         private UdpClient? _telemetryClient;
         private CancellationTokenSource? _telemetryCts;
@@ -256,7 +258,10 @@ namespace WheelPad.Core.Services
 
                     if (isGameActive)
                     {
-                        if (mDown && !_lastMDown)
+                        // 400ms Debounce guard: Ignore keyboard ESC / M echo immediately after a menu state change
+                        bool isWithinDebounce = (DateTime.UtcNow.Ticks - Interlocked.Read(ref _lastMenuToggleTicks)) < TimeSpan.FromMilliseconds(400).Ticks;
+
+                        if (mDown && !_lastMDown && !isWithinDebounce)
                         {
                             if (_isGamePaused && _currentMenuMode == "MAP")
                             {
@@ -269,7 +274,7 @@ namespace WheelPad.Core.Services
                                 SetPauseState(true, "MAP");
                             }
                         }
-                        else if (escDown && !_lastEscDown)
+                        else if (escDown && !_lastEscDown && !isWithinDebounce)
                         {
                             if (!_isGamePaused)
                             {
@@ -333,6 +338,7 @@ namespace WheelPad.Core.Services
 
         public void SetPauseState(bool isPaused, string menuMode = "PAUSE")
         {
+            Interlocked.Exchange(ref _lastMenuToggleTicks, DateTime.UtcNow.Ticks);
             if (!isPaused)
             {
                 _menuDepth = 0;

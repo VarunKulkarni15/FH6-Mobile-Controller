@@ -255,6 +255,11 @@ namespace WheelPad.Core.Services
             {
                 if (isPressed)
                 {
+                    // Debounce rapid toggle pulses from UDP/TCP to eliminate glitching loop
+                    if (GameDetector != null && (DateTime.UtcNow.Ticks - GameDetector.LastMenuToggleTicks) < TimeSpan.FromMilliseconds(350).Ticks)
+                    {
+                        return;
+                    }
                     bool newPausedState = !(GameDetector?.IsGamePaused ?? false);
                     GameDetector?.SetPauseState(newPausedState, "PAUSE");
                     if (_xboxController != null && _xboxController.IsConnected)
@@ -274,6 +279,11 @@ namespace WheelPad.Core.Services
             {
                 if (isPressed)
                 {
+                    // Debounce rapid toggle pulses from UDP/TCP to eliminate glitching loop
+                    if (GameDetector != null && (DateTime.UtcNow.Ticks - GameDetector.LastMenuToggleTicks) < TimeSpan.FromMilliseconds(350).Ticks)
+                    {
+                        return;
+                    }
                     bool newPaused = true;
                     if (GameDetector?.IsGamePaused == true && GameDetector.CurrentMenuMode == "MAP")
                     {

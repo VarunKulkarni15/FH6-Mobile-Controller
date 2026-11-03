@@ -14,9 +14,9 @@
     <Description>Sim racing hardware-level controller emulator and telemetry companion for Forza Horizon</Description>
     <Company>Varun Kulkarni</Company>
     <Copyright>Copyright ? 2026 Varun Kulkarni. All rights reserved.</Copyright>
-    <Version>1.2.0</Version>
-    <FileVersion>1.2.0.0</FileVersion>
-    <AssemblyVersion>1.2.0.0</AssemblyVersion>
+    <Version>1.5.0</Version>
+    <FileVersion>1.5.0.0</FileVersion>
+    <AssemblyVersion>1.5.0.0</AssemblyVersion>
     <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
 
