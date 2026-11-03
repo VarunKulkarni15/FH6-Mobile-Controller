@@ -471,41 +471,6 @@ fun FH6QuickSettingsDrawer(
                     Text("HEALTH >", color = Color.Black, fontSize = 10.sp, fontWeight = FontWeight.Black)
                 }
 
-                // Option 1c: Steering Tuning Preset
-                var steeringPresetIndex by remember { mutableStateOf(1) }
-                val steeringPresets = listOf("DRIFT (540° Counter-Steer)", "CIRCUIT (360° Linear)", "ARCADE (270° Rapid)")
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(6.dp))
-                        .background(Color(0xFF0F1722))
-                        .border(1.5.dp, Color(0xFFCCFF00), RoundedCornerShape(6.dp))
-                        .clickable {
-                            steeringPresetIndex = (steeringPresetIndex + 1) % steeringPresets.size
-                            view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
-                        }
-                        .padding(horizontal = 14.dp, vertical = 10.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Column {
-                        Text("STEERING TUNING", color = Color(0xFFCCFF00), fontSize = 11.sp, fontWeight = FontWeight.Black)
-                        Text(
-                            steeringPresets[steeringPresetIndex],
-                            color = Color.White,
-                            fontSize = 10.sp,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
-                    Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(4.dp))
-                            .background(Color(0xFFCCFF00))
-                            .padding(horizontal = 8.dp, vertical = 4.dp)
-                    ) {
-                        Text("CHANGE >", color = Color.Black, fontSize = 9.sp, fontWeight = FontWeight.Black)
-                    }
-                }
 
                 // Option 2: Gyroscope Tilt Steering Toggle
                 Row(
