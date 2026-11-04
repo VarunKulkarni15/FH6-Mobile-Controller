@@ -52,39 +52,23 @@ public partial class App : System.Windows.Application
 
         int currentPid = Environment.ProcessId;
 
-        // Check for existing running instances
+        // Guarantee clean single instance: terminate any lingering or zombie companion instances
         try
         {
-            foreach (var proc in Process.GetProcessesByName("HRZN-Controller").Concat(Process.GetProcessesByName("fh6-controller-windows")))
+            var oldNames = new[] { "HRZN-Controller", "fh6-controller-windows", "WheelPad.Server", "WheelPad.App" };
+            foreach (var name in oldNames)
             {
-                if (proc.Id != currentPid)
+                foreach (var proc in Process.GetProcessesByName(name))
                 {
-                    // If the other process has no visible main window handle (headless/zombie), kill it immediately!
-                    if (proc.MainWindowHandle == IntPtr.Zero)
+                    if (proc.Id != currentPid)
                     {
-                        Log($"Killing headless/zombie instance PID {proc.Id}...");
-                        try { proc.Kill(); proc.WaitForExit(400); } catch { }
-                    }
-                    else
-                    {
-                        // Active visible instance found: restore its window and bring to front
-                        Log($"Found active GUI instance PID {proc.Id}. Bringing window to front...");
-                        ShowWindow(proc.MainWindowHandle, SW_RESTORE);
-                        SetForegroundWindow(proc.MainWindowHandle);
-
-                        // Signal via named pipe
-                        try
-                        {
-                            using var client = new NamedPipeClientStream(".", PipeName, PipeDirection.Out);
-                            client.Connect(300);
-                            using var writer = new StreamWriter(client) { AutoFlush = true };
-                            writer.WriteLine("RESTORE_WINDOW");
-                        }
+                        Log($"Terminating prior companion instance {proc.ProcessName} (PID {proc.Id}) to guarantee exclusive port access...");
+                        try 
+                        { 
+                            proc.Kill(); 
+                            proc.WaitForExit(500); 
+                        } 
                         catch { }
-
-                        Log("Exiting duplicate launch.");
-                        Environment.Exit(0);
-                        return;
                     }
                 }
             }

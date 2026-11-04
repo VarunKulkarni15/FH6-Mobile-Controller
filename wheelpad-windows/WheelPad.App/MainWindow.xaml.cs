@@ -450,17 +450,7 @@ namespace WheelPad.App
 
         private void MainWindow_Closing(object? sender, System.ComponentModel.CancelEventArgs e)
         {
-            if (!_isExplicitExit)
-            {
-                e.Cancel = true;
-                Hide();
-                _notifyIcon.ShowBalloonTip(
-                    2000,
-                    "HRZN Controller Active",
-                    "Running in background for your game. Right-click tray icon to exit.",
-                    Forms.ToolTipIcon.Info
-                );
-            }
+            ExitApplication();
         }
 
         private void ExitApplication()
