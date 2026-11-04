@@ -110,7 +110,7 @@ namespace WheelPad.App
 
             _notifyIcon = new Forms.NotifyIcon
             {
-                Text = "FH6 Controller // Windows Companion",
+                Text = "HRZN Controller // Windows Companion",
                 Icon = trayIcon ?? System.Drawing.SystemIcons.Application,
                 Visible = true
             };
@@ -352,7 +352,7 @@ namespace WheelPad.App
 
                     _notifyIcon.ShowBalloonTip(
                         3000,
-                        "FH6 Controller Companion",
+                        "HRZN Controller Companion",
                         "Mobile Controller connected. Xbox 360 controller synchronized.",
                         Forms.ToolTipIcon.Info
                     );
@@ -364,7 +364,7 @@ namespace WheelPad.App
 
                     _notifyIcon.ShowBalloonTip(
                         2500,
-                        "FH6 Controller Companion",
+                        "HRZN Controller Companion",
                         "Mobile Controller disconnected. Inputs neutral.",
                         Forms.ToolTipIcon.Warning
                     );
@@ -431,7 +431,7 @@ namespace WheelPad.App
             Hide();
             _notifyIcon.ShowBalloonTip(
                 2000,
-                "FH6 Controller Companion",
+                "HRZN Controller Companion",
                 "Minimized to system tray. Companion is active in the background.",
                 Forms.ToolTipIcon.Info
             );
@@ -456,7 +456,7 @@ namespace WheelPad.App
                 Hide();
                 _notifyIcon.ShowBalloonTip(
                     2000,
-                    "FH6 Controller Active",
+                    "HRZN Controller Active",
                     "Running in background for your game. Right-click tray icon to exit.",
                     Forms.ToolTipIcon.Info
                 );

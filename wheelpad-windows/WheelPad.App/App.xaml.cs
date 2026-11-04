@@ -55,7 +55,7 @@ public partial class App : System.Windows.Application
         // Check for existing running instances
         try
         {
-            foreach (var proc in Process.GetProcessesByName("fh6-controller-windows"))
+            foreach (var proc in Process.GetProcessesByName("HRZN-Controller").Concat(Process.GetProcessesByName("fh6-controller-windows")))
             {
                 if (proc.Id != currentPid)
                 {

@@ -26,69 +26,132 @@ namespace WheelPad.Core.Services
 
     public class AutoUpdateService
     {
-                private static readonly string[] VersionUrls = new[]
-        {
-            "https://raw.githubusercontent.com/VarunKulkarni15/FH6-Mobile-Controller/master/site/version.json",
-            "https://horizoncontro.varunkulkarni.dpdns.org/version.json"
-        };
-        public const int CurrentVersionCode = 9;
-        public const string CurrentVersionName = "1.5.0";
-
-        private readonly HttpClient _httpClient;
-
-        public AutoUpdateService()
-        {
-            _httpClient = new HttpClient { Timeout = TimeSpan.FromSeconds(8) };
-            _httpClient.DefaultRequestHeaders.Add("User-Agent", "FH6-Companion-Windows/1.5.0");
-        }
-
-        public async Task<UpdateCheckResult> CheckForUpdatesAsync()
-        {
-            Exception? lastEx = null;
-            foreach (var url in VersionUrls)
-            {
-                try
-                {
-                    var response = await _httpClient.GetStringAsync(url);
-                    using var doc = JsonDocument.Parse(response);
-
-                    if (doc.RootElement.TryGetProperty("windows", out var winElem))
-                    {
-                        int remoteCode = winElem.GetProperty("versionCode").GetInt32();
-                        string remoteName = winElem.GetProperty("versionName").GetString() ?? "1.5.0";
-                        string downloadUrl = winElem.GetProperty("downloadUrl").GetString() ?? "";
-                        string changelog = winElem.TryGetProperty("changelog", out var cl) ? cl.GetString() ?? "" : "";
-
-                        var info = new VersionInfo
-                        {
-                            VersionCode = remoteCode,
-                            VersionName = remoteName,
-                            DownloadUrl = downloadUrl,
-                            Changelog = changelog
-                        };
-
-                        bool isNewer = remoteCode > CurrentVersionCode;
-
-                        return new UpdateCheckResult
-                        {
-                            IsUpdateAvailable = isNewer,
-                            LatestVersion = info,
-                            CurrentVersion = CurrentVersionName
-                        };
-                    }
-                }
-                catch (Exception ex)
-                {
-                    lastEx = ex;
-                }
-            }
-
-            return new UpdateCheckResult
-            {
-                IsUpdateAvailable = false,
-                CurrentVersion = CurrentVersionName,
-                ErrorMessage = lastEx?.Message
-            };
+                private static readonly string[] VersionUrls = new[]
+
+        {
+
+            "https://raw.githubusercontent.com/VarunKulkarni15/FH6-Mobile-Controller/master/site/version.json",
+
+            "https://horizoncontro.varunkulkarni.dpdns.org/version.json"
+
+        };
+
+        public const int CurrentVersionCode = 9;
+
+        public const string CurrentVersionName = "1.5.0";
+
+
+
+        private readonly HttpClient _httpClient;
+
+
+
+        public AutoUpdateService()
+
+        {
+
+            _httpClient = new HttpClient { Timeout = TimeSpan.FromSeconds(8) };
+
+            _httpClient.DefaultRequestHeaders.Add("User-Agent", "FH6-Companion-Windows/1.5.0");
+
+        }
+
+
+
+        public async Task<UpdateCheckResult> CheckForUpdatesAsync()
+
+        {
+
+            Exception? lastEx = null;
+
+            foreach (var url in VersionUrls)
+
+            {
+
+                try
+
+                {
+
+                    var response = await _httpClient.GetStringAsync(url);
+
+                    using var doc = JsonDocument.Parse(response);
+
+
+
+                    if (doc.RootElement.TryGetProperty("windows", out var winElem))
+
+                    {
+
+                        int remoteCode = winElem.GetProperty("versionCode").GetInt32();
+
+                        string remoteName = winElem.GetProperty("versionName").GetString() ?? "1.5.0";
+
+                        string downloadUrl = winElem.GetProperty("downloadUrl").GetString() ?? "";
+
+                        string changelog = winElem.TryGetProperty("changelog", out var cl) ? cl.GetString() ?? "" : "";
+
+
+
+                        var info = new VersionInfo
+
+                        {
+
+                            VersionCode = remoteCode,
+
+                            VersionName = remoteName,
+
+                            DownloadUrl = downloadUrl,
+
+                            Changelog = changelog
+
+                        };
+
+
+
+                        bool isNewer = remoteCode > CurrentVersionCode;
+
+
+
+                        return new UpdateCheckResult
+
+                        {
+
+                            IsUpdateAvailable = isNewer,
+
+                            LatestVersion = info,
+
+                            CurrentVersion = CurrentVersionName
+
+                        };
+
+                    }
+
+                }
+
+                catch (Exception ex)
+
+                {
+
+                    lastEx = ex;
+
+                }
+
+            }
+
+
+
+            return new UpdateCheckResult
+
+            {
+
+                IsUpdateAvailable = false,
+
+                CurrentVersion = CurrentVersionName,
+
+                ErrorMessage = lastEx?.Message
+
+            };
+
         }
 
         public async Task<bool> DownloadAndApplyUpdateAsync(string downloadUrl, Action<int> onProgress)
@@ -127,7 +190,7 @@ namespace WheelPad.Core.Services
                 string currentExe = Process.GetCurrentProcess().MainModule?.FileName ?? "";
                 if (string.IsNullOrEmpty(currentExe) || !File.Exists(currentExe))
                 {
-                    currentExe = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "fh6-controller-windows.exe");
+                    currentExe = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "HRZN-Controller.exe");
                 }
 
                 // Batch script that waits for current process to exit, swaps executable, and launches

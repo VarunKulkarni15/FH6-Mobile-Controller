@@ -29,7 +29,7 @@
 
   <Applications>
     <Application Id="HorizonMobileController"
-      Executable="fh6-controller-windows.exe"
+      Executable="HRZN-Controller.exe"
       EntryPoint="Windows.FullTrustApplication">
       <uap:VisualElements
         DisplayName="HRZN Mobile Controller"
@@ -41,7 +41,7 @@
         <uap:SplashScreen Image="Assets\SplashScreen.png" />
       </uap:VisualElements>
       <Extensions>
-        <desktop:Extension Category="windows.startupTask" Executable="fh6-controller-windows.exe" EntryPoint="Windows.FullTrustApplication">
+        <desktop:Extension Category="windows.startupTask" Executable="HRZN-Controller.exe" EntryPoint="Windows.FullTrustApplication">
           <desktop:StartupTask TaskId="HorizonMobileControllerStartup" Enabled="true" DisplayName="HRZN Mobile Controller" />
         </desktop:Extension>
       </Extensions>

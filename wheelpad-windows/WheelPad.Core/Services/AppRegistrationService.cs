@@ -39,14 +39,14 @@ public static class AppRegistrationService
             // 2. Register Windows App Paths (Win+R / Start Menu command indexing)
             try
             {
-                using var appPathsKey = Registry.CurrentUser.CreateSubKey(@"Software\Microsoft\Windows\CurrentVersion\App Paths\fh6-controller-windows.exe");
+                using var appPathsKey = Registry.CurrentUser.CreateSubKey(@"Software\Microsoft\Windows\CurrentVersion\App Paths\HRZN-Controller.exe");
                 if (appPathsKey != null)
                 {
                     appPathsKey.SetValue("", currentExe);
                     appPathsKey.SetValue("Path", exeDir);
                 }
 
-                using var fh6Key = Registry.CurrentUser.CreateSubKey(@"Software\Microsoft\Windows\CurrentVersion\App Paths\fh6.exe");
+                using var fh6Key = Registry.CurrentUser.CreateSubKey(@"Software\Microsoft\Windows\CurrentVersion\App Paths\hrzn.exe");
                 if (fh6Key != null)
                 {
                     fh6Key.SetValue("", currentExe);

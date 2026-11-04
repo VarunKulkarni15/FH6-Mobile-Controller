@@ -274,11 +274,11 @@
                             <Grid Margin="0,0,0,10">
                                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                     <Border Width="3" Height="12" Background="#00E5FF" Margin="0,0,8,0"/>
-                                    <TextBlock Text="FORZA ENGINE TELEMETRY LINK" Style="{StaticResource MetricHeaderLabel}"/>
+                                    <TextBlock Text="HORIZON ENGINE TELEMETRY LINK" Style="{StaticResource MetricHeaderLabel}"/>
                                 </StackPanel>
                             </Grid>
 
-                            <TextBlock Text="Supported: FH6 · FH5 · FH4 · FH3 · Forza Motorsport" FontSize="10" Foreground="#8EA6C2" FontWeight="SemiBold" Margin="0,0,0,10"/>
+                            <TextBlock Text="Supported: Horizon 5 · Horizon 4 · Sim Rigs · Motorsport" FontSize="10" Foreground="#8EA6C2" FontWeight="SemiBold" Margin="0,0,0,10"/>
 
                             <!-- Detected Game HUD Status -->
                             <Border Background="#0A1018" BorderBrush="#1E2C3E" BorderThickness="1.5" CornerRadius="4" Padding="14,10">
