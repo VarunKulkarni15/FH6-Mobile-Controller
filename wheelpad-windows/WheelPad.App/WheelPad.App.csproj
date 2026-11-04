@@ -9,9 +9,9 @@
     <UseWindowsForms>true</UseWindowsForms>
     <AssemblyName>fh6-controller-windows</AssemblyName>
     <ApplicationIcon>app_icon.ico</ApplicationIcon>
-    <AssemblyTitle>Forza Horizon Controller Companion</AssemblyTitle>
-    <Product>Forza Horizon Controller Suite</Product>
-    <Description>Sim racing hardware-level controller emulator and telemetry companion for Forza Horizon</Description>
+    <AssemblyTitle>FH6 Controller Companion</AssemblyTitle>
+    <Product>FH6 Controller Suite</Product>
+    <Description>Sim racing hardware-level controller emulator and telemetry companion for PC racing games</Description>
     <Company>Varun Kulkarni</Company>
     <Copyright>Copyright ? 2026 Varun Kulkarni. All rights reserved.</Copyright>
     <Version>1.5.0</Version>

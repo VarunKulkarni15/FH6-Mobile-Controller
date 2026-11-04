@@ -13,7 +13,7 @@ namespace WheelPad.Core.Services;
 /// </summary>
 public static class AppRegistrationService
 {
-    private const string AppTitle = "Forza Horizon Controller";
+    private const string AppTitle = "FH6 Controller";
     private const string AppDescription = "Sim Racing Controller Companion & Telemetry Suite for PC";
     private const string PublisherName = "Varun Kulkarni";
     private const string AppVersion = "1.2.0";
