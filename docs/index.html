@@ -8,7 +8,7 @@
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Forza Horizon Controller // Sim Racing Controller Suite for PC</title>
+    <title>HRZN Mobile Controller // Sim Racing Controller Suite for PC</title>
 
     <link rel="icon" type="image/x-icon" href="favicon.ico">
 
@@ -21,7 +21,7 @@
 
     <meta property="og:url" content="https://hrzncontroller.varunkulkarni.dpdns.org/">
 
-    <meta property="og:title" content="Horizon Controller // Sim Racing Controller Suite">
+    <meta property="og:title" content="HRZN Controller // Sim Racing Controller Suite">
 
     <meta property="og:description"
         content="Direct hardware-level Xbox 360 controller emulation for PC. Transform your phone into a low-latency sim-racing rig.">
@@ -589,7 +589,193 @@
 
         }
 
-        .btn-volt {
+        
+        /* Dual-Platform Download Deck */
+        .hero-download-deck {
+            display: flex;
+            align-items: stretch;
+            justify-content: center;
+            width: 100%;
+            max-width: 980px;
+            background: rgba(14, 26, 27, 0.65);
+            border: 1px solid var(--border-active);
+            border-radius: 8px;
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+            margin: 0 auto 36px;
+            overflow: hidden;
+            text-align: left;
+        }
+
+        .download-platform-col {
+            flex: 1 1 50%;
+            padding: 30px 32px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .hero-deck-divider {
+            width: 1px;
+            background: linear-gradient(180deg, transparent 0%, var(--border-active) 15%, var(--border-active) 85%, transparent 100%);
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        .deck-platform-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 14px;
+        }
+
+        .deck-platform-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-family: var(--font-racing);
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: var(--text-dim);
+        }
+
+        .deck-platform-label svg {
+            color: var(--volt);
+        }
+
+        .deck-version-tag {
+            font-family: var(--font-racing);
+            font-size: 11px;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            background: rgba(255, 255, 255, 0.04);
+            padding: 3px 8px;
+            border-radius: 3px;
+            border: 1px solid var(--border-subtle);
+        }
+
+        /* Authentic FH6-Themed Coming Soon Motorsport Pill */
+        .fh6-coming-soon-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(204, 255, 0, 0.1);
+            border: 1px solid var(--volt);
+            color: var(--volt);
+            font-family: var(--font-racing);
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            padding: 4px 12px;
+            border-radius: 2px;
+            clip-path: polygon(6px 0%, 100% 0%, calc(100% - 6px) 100%, 0% 100%);
+            box-shadow: 0 0 12px rgba(204, 255, 0, 0.25);
+            white-space: nowrap;
+        }
+
+        .deck-card-title {
+            font-family: var(--font-racing);
+            font-size: 22px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--white);
+            margin: 0 0 8px;
+        }
+
+        .deck-card-desc {
+            font-size: 14px;
+            line-height: 1.55;
+            color: var(--text-dim);
+            margin: 0 0 16px;
+            flex-grow: 1;
+        }
+
+        .deck-trust-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            color: #A3B8CC;
+            background: rgba(18, 26, 40, 0.6);
+            border: 1px solid var(--border-subtle);
+            padding: 6px 12px;
+            border-radius: 4px;
+            margin-bottom: 22px;
+            width: fit-content;
+        }
+
+        .deck-trust-badge svg {
+            color: var(--volt);
+        }
+
+        .deck-actions-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .deck-actions-group .btn-volt,
+        .deck-actions-group .btn-slate {
+            width: 100%;
+            justify-content: center;
+            text-align: center;
+            padding: 14px 20px;
+            box-sizing: border-box;
+        }
+
+        .btn-sub-tag {
+            display: inline-block;
+            font-size: 10px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            padding: 2px 6px;
+            border-radius: 2px;
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--text-muted);
+            margin-left: 6px;
+        }
+
+        .deck-sublink-wrap {
+            margin-top: 6px;
+            text-align: center;
+        }
+
+        .deck-sublink {
+            font-size: 12px;
+            color: var(--text-muted);
+            text-decoration: underline;
+            text-underline-offset: 3px;
+            transition: color 0.2s ease;
+        }
+
+        .deck-sublink:hover {
+            color: var(--volt);
+        }
+
+        @media (max-width: 820px) {
+            .hero-download-deck {
+                flex-direction: column;
+            }
+
+            .hero-deck-divider {
+                width: 100%;
+                height: 1px;
+                background: linear-gradient(90deg, transparent 0%, var(--border-active) 15%, var(--border-active) 85%, transparent 100%);
+            }
+
+            .download-platform-col {
+                padding: 24px 20px;
+            }
+        }
+
+.btn-volt {
 
             background: var(--volt);
 
@@ -1455,11 +1641,11 @@
 
         <a href="#" class="brand-link">
 
-            <img src="assets/fh6_logo.svg" alt="Forza Horizon Controller Logo" class="brand-logo-img">
+            <img src="assets/fh6_logo.svg" alt="Forza HRZN Controller Logo" class="brand-logo-img">
 
             <div class="brand-titles">
 
-                <span class="brand-text">HORIZON <span class="volt">CONTROLLER</span></span>
+                <span class="brand-text">HRZN <span class="volt">CONTROLLER</span></span>
 
                 <span class="brand-subtext">SIM RACING EMULATION</span>
 
@@ -1520,7 +1706,7 @@
 
             <h1 class="hero-title">
 
-                Forza Horizon <br>
+                HRZN Mobile <br>
 
                 <span class="volt">Controller Suite</span>
 
@@ -1534,37 +1720,94 @@
 
             </p>
 
-            <!-- High-Impact Download Group -->
+                        <!-- Dual-Platform Download Deck (Side-by-Side with Clean Vertical Divider) -->
+            <div class="hero-download-deck">
+                <!-- Left Platform: Android Mobile Client -->
+                <div class="download-platform-col">
+                    <div>
+                        <div class="deck-platform-header">
+                            <div class="deck-platform-label">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M17.523 15.3414c-.5511 0-.9993-.4486-.9993-.9997s.4482-.9993.9993-.9993c.551 0 .9993.4482.9993.9993.0001.5511-.4483.9997-.9993.9997m-11.046 0c-.5511 0-.9993-.4486-.9993-.9997s.4482-.9993.9993-.9993c.5511 0 .9993.4482.9993.9993 0 .5511-.4482.9997-.9993.9997m11.4045-6.02l1.9973-3.4592a.416.416 0 00-.1521-.5676.416.416 0 00-.5676.1521l-2.0223 3.503C15.5902 8.4101 13.8559 8.082 12 8.082s-3.5902.3282-5.1368.8677L4.8409 5.4467a.4161.4161 0 00-.5677-.1521.4157.4157 0 00-.1521.5676l1.9973 3.4592C2.6889 11.1867.3432 14.6589 0 18.761h24c-.3432-4.1021-2.6889-7.5743-6.1185-9.4396" />
+                                </svg>
+                                <span>Android Client</span>
+                            </div>
+                            <span class="deck-version-tag">v1.2.0 &bull; 7.37 MB</span>
+                        </div>
 
-            <div class="hero-cta-group">
+                        <h3 class="deck-card-title">HRZN Mobile Controller</h3>
+                        <p class="deck-card-desc">
+                            Touch steering wheel, 6-axis gyroscope motion tilt, progressive pedal triggers, customizable cockpit HUD, and 120Hz FastStream.
+                        </p>
 
-                <a href="https://apps.microsoft.com/detail/9PKKK7NB747K" target="_blank" class="btn-volt"
-                    title="Direct Microsoft Store Installation">
+                        <div class="deck-trust-badge">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+                            <span>0/68 Clean &bull; VirusTotal Verified</span>
+                        </div>
+                    </div>
 
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                    <div class="deck-actions-group">
+                        <a href="javascript:void(0)" onclick="openApkModal()" class="btn-volt">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M17.523 15.3414c-.5511 0-.9993-.4486-.9993-.9997s.4482-.9993.9993-.9993c.551 0 .9993.4482.9993.9993.0001.5511-.4483.9997-.9993.9997m-11.046 0c-.5511 0-.9993-.4486-.9993-.9997s.4482-.9993.9993-.9993c.5511 0 .9993.4482.9993.9993 0 .5511-.4482.9997-.9993.9997m11.4045-6.02l1.9973-3.4592a.416.416 0 00-.1521-.5676.416.416 0 00-.5676.1521l-2.0223 3.503C15.5902 8.4101 13.8559 8.082 12 8.082s-3.5902.3282-5.1368.8677L4.8409 5.4467a.4161.4161 0 00-.5677-.1521.4157.4157 0 00-.1521.5676l1.9973 3.4592C2.6889 11.1867.3432 14.6589 0 18.761h24c-.3432-4.1021-2.6889-7.5743-6.1185-9.4396" />
+                            </svg>
+                            <span>Download Android App</span>
+                        </a>
+                        <div class="deck-sublink-wrap">
+                            <a href="/HRZNController.apk" download class="deck-sublink">Direct APK link (7.37 MB)</a>
+                        </div>
+                    </div>
+                </div>
 
-                        <path
-                            d="M0 3.449L9.75 2.1v9.451H0m10.949-9.602L24 0v11.4H10.949M0 12.6h9.75v9.451L0 20.699M10.949 12.6H24V24l-12.951-1.801" />
+                <!-- Straight Vertical Divider Line -->
+                <div class="hero-deck-divider"></div>
 
-                    </svg>
+                <!-- Right Platform: Windows PC Companion -->
+                <div class="download-platform-col">
+                    <div>
+                        <div class="deck-platform-header">
+                            <div class="deck-platform-label">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M0 3.449L9.75 2.1v9.451H0m10.949-9.602L24 0v11.4H10.949M0 12.6h9.75v9.451L0 20.699M10.949 12.6H24V24l-12.951-1.801" />
+                                </svg>
+                                <span>Windows Companion</span>
+                            </div>
+                            <span class="fh6-coming-soon-badge">// COMING SOON</span>
+                        </div>
 
-                    <span>Get from Microsoft Store</span>
+                        <h3 class="deck-card-title">HRZN PC Server</h3>
+                        <p class="deck-card-desc">
+                            Direct ViGEmBus Xbox 360 virtual controller emulation. Zero cloud latency, local UDP broadcast auto-pairing, and 120Hz physics sync.
+                        </p>
 
-                </a>
+                        <div class="deck-trust-badge">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+                            <span>Standalone .NET 8 &bull; 0 Threats Found</span>
+                        </div>
+                    </div>
 
-                <a href="javascript:void(0)" onclick="openApkModal()" class="btn-slate">
+                    <div class="deck-actions-group">
+                        <!-- 1. Microsoft Store Download Button -->
+                        <a href="https://apps.microsoft.com/detail/9PKKK7NB747K" target="_blank" class="btn-slate">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M0 3.449L9.75 2.1v9.451H0m10.949-9.602L24 0v11.4H10.949M0 12.6h9.75v9.451L0 20.699M10.949 12.6H24V24l-12.951-1.801" />
+                            </svg>
+                            <span>Get from Microsoft Store</span>
+                            <span class="btn-sub-tag">In Review</span>
+                        </a>
 
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-
-                        <path
-                            d="M17.523 15.3414c-.5511 0-.9993-.4486-.9993-.9997s.4482-.9993.9993-.9993c.551 0 .9993.4482.9993.9993.0001.5511-.4483.9997-.9993.9997m-11.046 0c-.5511 0-.9993-.4486-.9993-.9997s.4482-.9993.9993-.9993c.5511 0 .9993.4482.9993.9993 0 .5511-.4482.9997-.9993.9997m11.4045-6.02l1.9973-3.4592a.416.416 0 00-.1521-.5676.416.416 0 00-.5676.1521l-2.0223 3.503C15.5902 8.4101 13.8559 8.082 12 8.082s-3.5902.3282-5.1368.8677L4.8409 5.4467a.4161.4161 0 00-.5677-.1521.4157.4157 0 00-.1521.5676l1.9973 3.4592C2.6889 11.1867.3432 14.6589 0 18.761h24c-.3432-4.1021-2.6889-7.5743-6.1185-9.4396" />
-
-                    </svg>
-
-                    <span>Download Android App</span>
-
-                </a>
-
+                        <!-- 2. Direct Standalone .exe / GitHub Download Button -->
+                        <a href="/releases/fh6-controller-windows.exe" download class="btn-volt">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
+                            </svg>
+                            <span>Download Standalone (.exe)</span>
+                        </a>
+                        <div class="deck-sublink-wrap">
+                            <a href="https://github.com/VarunKulkarni15/FH6-Mobile-Controller/releases" target="_blank" class="deck-sublink">GitHub Releases &bull; Standalone .EXE (1.04 MB)</a>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- Authentic Technical Specs Strip -->
@@ -1987,7 +2230,7 @@
 
             <div>
 
-                <strong>Horizon Mobile Controller Suite</strong> &bull; Open-source sim racing controller bridge for
+                <strong>HRZN Mobile Controller Suite</strong> &bull; Open-source sim racing controller bridge for
                 Forza Horizon.
 
             </div>
@@ -2034,7 +2277,7 @@
             <!-- Modal Header -->
             <div style="display: flex; align-items: center; justify-content: space-between; padding: 18px 24px; border-bottom: 1px solid var(--border-subtle); background: rgba(18, 26, 40, 0.55);">
                 <div style="display: flex; align-items: center; gap: 10px;">
-                    <span style="display: inline-block; width: 8px; height: 8px; background: var(--volt); border-radius: 50%; box-shadow: 0 0 8px var(--volt);"></span>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" style="color: var(--volt); flex-shrink: 0;"><path d="M17.523 15.3414c-.5511 0-.9993-.4486-.9993-.9997s.4482-.9993.9993-.9993c.551 0 .9993.4482.9993.9993.0001.5511-.4483.9997-.9993.9997m-11.046 0c-.5511 0-.9993-.4486-.9993-.9997s.4482-.9993.9993-.9993c.5511 0 .9993.4482.9993.9993 0 .5511-.4482.9997-.9993.9997m11.4045-6.02l1.9973-3.4592a.416.416 0 00-.1521-.5676.416.416 0 00-.5676.1521l-2.0223 3.503C15.5902 8.4101 13.8559 8.082 12 8.082s-3.5902.3282-5.1368.8677L4.8409 5.4467a.4161.4161 0 00-.5677-.1521.4157.4157 0 00-.1521.5676l1.9973 3.4592C2.6889 11.1867.3432 14.6589 0 18.761h24c-.3432-4.1021-2.6889-7.5743-6.1185-9.4396" /></svg>
                     <span style="font-family: var(--font-racing); font-size: 14px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--white);">
                         Verified Android Build
                     </span>
