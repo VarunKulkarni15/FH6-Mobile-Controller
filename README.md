@@ -11,7 +11,7 @@
 [![Security](https://img.shields.io/badge/VirusTotal-0%2F68%20Clean-brightgreen.svg?style=flat-square)](https://www.virustotal.com/gui/file/9c8484d12cc2db2975fa4892f9833d3b3614838a25137d3b95f5fae739701d4d)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](LICENSE)
 
-[**Live Web Portal**](https://hrzncontroller.varunkulkarni.dpdns.org/) &nbsp;&bull;&nbsp; [**Microsoft Store**](https://apps.microsoft.com/detail/9PKKK7NB747K) &nbsp;&bull;&nbsp; [**Windows (.exe)**](releases/fh6-controller-windows.exe) &nbsp;&bull;&nbsp; [**Android (.apk)**](HRZNController.apk)
+[**Live Web Portal**](https://hrzncontroller.varunkulkarni.dpdns.org/) &nbsp;&bull;&nbsp; [**Microsoft Store**](https://apps.microsoft.com/detail/9PKKK7NB747K) &nbsp;&bull;&nbsp; [**Windows (.exe)**](releases/HRZN-Controller.exe) &nbsp;&bull;&nbsp; [**Android (.apk)**](HRZNController.apk)
 
 </div>
 
@@ -53,7 +53,7 @@ HRZN Controller supports both wireless Wi-Fi and wired USB connections:
 
 ### Mode 1: Wireless Wi-Fi (No Cables)
 1. Ensure your PC and phone are connected to the same local Wi-Fi router.
-2. Launch **fh6-controller-windows.exe** on your PC.
+2. Launch **HRZN-Controller.exe** on your PC.
 3. Open **HRZN Controller** on your phone and tap **Scan QR** (or let it auto-discover your PC in <50ms).
 4. *Tip:* You can charge your phone from any wall adapter, battery bank, or PC USB port while playing wirelessly.
 
@@ -67,7 +67,7 @@ HRZN Controller supports both wireless Wi-Fi and wired USB connections:
 ## Installation & Downloads
 
 ### Windows Companion (`fh6-controller-windows.exe`)
-1. Download [**fh6-controller-windows.exe**](releases/fh6-controller-windows.exe) (Standalone 1MB single-file executable, zero DLL setup required).
+1. Download [**HRZN-Controller.exe**](releases/HRZN-Controller.exe) (Standalone 1MB single-file executable, zero DLL setup required).
 2. Launch the companion. On first run, it automatically:
    - Registers into the Windows Start Menu and Windows Search (`HRZN Mobile Controller`).
    - Checks for the open-source Virtual Gamepad Emulation Bus (ViGEmBus) driver and prompts standard Windows UAC permission to configure the Xbox 360 virtual device if not already present.
