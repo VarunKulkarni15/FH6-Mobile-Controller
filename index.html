@@ -1985,7 +1985,7 @@
                     </div>
 
                     <div class="deck-actions-group">
-                        <a href="/HRZNController.apk" download class="btn-volt">
+                        <a href="javascript:void(0)" onclick="openApkModal()" class="btn-volt">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
                                 <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
                             </svg>
@@ -2043,7 +2043,7 @@
                         </div>
 
                         <!-- Option 2: Direct Standalone .EXE Button -->
-                        <a href="/releases/HRZN-Controller.exe" download class="btn-volt">
+                        <a href="javascript:void(0)" onclick="openExeModal()" class="btn-volt">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
                                 <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
                             </svg>
@@ -2652,9 +2652,9 @@
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
                             <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
                         </svg>
-                        <span>Download APK (7.37 MB)</span>
+                        <span>Proceed to Download APK (7.37 MB)</span>
                     </a>
-                    <a href="https://www.virustotal.com/gui/file/9c8484d12cc2db2975fa4892f9833d3b3614838a25137d3b95f5fae739701d4d" target="_blank" rel="noopener noreferrer" class="btn-slate" style="flex: 1 1 180px; justify-content: center; text-align: center; padding: 15px 22px;">
+                    <a href="https://www.virustotal.com/gui/file/9c8484d12cc2db2975fa4892f9833d3b3614838a25137d3b95f5fae739701d4d?nocache=1" target="_blank" rel="noopener noreferrer" class="btn-slate" style="flex: 1 1 180px; justify-content: center; text-align: center; padding: 15px 22px;">
                         <span>View Scan Report</span>
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
                     </a>
@@ -2689,6 +2689,11 @@
 
             <!-- Modal Content -->
             <div style="padding: 22px 24px 26px;">
+                <!-- Authentic Cropped VirusTotal Proof Screenshot -->
+                <div style="background: #090e16; border: 1px solid var(--border-subtle); border-radius: 6px; overflow: hidden; margin-bottom: 16px; box-shadow: inset 0 2px 8px rgba(0,0,0,0.4);">
+                    <img src="assets/virustotal_scan_exe.png" alt="VirusTotal Verified Windows Scan" style="width: 100%; height: auto; display: block; object-fit: contain;">
+                </div>
+
                 <!-- Security Verification Status Box -->
                 <div style="background: rgba(18, 26, 40, 0.7); border: 1px solid var(--border-subtle); border-radius: 6px; padding: 16px; margin-bottom: 16px;">
                     <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.06);">
@@ -2732,9 +2737,9 @@
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
                             <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
                         </svg>
-                        <span>Download Standalone (.exe)</span>
+                        <span>Proceed to Download Standalone (.exe)</span>
                     </a>
-                    <a href="https://www.virustotal.com/gui/file/8bd19abc6f948da193d4dc21ef70d13a857a1a01824b5b1c5b01ed6ddef156f9" target="_blank" rel="noopener noreferrer" class="btn-slate" style="flex: 1 1 180px; justify-content: center; text-align: center; padding: 15px 22px;">
+                    <a href="https://www.virustotal.com/gui/file/8bd19abc6f948da193d4dc21ef70d13a857a1a01824b5b1c5b01ed6ddef156f9?nocache=1" target="_blank" rel="noopener noreferrer" class="btn-slate" style="flex: 1 1 180px; justify-content: center; text-align: center; padding: 15px 22px;">
                         <span>View Scan Report</span>
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
                     </a>
