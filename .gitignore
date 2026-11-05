@@ -46,3 +46,6 @@ docs/security/
 
 # Personal recording and screen capture scripts
 recordings/
+
+record_controller.py
+start_recording.bat
