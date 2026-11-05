@@ -2057,12 +2057,21 @@
                             </button>
                         </div>
 
-                        <!-- Driver Setup Callout -->
-                        <div style="margin-top: 10px; padding: 10px 12px; background: rgba(255, 184, 0, 0.08); border: 1px solid rgba(255, 184, 0, 0.35); border-radius: 6px; text-align: left;">
-                            <div style="font-size: 10px; font-weight: 900; color: #FFB800; letter-spacing: 0.5px; text-transform: uppercase;">&#9888; Driver Prerequisite:</div>
-                            <div style="font-size: 11px; color: #C5D4E3; margin-top: 3px; line-height: 1.4;">
-                                For hardware Xbox 360 controller emulation in Steam &amp; PC racing titles, install the official signed 
-                                <a href="https://github.com/nefarius/ViGEmBus/releases/latest" target="_blank" rel="noopener" style="color: #CCFF00; font-weight: bold; text-decoration: underline;">ViGEmBus Driver (Latest Release) &nearr;</a>.
+                        <!-- Prerequisites Callout (Driver & .NET 8) -->
+                        <div style="margin-top: 12px; padding: 12px 14px; background: rgba(255, 184, 0, 0.06); border: 1px solid rgba(255, 184, 0, 0.35); border-radius: 6px; text-align: left;">
+                            <div style="font-size: 10px; font-weight: 900; color: #FFB800; letter-spacing: 0.8px; text-transform: uppercase; margin-bottom: 8px;">&#9888; Required Windows Dependencies:</div>
+                            
+                            <div style="display: flex; flex-direction: column; gap: 8px; font-size: 11px; color: #C5D4E3; line-height: 1.4;">
+                                <div>
+                                    <div style="font-weight: bold; color: #FFFFFF; margin-bottom: 2px;">1. Virtual Xbox 360 Controller Driver:</div>
+                                    <a href="https://github.com/nefarius/ViGEmBus/releases/download/v1.22.0/ViGEmBus_1.22.0_x64_x86_arm64.exe" target="_blank" rel="noopener" style="color: #CCFF00; font-weight: bold; text-decoration: underline;">Download ViGEmBus Setup (v1.22.0 &bull; 6 MB) &nearr;</a>
+                                    <div style="font-size: 10px; color: #8A9AA8; margin-top: 1px;">Enables hardware XInput gamepad emulation in Steam &amp; PC racing games.</div>
+                                </div>
+                                <div style="border-top: 1px solid rgba(255, 255, 255, 0.06); padding-top: 6px;">
+                                    <div style="font-weight: bold; color: #FFFFFF; margin-bottom: 2px;">2. Microsoft .NET 8 Desktop Runtime (x64):</div>
+                                    <a href="https://aka.ms/dotnet/8.0/windowsdesktop-runtime-win-x64.exe" target="_blank" rel="noopener" style="color: #00E5FF; font-weight: bold; text-decoration: underline;">Download .NET 8 Desktop Runtime (Official Microsoft) &nearr;</a>
+                                    <div style="font-size: 10px; color: #8A9AA8; margin-top: 1px;">Required by Windows to run modern C# .NET 8 desktop applications.</div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -2727,7 +2736,12 @@
                         <circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>
                     </svg>
                     <div style="font-size: 12px; color: var(--text-dim); line-height: 1.5;">
-                        <strong style="color: var(--white);">Standalone Portability:</strong> Requires zero installation. Built from open-source C# .NET 8 code with direct ViGEmBus driver hooking for 120Hz zero-cloud racing telemetry.
+                        <strong style="color: var(--white);">Standalone Portability:</strong> Requires zero installation. Built from open-source C# .NET 8 with direct ViGEmBus driver hooking for 120Hz zero-cloud racing telemetry.
+                        <div style="margin-top: 8px; padding-top: 6px; border-top: 1px solid rgba(255,255,255,0.06); font-size: 11px;">
+                            <span style="color: #FFFFFF; font-weight: bold;">Quick Dependencies:</span> 
+                            <a href="https://github.com/nefarius/ViGEmBus/releases/download/v1.22.0/ViGEmBus_1.22.0_x64_x86_arm64.exe" target="_blank" rel="noopener" style="color: var(--volt); text-decoration: underline; margin-left: 4px; margin-right: 10px;">ViGEmBus Setup (6 MB) &nearr;</a>
+                            <a href="https://aka.ms/dotnet/8.0/windowsdesktop-runtime-win-x64.exe" target="_blank" rel="noopener" style="color: #00E5FF; text-decoration: underline;">.NET 8 Runtime (Microsoft) &nearr;</a>
+                        </div>
                     </div>
                 </div>
 

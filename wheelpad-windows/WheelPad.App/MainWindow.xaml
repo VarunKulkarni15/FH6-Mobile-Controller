@@ -225,7 +225,7 @@
                             </StackPanel>
                             <TextBlock Text="Mobile Wi-Fi connection may be isolated by your VPN tunnel. If mobile pairing fails, enable local LAN bypass or pause VPN." FontSize="10" Foreground="#A0B0C0" Margin="0,3,0,0"/>
                         </StackPanel>
-                        <Button x:Name="BtnDismissVpn" Style="{StaticResource GhostButton}" Content="DISMISS" Margin="12,0,0,0" VerticalAlignment="Center" Click="BtnDismissVpn_Click"/>
+                        <Button x:Name="BtnDismissVpn" Grid.Column="1" Style="{StaticResource GhostButton}" Content="DISMISS" Padding="12,6" Margin="12,0,0,0" VerticalAlignment="Center" Click="BtnDismissVpn_Click"/>
                     </Grid>
                 </Border>
 
