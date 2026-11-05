@@ -1,18 +1,19 @@
 {
   "runtimeTarget": {
-    "name": ".NETCoreApp,Version=v8.0",
+    "name": ".NETCoreApp,Version=v8.0/win-x64",
     "signature": ""
   },
   "compilationOptions": {},
   "targets": {
-    ".NETCoreApp,Version=v8.0": {
-      "fh6-controller-windows/1.2.0": {
+    ".NETCoreApp,Version=v8.0": {},
+    ".NETCoreApp,Version=v8.0/win-x64": {
+      "HRZN-Controller/1.5.0": {
         "dependencies": {
           "QRCoder": "1.8.1",
           "WheelPad.Core": "1.0.0"
         },
         "runtime": {
-          "fh6-controller-windows.dll": {}
+          "HRZN-Controller.dll": {}
         }
       },
       "Microsoft.Win32.SystemEvents/6.0.0": {},
@@ -56,7 +57,7 @@
     }
   },
   "libraries": {
-    "fh6-controller-windows/1.2.0": {
+    "HRZN-Controller/1.5.0": {
       "type": "project",
       "serviceable": false,
       "sha512": ""

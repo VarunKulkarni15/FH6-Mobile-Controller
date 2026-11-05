@@ -1,7 +1,7 @@
 {
-  "name": "Horizon Controller — Sim Racing Emulation",
-  "short_name": "HorizonController",
-  "description": "Virtual Xbox 360 controller emulation and 120Hz UDP telemetry companion for Forza Horizon.",
+  "name": "HRZN Mobile Controller — Sim Racing Emulation",
+  "short_name": "HRZNController",
+  "description": "Virtual Xbox 360 controller emulation and 120Hz UDP telemetry companion for PC racing games.",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#080C12",

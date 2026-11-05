@@ -146,46 +146,23 @@ namespace WheelPad.App
 
             if (_xbox.IsConnected)
             {
-                TxtControllerStatus.Text = "STEAM / ViGEmBUS ACTIVE";
+                TxtControllerStatus.Text = "XINPUT / VIGEMBUS ACTIVE";
                 StatusDot.Fill = new SolidColorBrush(System.Windows.Media.Color.FromRgb(0xCC, 0xFF, 0x00));
             }
             else
             {
-                TxtControllerStatus.Text = "CHECKING VIGEMBUS DRIVER...";
-                StatusDot.Fill = new SolidColorBrush(System.Windows.Media.Color.FromRgb(0xFF, 0xCC, 0x00));
-
-                // Seamless ViGEm installer fallback
-                Task.Run(async () =>
-                {
-                    if (!ViGEmInstallerService.IsDriverInstalled())
-                    {
-                        await Dispatcher.InvokeAsync(() =>
-                        {
-                            TxtControllerStatus.Text = "AUTO-DOWNLOADING VIGEMBUS...";
-                        });
-
-                        bool success = await ViGEmInstallerService.DownloadAndInstallDriverAsync(msg =>
-                        {
-                            Dispatcher.InvokeAsync(() =>
-                            {
-                                TxtControllerStatus.Text = msg.ToUpperInvariant();
-                            });
-                        });
-
-                        if (success)
-                        {
-                            _xbox.Connect();
-                            await Dispatcher.InvokeAsync(() =>
-                            {
-                                if (_xbox.IsConnected)
-                                {
-                                    TxtControllerStatus.Text = "STEAM / ViGEmBUS ACTIVE";
-                                    StatusDot.Fill = new SolidColorBrush(System.Windows.Media.Color.FromRgb(0xCC, 0xFF, 0x00));
-                                }
-                            });
-                        }
-                    }
-                });
+                TxtControllerStatus.Text = "READY (STANDBY)";
+                StatusDot.Fill = new SolidColorBrush(System.Windows.Media.Color.FromRgb(0x00, 0xDD, 0xFF));
+            }
+            if (_xbox.IsConnected)
+            {
+                TxtControllerStatus.Text = "XINPUT / VIGEMBUS ACTIVE";
+                StatusDot.Fill = new SolidColorBrush(System.Windows.Media.Color.FromRgb(0xCC, 0xFF, 0x00));
+            }
+            else
+            {
+                TxtControllerStatus.Text = "READY (STANDBY)";
+                StatusDot.Fill = new SolidColorBrush(System.Windows.Media.Color.FromRgb(0x00, 0xDD, 0xFF));
             }
 
             // 6. Platform & Launcher Detection (Steam, Xbox Game Pass, Epic Games)

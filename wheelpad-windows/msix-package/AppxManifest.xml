@@ -9,7 +9,7 @@
   <Identity
     Name="VarunKulkarni.HorizonMobileController"
     Publisher="CN=84738989-BF6A-4895-918A-6D43BEF02ECF"
-    Version="1.0.1.0"
+    Version="1.0.2.0"
     ProcessorArchitecture="x64" />
 
   <Properties>
@@ -55,4 +55,3 @@
   </Capabilities>
 
 </Package>
-
