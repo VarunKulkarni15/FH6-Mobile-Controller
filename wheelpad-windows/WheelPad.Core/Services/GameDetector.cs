@@ -110,18 +110,18 @@ namespace WheelPad.Core.Services
 
         public static string GetFriendlyGameName(string processName)
         {
-            if (string.IsNullOrWhiteSpace(processName)) return "Unknown Game";
+            if (string.IsNullOrWhiteSpace(processName)) return "SIM RACING GAME";
             string lower = processName.ToLowerInvariant();
-            if (lower.Contains("6") && (lower.Contains("horizon") || lower.Contains("fh"))) return "Forza Horizon 6";
-            if (lower.Contains("5") && (lower.Contains("horizon") || lower.Contains("fh"))) return "Forza Horizon 5";
-            if (lower.Contains("4") && (lower.Contains("horizon") || lower.Contains("fh"))) return "Forza Horizon 4";
-            if (lower.Contains("3") && (lower.Contains("horizon") || lower.Contains("fh"))) return "Forza Horizon 3";
-            if (lower.Contains("motorsport")) return "Forza Motorsport";
-            if (lower.Contains("tlou") || lower.Contains("lastofus")) return "The Last of Us Part II";
-            if (lower.Contains("minecraft.windows") || lower.Contains("minecraft")) return "Minecraft Bedrock";
-            if (lower.Contains("javaw")) return "Minecraft Java";
-            if (lower.Contains("forza")) return "Forza Horizon";
-            return processName;
+            if (lower.Contains("6") && (lower.Contains("horizon") || lower.Contains("fh"))) return "Open-World Racing (Next-Gen)";
+            if (lower.Contains("5") && (lower.Contains("horizon") || lower.Contains("fh"))) return "Open-World Racing 5";
+            if (lower.Contains("4") && (lower.Contains("horizon") || lower.Contains("fh"))) return "Open-World Racing 4";
+            if (lower.Contains("3") && (lower.Contains("horizon") || lower.Contains("fh"))) return "Open-World Racing 3";
+            if (lower.Contains("motorsport")) return "Track Motorsport Sim";
+            if (lower.Contains("tlou") || lower.Contains("lastofus")) return "Action Adventure";
+            if (lower.Contains("minecraft.windows") || lower.Contains("minecraft")) return "Sandbox Game";
+            if (lower.Contains("javaw")) return "Sandbox Java";
+            if (lower.Contains("forza") || lower.Contains("horizon")) return "Open-World Racing Sim";
+            return processName.ToUpper();
         }
 
         public event EventHandler<GameStatusEventArgs>? GameStatusChanged;
@@ -189,7 +189,7 @@ namespace WheelPad.Core.Services
                         catch { }
                     }
                 });
-                LogMessage?.Invoke(this, "[GameDetector] Listening for Forza Telemetry Data Out on UDP 5300...");
+                LogMessage?.Invoke(this, "[GameDetector] Listening for Telemetry Data Out on UDP 5300...");
             }
             catch (Exception ex)
             {
@@ -297,8 +297,13 @@ namespace WheelPad.Core.Services
             LogMessage?.Invoke(this, $"[GameDetector] State updated: Mode={_currentMenuMode}, Paused={_isGamePaused}, Depth={_menuDepth}");
         }
 
-        public void CheckImmediately()
+        public void CheckImmediately(bool forceNotify = false)
         {
+            if (forceNotify)
+            {
+                _isGameRunning = false;
+                _lastProcessId = 0;
+            }
             PollCallback(null);
         }
 
@@ -317,6 +322,31 @@ namespace WheelPad.Core.Services
                         {
                             activeProcess = matches.First();
                             break;
+                        }
+                    }
+                    catch { }
+                }
+
+                // Fallback: search all running processes if exact name did not match
+                if (activeProcess == null)
+                {
+                    try
+                    {
+                        var all = Process.GetProcesses();
+                        foreach (var p in all)
+                        {
+                            try
+                            {
+                                string pName = p.ProcessName.ToLowerInvariant();
+                                if (pName.Contains("forzahorizon") || pName.Contains("forzamotorsport") ||
+                                    pName == "fh5" || pName == "fh4" || pName == "fh6" ||
+                                    pName.StartsWith("forza", StringComparison.OrdinalIgnoreCase))
+                                {
+                                    activeProcess = p;
+                                    break;
+                                }
+                            }
+                            catch { }
                         }
                     }
                     catch { }

@@ -8,7 +8,7 @@ namespace WheelPad.Core.Services
     [SupportedOSPlatform("windows")]
     public static class ViGEmInstallerService
     {
-        public const string VigemDownloadUrl = "https://github.com/nefarius/ViGEmBus/releases";
+        public const string VigemDownloadUrl = "https://github.com/nefarius/ViGEmBus/releases/latest";
 
         public static bool IsDriverInstalled()
         {

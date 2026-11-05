@@ -1,3 +1,5 @@
+using System.Diagnostics;
+using System.Windows.Threading;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.NetworkInformation;
@@ -27,6 +29,7 @@ namespace WheelPad.App
         private readonly AutoUpdateService _autoUpdateService;
         private readonly Forms.NotifyIcon _notifyIcon;
         private bool _isExplicitExit = false;
+        private DispatcherTimer? _driverWatcherTimer;
         private string? _pendingUpdateUrl;
 
         private static void Log(string msg)
@@ -148,21 +151,22 @@ namespace WheelPad.App
             {
                 TxtControllerStatus.Text = "XINPUT / VIGEMBUS ACTIVE";
                 StatusDot.Fill = new SolidColorBrush(System.Windows.Media.Color.FromRgb(0xCC, 0xFF, 0x00));
+                BannerDriver.Visibility = Visibility.Collapsed;
             }
             else
             {
-                TxtControllerStatus.Text = "READY (STANDBY)";
-                StatusDot.Fill = new SolidColorBrush(System.Windows.Media.Color.FromRgb(0x00, 0xDD, 0xFF));
+                TxtControllerStatus.Text = "DRIVER SETUP REQUIRED";
+                StatusDot.Fill = new SolidColorBrush(System.Windows.Media.Color.FromRgb(0xFF, 0xB8, 0x00));
+                BannerDriver.Visibility = Visibility.Visible;
+                StartDriverWatcherTimer();
             }
-            if (_xbox.IsConnected)
+
+            // Detect active VPN tunnel
+            var (vpnActive, vpnName) = DetectActiveVpn();
+            if (vpnActive)
             {
-                TxtControllerStatus.Text = "XINPUT / VIGEMBUS ACTIVE";
-                StatusDot.Fill = new SolidColorBrush(System.Windows.Media.Color.FromRgb(0xCC, 0xFF, 0x00));
-            }
-            else
-            {
-                TxtControllerStatus.Text = "READY (STANDBY)";
-                StatusDot.Fill = new SolidColorBrush(System.Windows.Media.Color.FromRgb(0x00, 0xDD, 0xFF));
+                BannerVpn.Visibility = Visibility.Visible;
+                TxtVpnName.Text = $"Active VPN: {vpnName ?? "Tunnel Detected"}";
             }
 
             // 6. Platform & Launcher Detection (Steam, Xbox Game Pass, Epic Games)
@@ -191,8 +195,15 @@ namespace WheelPad.App
             // Window Close handler
             Closing += MainWindow_Closing;
 
-            // Trigger immediate game detection on startup
-            _gameDetector.CheckImmediately();
+            // Trigger immediate game detection on startup (with force sync)
+            _gameDetector.CheckImmediately(forceNotify: true);
+            if (_gameDetector.IsGameRunning && _gameDetector.CurrentGameName != null)
+            {
+                TxtGameStatus.Text = _gameDetector.CurrentGameName.ToUpper();
+                TxtGameStatus.Foreground = new SolidColorBrush(System.Windows.Media.Color.FromRgb(0xCC, 0xFF, 0x00));
+                TxtProcessId.Text = _gameDetector.CurrentProcessId.ToString();
+                TxtProcessId.Foreground = new SolidColorBrush(System.Windows.Media.Color.FromRgb(0xCC, 0xFF, 0x00));
+            }
 
             // Check for updates in background
             _ = CheckForUpdatesSilentlyAsync();
@@ -467,6 +478,129 @@ namespace WheelPad.App
                 ImgAmbientBg.Source = bmp;
             }
             catch { }
+        }
+
+        private void StartDriverWatcherTimer()
+        {
+            if (_driverWatcherTimer != null) return;
+            _driverWatcherTimer = new DispatcherTimer
+            {
+                Interval = TimeSpan.FromSeconds(2.5)
+            };
+            _driverWatcherTimer.Tick += (s, e) =>
+            {
+                if (ViGEmInstallerService.IsDriverInstalled())
+                {
+                    _xbox.Connect();
+                    if (_xbox.IsConnected)
+                    {
+                        _driverWatcherTimer.Stop();
+                        BannerDriver.Visibility = Visibility.Collapsed;
+                        TxtControllerStatus.Text = "XINPUT / VIGEMBUS ACTIVE";
+                        StatusDot.Fill = new SolidColorBrush(System.Windows.Media.Color.FromRgb(0xCC, 0xFF, 0x00));
+
+                        _notifyIcon.ShowBalloonTip(
+                            4000,
+                            "ViGEmBus Driver Ready",
+                            "ViGEmBus detected! Virtual Xbox 360 controller is now active.",
+                            Forms.ToolTipIcon.Info
+                        );
+                        TxtFooter.Text = "ViGEmBus detected! Virtual Xbox 360 controller connected.";
+                    }
+                }
+            };
+            _driverWatcherTimer.Start();
+        }
+
+        private void BtnDownloadDriver_Click(object sender, RoutedEventArgs e)
+        {
+            ViGEmInstallerService.OpenDriverDownloadPage();
+            TxtFooter.Text = "Opening official ViGEmBus download page in browser...";
+        }
+
+        private void BtnRecheckDriver_Click(object sender, RoutedEventArgs e)
+        {
+            if (ViGEmInstallerService.IsDriverInstalled())
+            {
+                _xbox.Connect();
+                if (_xbox.IsConnected)
+                {
+                    _driverWatcherTimer?.Stop();
+                    BannerDriver.Visibility = Visibility.Collapsed;
+                    TxtControllerStatus.Text = "XINPUT / VIGEMBUS ACTIVE";
+                    StatusDot.Fill = new SolidColorBrush(System.Windows.Media.Color.FromRgb(0xCC, 0xFF, 0x00));
+                    TxtFooter.Text = "ViGEmBus driver connected successfully!";
+                    _notifyIcon.ShowBalloonTip(3000, "ViGEmBus Connected", "Virtual Xbox 360 controller is ready.", Forms.ToolTipIcon.Info);
+                }
+            }
+            else
+            {
+                TxtFooter.Text = "Driver not detected yet. Complete the installer and click Recheck.";
+            }
+        }
+
+        private void BtnDismissVpn_Click(object sender, RoutedEventArgs e)
+        {
+            BannerVpn.Visibility = Visibility.Collapsed;
+        }
+
+        private void LinkWebPortal_Click(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            try
+            {
+                Process.Start(new ProcessStartInfo("https://hrzncontroller.varunkulkarni.dpdns.org") { UseShellExecute = true });
+            }
+            catch { }
+        }
+
+        private void LinkGithub_Click(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            try
+            {
+                Process.Start(new ProcessStartInfo("https://github.com/VarunKulkarni15/FH6-Mobile-Controller") { UseShellExecute = true });
+            }
+            catch { }
+        }
+
+        private void LinkDriver_Click(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            ViGEmInstallerService.OpenDriverDownloadPage();
+        }
+
+        private (bool isVpnActive, string? vpnName) DetectActiveVpn()
+        {
+            try
+            {
+                var interfaces = NetworkInterface.GetAllNetworkInterfaces()
+                    .Where(nic => nic.OperationalStatus == OperationalStatus.Up &&
+                                  nic.NetworkInterfaceType != NetworkInterfaceType.Loopback);
+
+                foreach (var nic in interfaces)
+                {
+                    string desc = nic.Description.ToLowerInvariant();
+                    string name = nic.Name.ToLowerInvariant();
+
+                    if (nic.NetworkInterfaceType == NetworkInterfaceType.Ppp ||
+                        desc.Contains("tap-windows") || desc.Contains("wireguard") ||
+                        desc.Contains("nordvpn") || desc.Contains("expressvpn") ||
+                        desc.Contains("proton") || desc.Contains("tailscale") ||
+                        desc.Contains("zerotier") || desc.Contains("openvpn") ||
+                        desc.Contains("warp") || desc.Contains("hamachi") ||
+                        desc.Contains("radmin") || desc.Contains("mullvad") ||
+                        desc.Contains("surfshark") || desc.Contains("windscribe") ||
+                        desc.Contains("vpn") || name.Contains("vpn") ||
+                        name.Contains("wireguard") || name.Contains("tailscale"))
+                    {
+                        var ipProps = nic.GetIPProperties();
+                        if (ipProps.UnicastAddresses.Any(u => u.Address.AddressFamily == AddressFamily.InterNetwork))
+                        {
+                            return (true, nic.Description);
+                        }
+                    }
+                }
+            }
+            catch { }
+            return (false, null);
         }
 
         private string GetLocalIpAddress()

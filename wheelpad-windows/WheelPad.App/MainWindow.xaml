@@ -184,27 +184,73 @@
                 </Grid>
             </Border>
 
-            <!-- 1.5. Dynamic In-App Auto-Update Banner -->
-            <Border Grid.Row="1" x:Name="BannerUpdate" Background="#162409" BorderBrush="#CCFF00" BorderThickness="1.5" CornerRadius="6" Padding="14,10" Margin="0,0,0,14" Visibility="Collapsed">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
-                    <StackPanel Grid.Column="0" VerticalAlignment="Center">
-                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                            <TextBlock Text="⚡ UPDATE AVAILABLE:" FontWeight="Black" FontSize="11" Foreground="#CCFF00" Margin="0,0,8,0"/>
-                            <TextBlock x:Name="TxtUpdateTitle" Text="v1.2.0 is now live" FontWeight="Bold" FontSize="11" Foreground="#FFFFFF"/>
+            <!-- 1.5. Dynamic Cockpit Telemetry Banners -->
+            <StackPanel Grid.Row="1" Margin="0,0,0,14">
+                <!-- Driver Setup Banner (Shown when ViGEmBus driver is missing or needs update) -->
+                <Border x:Name="BannerDriver" Background="#161508" BorderBrush="#FFB800" BorderThickness="1.5" CornerRadius="4" Padding="12,9" Margin="0,0,0,10" Visibility="Collapsed">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <Border Background="#FFB800" CornerRadius="2" Padding="6,2" Margin="0,0,10,0">
+                                    <TextBlock x:Name="TxtDriverBadge" Text="SETUP REQUIRED" FontSize="9" FontWeight="Black" Foreground="#06090F"/>
+                                </Border>
+                                <TextBlock x:Name="TxtDriverTitle" Text="Virtual Xbox 360 Controller Driver (ViGEmBus)" FontWeight="Bold" FontSize="11" Foreground="#FFFFFF"/>
+                            </StackPanel>
+                            <TextBlock x:Name="TxtDriverDesc" Text="To enable hardware Xbox controller emulation across Steam, PC racing sims &amp; launchers, install the official signed driver." FontSize="10" Foreground="#A0B0C0" Margin="0,3,0,0"/>
                         </StackPanel>
-                        <TextBlock x:Name="TxtUpdateChangelog" Text="Changelog: Dual Analog Stick ViGEmBus axes and 120Hz FastStream extended pipeline." FontSize="10" Foreground="#A0B0C0" Margin="0,2,0,0"/>
-                        <ProgressBar x:Name="ProgUpdate" Height="4" Background="#080C12" Foreground="#CCFF00" BorderThickness="0" Margin="0,6,0,0" Visibility="Collapsed"/>
-                    </StackPanel>
-                    <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="12,0,0,0">
-                        <Button x:Name="BtnApplyUpdate" Style="{StaticResource VoltButton}" Content="UPDATE NOW" Padding="12,6" Click="BtnApplyUpdate_Click"/>
-                        <Button x:Name="BtnDismissUpdate" Background="Transparent" Foreground="#7E94AD" BorderThickness="0" Content="✕" Margin="8,0,0,0" FontSize="12" Cursor="Hand" Click="BtnDismissUpdate_Click"/>
-                    </StackPanel>
-                </Grid>
-            </Border>
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="12,0,0,0">
+                            <Button x:Name="BtnDownloadDriver" Style="{StaticResource VoltButton}" Content="DOWNLOAD DRIVER ↗" Padding="12,6" Click="BtnDownloadDriver_Click"/>
+                            <Button x:Name="BtnRecheckDriver" Style="{StaticResource GhostButton}" Content="RECHECK" Padding="10,6" Margin="8,0,0,0" Click="BtnRecheckDriver_Click"/>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <!-- VPN Telemetry Notice (Shown only if active VPN adapter is detected) -->
+                <Border x:Name="BannerVpn" Background="#181308" BorderBrush="#FF9900" BorderThickness="1.5" CornerRadius="4" Padding="12,9" Margin="0,0,0,10" Visibility="Collapsed">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <Border Background="#FF9900" CornerRadius="2" Padding="6,2" Margin="0,0,10,0">
+                                    <TextBlock Text="VPN DETECTED" FontSize="9" FontWeight="Black" Foreground="#06090F"/>
+                                </Border>
+                                <TextBlock x:Name="TxtVpnName" Text="Active VPN tunnel detected on host network" FontWeight="Bold" FontSize="11" Foreground="#FFFFFF"/>
+                            </StackPanel>
+                            <TextBlock Text="Mobile Wi-Fi connection may be isolated by your VPN tunnel. If mobile pairing fails, enable local LAN bypass or pause VPN." FontSize="10" Foreground="#A0B0C0" Margin="0,3,0,0"/>
+                        </StackPanel>
+                        <Button x:Name="BtnDismissVpn" Style="{StaticResource GhostButton}" Content="DISMISS" Margin="12,0,0,0" VerticalAlignment="Center" Click="BtnDismissVpn_Click"/>
+                    </Grid>
+                </Border>
+
+                <!-- In-App Auto-Update Banner -->
+                <Border x:Name="BannerUpdate" Background="#162409" BorderBrush="#CCFF00" BorderThickness="1.5" CornerRadius="4" Padding="12,9" Visibility="Collapsed">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <TextBlock Text="⚡ UPDATE AVAILABLE:" FontWeight="Black" FontSize="11" Foreground="#CCFF00" Margin="0,0,8,0"/>
+                                <TextBlock x:Name="TxtUpdateTitle" Text="v1.2.0 is now live" FontWeight="Bold" FontSize="11" Foreground="#FFFFFF"/>
+                            </StackPanel>
+                            <TextBlock x:Name="TxtUpdateChangelog" Text="Changelog: Dual Analog Stick ViGEmBus axes and 120Hz FastStream extended pipeline." FontSize="10" Foreground="#A0B0C0" Margin="0,2,0,0"/>
+                            <ProgressBar x:Name="ProgUpdate" Height="4" Background="#080C12" Foreground="#CCFF00" BorderThickness="0" Margin="0,6,0,0" Visibility="Collapsed"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="12,0,0,0">
+                            <Button x:Name="BtnApplyUpdate" Style="{StaticResource VoltButton}" Content="UPDATE NOW" Padding="12,6" Click="BtnApplyUpdate_Click"/>
+                            <Button x:Name="BtnDismissUpdate" Background="Transparent" Foreground="#7E94AD" BorderThickness="0" Content="✕" Margin="8,0,0,0" FontSize="12" Cursor="Hand" Click="BtnDismissUpdate_Click"/>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+            </StackPanel>
 
             <!-- 2. Main Cockpit Grid -->
             <Grid Grid.Row="2">
@@ -274,11 +320,11 @@
                             <Grid Margin="0,0,0,10">
                                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                     <Border Width="3" Height="12" Background="#00E5FF" Margin="0,0,8,0"/>
-                                    <TextBlock Text="HORIZON ENGINE TELEMETRY LINK" Style="{StaticResource MetricHeaderLabel}"/>
+                                    <TextBlock Text="SIM ENGINE // TELEMETRY LINK" Style="{StaticResource MetricHeaderLabel}"/>
                                 </StackPanel>
                             </Grid>
 
-                            <TextBlock Text="Supported: Horizon 5 · Horizon 4 · Sim Rigs · Motorsport" FontSize="10" Foreground="#8EA6C2" FontWeight="SemiBold" Margin="0,0,0,10"/>
+                            <TextBlock Text="Supported: PC Racing Games · Open-World Simulators · Steam &amp; Xbox" FontSize="10" Foreground="#8EA6C2" FontWeight="SemiBold" Margin="0,0,0,10"/>
 
                             <!-- Detected Game HUD Status -->
                             <Border Background="#0A1018" BorderBrush="#1E2C3E" BorderThickness="1.5" CornerRadius="4" Padding="14,10">
@@ -428,10 +474,23 @@
                 </Border>
             </Grid>
 
-            <!-- 3. Bottom Command Strip -->
-            <Border Grid.Row="3" Background="#E60A1018" BorderBrush="#223246" BorderThickness="1.5" CornerRadius="6" Padding="14,10" Margin="0,12,0,0">
+            <!-- 3. Bottom Command Strip with Web & Official Source Links -->
+            <Border Grid.Row="3" Background="#E60A1018" BorderBrush="#223246" BorderThickness="1.5" CornerRadius="4" Padding="12,8" Margin="0,12,0,0">
                 <Grid>
-                    <TextBlock x:Name="TxtFooter" Text="HRZN Companion running · ViGEmBus slot 1 mapped · FastStream active." FontSize="11" Foreground="#8EA6C2" VerticalAlignment="Center"/>
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <TextBlock x:Name="TxtFooter" Text="HRZN Companion running · ViGEmBus active · 120Hz FastStream engine." FontSize="11" Foreground="#8EA6C2" VerticalAlignment="Center"/>
+                        
+                        <Border Background="#101722" BorderBrush="#223246" BorderThickness="1" CornerRadius="3" Margin="14,0,0,0" Padding="8,3" Cursor="Hand" MouseLeftButtonUp="LinkWebPortal_Click">
+                            <TextBlock Text="WEB PORTAL ↗" FontSize="9" FontWeight="Bold" Foreground="#CCFF00"/>
+                        </Border>
+                        <Border Background="#101722" BorderBrush="#223246" BorderThickness="1" CornerRadius="3" Margin="6,0,0,0" Padding="8,3" Cursor="Hand" MouseLeftButtonUp="LinkGithub_Click">
+                            <TextBlock Text="GITHUB ↗" FontSize="9" FontWeight="Bold" Foreground="#8EA6C2"/>
+                        </Border>
+                        <Border Background="#101722" BorderBrush="#223246" BorderThickness="1" CornerRadius="3" Margin="6,0,0,0" Padding="8,3" Cursor="Hand" MouseLeftButtonUp="LinkDriver_Click">
+                            <TextBlock Text="OFFICIAL DRIVER ↗" FontSize="9" FontWeight="Bold" Foreground="#8EA6C2"/>
+                        </Border>
+                    </StackPanel>
+                    
                     <StackPanel HorizontalAlignment="Right" Orientation="Horizontal">
                         <Button Style="{StaticResource GhostButton}" Content="CHECK FOR UPDATES" Margin="0,0,8,0" Click="BtnCheckUpdates_Click"/>
                         <Button Style="{StaticResource VoltButton}" Content="MINIMIZE TO TRAY" Click="BtnMinimizeTray_Click"/>
