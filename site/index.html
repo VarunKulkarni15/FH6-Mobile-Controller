@@ -594,166 +594,1316 @@
 
         }
 
-        /* FH6 Dual Matching Download Cards (Stacked & Unified) */
+        /* FH6 Dual-Platform Download Deck (Adaptive & Responsive) */
 
-        .hero-download-stack {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-            width: 100%;
-            max-width: 680px;
-            margin: 0 auto 36px;
-        }
+        .hero-download-deck {
 
-        .hero-card {
+            display: grid;
+
+            grid-template-columns: 1fr 1px 1fr;
+
             width: 100%;
-            background: radial-gradient(circle at top right, rgba(204, 255, 0, 0.035) 0%, rgba(14, 26, 27, 0.75) 70%);
+
+            max-width: 1020px;
+
+            background: rgba(14, 26, 27, 0.72);
+
             border: 1px solid var(--border-active);
+
             border-radius: 10px;
+
             backdrop-filter: blur(16px);
+
             -webkit-backdrop-filter: blur(16px);
+
             box-shadow: 0 24px 60px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.06);
-            padding: 28px 32px;
+
+            margin: 0 auto 36px;
+
+            overflow: hidden;
+
             text-align: left;
+
             position: relative;
-            transition: border-color 0.25s ease, box-shadow 0.25s ease;
+
         }
 
-        .hero-card:hover {
-            border-color: rgba(204, 255, 0, 0.4);
-            box-shadow: 0 28px 70px rgba(0, 0, 0, 0.75), 0 0 30px rgba(204, 255, 0, 0.06);
-        }
+        .download-platform-col {
 
-        .hero-card.card-pc:hover {
-            border-color: rgba(0, 229, 255, 0.4);
-            box-shadow: 0 28px 70px rgba(0, 0, 0, 0.75), 0 0 30px rgba(0, 229, 255, 0.08);
-        }
+            padding: 32px 36px;
 
-        .hero-card-header {
             display: flex;
-            align-items: center;
+
+            flex-direction: column;
+
             justify-content: space-between;
-            gap: 12px;
-            margin-bottom: 12px;
-        }
 
-        .hero-card-label {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-family: var(--font-racing);
-            font-size: 12px;
-            font-weight: 700;
-            letter-spacing: 1.5px;
-            text-transform: uppercase;
-        }
-
-        .hero-card-label.label-pc {
-            color: var(--cyan);
-        }
-
-        .hero-card-label.label-android {
-            color: var(--volt);
-        }
-
-        .hero-card-tag {
-            font-family: var(--font-racing);
-            font-size: 11px;
-            letter-spacing: 1px;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            background: rgba(255, 255, 255, 0.04);
-            padding: 3px 8px;
-            border-radius: 3px;
-            border: 1px solid var(--border-subtle);
-        }
-
-        .hero-card-title {
-            font-family: var(--font-racing);
-            font-size: 22px;
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            color: var(--white);
-            margin: 0 0 8px;
-        }
-
-        .hero-card-desc {
-            font-size: 13px;
-            line-height: 1.55;
-            color: var(--text-dim);
-            margin: 0 0 18px;
-        }
-
-        .hero-card-subtext {
-            font-size: 11px;
-            color: var(--text-muted);
-            text-align: center;
-            margin-top: 10px;
-            letter-spacing: 0.3px;
-        }
-
-        @media (max-width: 640px) {
-            .hero-download-stack {
-                gap: 16px;
-                margin-bottom: 28px;
-            }
-            .hero-card {
-                padding: 22px 18px;
-            }
-            .hero-card-title {
-                font-size: 19px;
-            }
-            .hero-card-desc {
-                font-size: 12px;
-            }
-        }
-
-                /* Minimalist Video Frame (Pure Volt Lime Border, Zero BG Card) */
-
-        .video-pure-section {
-            padding: 10px 24px 60px;
-            max-width: 900px;
-            margin: 0 auto;
             position: relative;
-            z-index: 2;
+
+            background: radial-gradient(circle at top right, rgba(204, 255, 0, 0.03) 0%, transparent 60%);
+
         }
 
-        .video-pure-frame {
+        .hero-deck-divider {
+
+            width: 1px;
+
+            background: linear-gradient(180deg, transparent 0%, var(--border-active) 15%, var(--border-active) 85%, transparent 100%);
+
+            position: relative;
+
+        }
+
+        .deck-platform-header {
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: space-between;
+
+            gap: 12px;
+
+            margin-bottom: 14px;
+
+        }
+
+        .deck-platform-label {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 8px;
+
+            font-family: var(--font-racing);
+
+            font-size: 12px;
+
+            font-weight: 700;
+
+            letter-spacing: 1.5px;
+
+            text-transform: uppercase;
+
+            color: var(--text-dim);
+
+        }
+
+        .deck-platform-label svg {
+
+            color: var(--volt);
+
+        }
+
+        .deck-version-tag {
+
+            font-family: var(--font-racing);
+
+            font-size: 11px;
+
+            letter-spacing: 1px;
+
+            color: var(--text-muted);
+
+            text-transform: uppercase;
+
+            background: rgba(255, 255, 255, 0.04);
+
+            padding: 3px 8px;
+
+            border-radius: 3px;
+
+            border: 1px solid var(--border-subtle);
+
+        }
+
+        .deck-card-title {
+
+            font-family: var(--font-racing);
+
+            font-size: 24px;
+
+            font-weight: 800;
+
+            text-transform: uppercase;
+
+            letter-spacing: 0.5px;
+
+            color: var(--white);
+
+            margin: 0 0 10px;
+
+        }
+
+        .deck-card-desc {
+
+            font-size: 14px;
+
+            line-height: 1.55;
+
+            color: var(--text-dim);
+
+            margin: 0 0 16px;
+
+        }
+
+        .deck-trust-badge {
+
+            display: inline-flex;
+
+            align-items: center;
+
+            gap: 6px;
+
+            font-size: 12px;
+
+            color: #A3B8CC;
+
+            background: rgba(18, 26, 40, 0.6);
+
+            border: 1px solid var(--border-subtle);
+
+            padding: 6px 12px;
+
+            border-radius: 4px;
+
+            margin-bottom: 22px;
+
+            width: fit-content;
+
+        }
+
+        .deck-trust-badge svg {
+
+            color: var(--volt);
+
+        }
+
+        .deck-actions-group {
+
+            display: flex;
+
+            flex-direction: column;
+
+            gap: 10px;
+
+        }
+
+        .deck-actions-group .btn-volt,
+
+        .deck-actions-group .btn-slate {
+
+            width: 100%;
+
+            justify-content: center;
+
+            text-align: center;
+
+            padding: 14px 20px;
+
+            box-sizing: border-box;
+
+            cursor: pointer;
+
+            border: 1px solid transparent;
+
+        }
+
+        .deck-actions-group .btn-slate {
+
+            border-color: var(--border-active);
+
+        }
+
+        /* Store Button Shake & Coming Soon Badge Spring Transform */
+
+        @keyframes store-locked-shake {
+
+            0%, 100% { transform: translateX(0); }
+
+            15% { transform: translateX(-5px); }
+
+            30% { transform: translateX(5px); }
+
+            45% { transform: translateX(-4px); }
+
+            60% { transform: translateX(4px); }
+
+            75% { transform: translateX(-2px); }
+
+            90% { transform: translateX(2px); }
+
+        }
+
+        .btn-store-locked {
+
+            cursor: pointer !important;
+
+            user-select: none;
+
+            transition: all 0.25s ease;
+
+            position: relative;
+
+        }
+
+        .btn-store-locked:hover,
+
+        .btn-store-locked.store-shaking {
+
+            animation: store-locked-shake 0.45s ease-in-out;
+
+            border-color: rgba(204, 255, 0, 0.4) !important;
+
+        }
+
+        .fh6-store-badge {
+
+            display: inline-flex;
+
+            align-items: center;
+
+            background: rgba(204, 255, 0, 0.12);
+
+            border: 1px solid var(--volt);
+
+            color: var(--volt);
+
+            font-family: var(--font-racing);
+
+            font-size: 10px;
+
+            font-weight: 800;
+
+            letter-spacing: 1.5px;
+
+            text-transform: uppercase;
+
+            padding: 3px 8px;
+
+            border-radius: 2px;
+
+            clip-path: polygon(5px 0%, 100% 0%, calc(100% - 5px) 100%, 0% 100%);
+
+            margin-left: auto;
+
+            transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.25s ease, color 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+
+        }
+
+        .btn-store-locked:hover .fh6-store-badge,
+
+        .btn-store-locked.store-shaking .fh6-store-badge {
+
+            transform: scale(1.15) rotate(-2.5deg);
+
+            background: rgba(204, 255, 0, 0.25) !important;
+
+            color: #FFFFFF !important;
+
+            border-color: #CCFF00 !important;
+
+            box-shadow: 0 0 16px rgba(204, 255, 0, 0.65), inset 0 0 6px rgba(204, 255, 0, 0.3) !important;
+
+        }
+
+        /* The "OR" separator */
+
+        .deck-or-divider {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 12px;
+
+            margin: 2px 0;
+
+        }
+
+        .deck-or-divider .or-line {
+
+            flex: 1;
+
+            height: 1px;
+
+            background: rgba(255, 255, 255, 0.08);
+
+        }
+
+        .deck-or-divider .or-label {
+
+            font-family: var(--font-racing);
+
+            font-size: 10px;
+
+            font-weight: 700;
+
+            letter-spacing: 1.5px;
+
+            color: var(--text-muted);
+
+            text-transform: uppercase;
+
+        }
+
+        .deck-trust-footer {
+
+            margin-top: 8px;
+
+            text-align: center;
+
+        }
+
+        .deck-report-trigger {
+
+            background: transparent;
+
+            border: none;
+
+            color: var(--text-muted);
+
+            font-size: 12px;
+
+            display: inline-flex;
+
+            align-items: center;
+
+            gap: 6px;
+
+            cursor: pointer;
+
+            padding: 4px 8px;
+
+            border-radius: 4px;
+
+            transition: color 0.2s ease, background 0.2s ease;
+
+        }
+
+        .deck-report-trigger:hover {
+
+            color: var(--volt);
+
+            background: rgba(204, 255, 0, 0.05);
+
+        }
+
+        .deck-report-trigger svg {
+
+            color: var(--volt);
+
+        }
+
+        @media (max-width: 880px) {
+
+            .hero-download-deck {
+
+                grid-template-columns: 1fr;
+
+            }
+
+            .hero-deck-divider {
+
+                width: 100%;
+
+                height: 1px;
+
+                background: linear-gradient(90deg, transparent 0%, var(--border-active) 15%, var(--border-active) 85%, transparent 100%);
+
+            }
+
+            .download-platform-col {
+
+                padding: 26px 22px;
+
+            }
+
+        }
+
+.btn-volt {
+
+            background: var(--volt) !important;
+
+            color: #06090F !important;
+
+            font-family: var(--font-racing);
+
+            font-size: 13px;
+
+            font-weight: 800;
+
+            letter-spacing: 1px;
+
+            padding: 16px 28px;
+
+            border-radius: 4px;
+
+            text-decoration: none;
+
+            text-transform: uppercase;
+
+            display: inline-flex;
+
+            align-items: center;
+
+            gap: 10px;
+
+            transition: all 0.2s ease;
+
+            box-shadow: 0 4px 18px rgba(204, 255, 0, 0.22);
+
+        }
+
+        .btn-volt:hover {
+
+            background: #FFFFFF;
+
+            transform: translateY(-2px);
+
+            box-shadow: 0 6px 24px rgba(255, 255, 255, 0.3);
+
+        }
+
+        .btn-slate {
+
+            background: var(--bg-panel);
+
+            color: var(--white);
+
+            border: 1px solid var(--border-active);
+
+            font-family: var(--font-racing);
+
+            font-size: 13px;
+
+            font-weight: 800;
+
+            letter-spacing: 1px;
+
+            padding: 16px 28px;
+
+            border-radius: 4px;
+
+            text-decoration: none;
+
+            text-transform: uppercase;
+
+            display: inline-flex;
+
+            align-items: center;
+
+            gap: 10px;
+
+            transition: all 0.2s ease;
+
+        }
+
+        .btn-slate:hover {
+
+            border-color: var(--volt);
+
+            color: var(--volt);
+
+            transform: translateY(-2px);
+
+        }
+
+        
+        .btn-nav-store {
+            border-color: rgba(204, 255, 0, 0.45) !important;
+            color: var(--volt) !important;
+            background: rgba(204, 255, 0, 0.06) !important;
+        }
+
+        .btn-nav-store:hover {
+            border-color: var(--volt) !important;
+            background: rgba(204, 255, 0, 0.16) !important;
+            box-shadow: 0 0 16px rgba(204, 255, 0, 0.35) !important;
+            color: #FFFFFF !important;
+        }
+
+        /* Gameplay Video Minimalist Frame (Volt Lime Stroke Only, Zero Background Card) */
+        .gameplay-video-section {
+            width: 100%;
+            max-width: 960px;
+            margin: 40px auto 60px;
+            padding: 0 20px;
+            box-sizing: border-box;
+        }
+
+        .gameplay-video-frame {
             position: relative;
             width: 100%;
-            padding-bottom: 56.25%; /* 16:9 widescreen */
-            height: 0;
-            border-radius: 12px;
+            aspect-ratio: 16 / 9;
             border: 2px solid var(--volt);
-            box-shadow: 0 16px 50px rgba(0, 0, 0, 0.8), 0 0 25px rgba(204, 255, 0, 0.22);
+            border-radius: 12px;
             overflow: hidden;
             background: #000000;
-            transition: box-shadow 0.3s ease, transform 0.3s ease;
+            box-shadow: 0 16px 48px rgba(0, 0, 0, 0.7), 0 0 20px rgba(204, 255, 0, 0.12);
         }
 
-        .video-pure-frame:hover {
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.9), 0 0 35px rgba(204, 255, 0, 0.35);
-            transform: translateY(-2px);
-        }
-
-        .video-pure-frame iframe {
+        .gameplay-video-frame iframe {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            border: 0;
+            border: none;
+            display: block;
         }
 
         @media (max-width: 640px) {
-            .video-pure-section {
-                padding: 6px 16px 40px;
+            .gameplay-video-section {
+                margin: 24px auto 40px;
+                padding: 0 16px;
             }
-            .video-pure-frame {
+            .gameplay-video-frame {
                 border-radius: 8px;
-                border-width: 1.5px;
             }
+        }
+
+.hero-specs-strip {
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            flex-wrap: wrap;
+
+            gap: 28px;
+
+            padding-top: 24px;
+
+            border-top: 1px solid var(--border-subtle);
+
+        }
+
+        .spec-item {
+
+            font-family: var(--font-racing);
+
+            font-size: 11px;
+
+            font-weight: 700;
+
+            letter-spacing: 1.5px;
+
+            color: var(--text-muted);
+
+            text-transform: uppercase;
+
+        }
+
+        .spec-item span {
+
+            color: var(--white);
+
+        }
+
+        /* Showcase Section: Real Mobile App Screenshots */
+
+        .showcase-section {
+
+            padding: 80px 24px;
+
+            max-width: 1200px;
+
+            margin: 0 auto;
+
+        }
+
+        .section-header {
+
+            margin-bottom: 48px;
+
+        }
+
+        .section-tag {
+
+            font-family: var(--font-racing);
+
+            font-size: 11px;
+
+            font-weight: 800;
+
+            letter-spacing: 2px;
+
+            color: var(--volt);
+
+            text-transform: uppercase;
+
+            margin-bottom: 6px;
+
+        }
+
+        .section-heading {
+
+            font-family: var(--font-racing);
+
+            font-size: clamp(26px, 3.5vw, 42px);
+
+            font-weight: 800;
+
+            letter-spacing: -0.5px;
+
+            text-transform: uppercase;
+
+            line-height: 1.15;
+
+        }
+
+        .showcase-grid {
+
+            display: flex;
+
+            flex-direction: column;
+
+            gap: 60px;
+
+        }
+
+        .showcase-card {
+
+            background: var(--bg-panel);
+
+            border: 1px solid var(--border-subtle);
+
+            border-radius: 8px;
+
+            overflow: hidden;
+
+            display: grid;
+
+            grid-template-columns: 1.1fr 1fr;
+
+            transition: border-color 0.2s ease;
+
+        }
+
+        .showcase-card:hover {
+
+            border-color: var(--border-active);
+
+        }
+
+        .showcase-card.reverse {
+
+            grid-template-columns: 1fr 1.1fr;
+
+        }
+
+        .showcase-card.reverse .showcase-visual {
+
+            order: 2;
+
+        }
+
+        .showcase-card.reverse .showcase-info {
+
+            order: 1;
+
+        }
+
+        .showcase-visual {
+
+            background: #05080C;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            padding: 24px;
+
+            border-right: 1px solid var(--border-subtle);
+
+        }
+
+        .showcase-card.reverse .showcase-visual {
+
+            border-right: none;
+
+            border-left: 1px solid var(--border-subtle);
+
+        }
+
+        .showcase-visual img {
+
+            width: 100%;
+
+            height: auto;
+
+            border-radius: 6px;
+
+            display: block;
+
+        }
+
+        .showcase-info {
+
+            padding: 42px 40px;
+
+            display: flex;
+
+            flex-direction: column;
+
+            justify-content: center;
+
+        }
+
+        .showcase-number {
+
+            font-family: var(--font-racing);
+
+            font-size: 11px;
+
+            font-weight: 800;
+
+            color: var(--volt);
+
+            letter-spacing: 2px;
+
+            text-transform: uppercase;
+
+            margin-bottom: 10px;
+
+        }
+
+        .showcase-title {
+
+            font-family: var(--font-racing);
+
+            font-size: 24px;
+
+            font-weight: 800;
+
+            text-transform: uppercase;
+
+            letter-spacing: 0.5px;
+
+            margin-bottom: 16px;
+
+            line-height: 1.2;
+
+        }
+
+        .showcase-body {
+
+            color: var(--text-dim);
+
+            font-size: 14px;
+
+            line-height: 1.65;
+
+            margin-bottom: 24px;
+
+        }
+
+        .showcase-bullets {
+
+            list-style: none;
+
+            display: flex;
+
+            flex-direction: column;
+
+            gap: 10px;
+
+        }
+
+        .showcase-bullets li {
+
+            font-family: var(--font-racing);
+
+            font-size: 12px;
+
+            font-weight: 700;
+
+            color: var(--white);
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 10px;
+
+        }
+
+        .showcase-bullets li::before {
+
+            content: "";
+
+            width: 6px;
+
+            height: 6px;
+
+            background: var(--volt) !important;
+
+            border-radius: 1px;
+
+        }
+
+        /* 3-Column Architecture Matrix */
+
+        .tech-section {
+
+            padding: 80px 24px;
+
+            max-width: 1200px;
+
+            margin: 0 auto;
+
+            border-top: 1px solid var(--border-subtle);
+
+        }
+
+        .tech-grid {
+
+            display: grid;
+
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+
+            gap: 24px;
+
+        }
+
+        .tech-card {
+
+            background: var(--bg-panel);
+
+            border: 1px solid var(--border-subtle);
+
+            border-radius: 6px;
+
+            padding: 32px;
+
+        }
+
+        .tech-card-header {
+
+            font-family: var(--font-racing);
+
+            font-size: 11px;
+
+            font-weight: 800;
+
+            color: var(--volt);
+
+            letter-spacing: 1.5px;
+
+            text-transform: uppercase;
+
+            margin-bottom: 12px;
+
+        }
+
+        .tech-card-title {
+
+            font-family: var(--font-racing);
+
+            font-size: 19px;
+
+            font-weight: 800;
+
+            text-transform: uppercase;
+
+            margin-bottom: 12px;
+
+            line-height: 1.25;
+
+        }
+
+        .tech-card-body {
+
+            color: var(--text-dim);
+
+            font-size: 13.5px;
+
+            line-height: 1.6;
+
+        }
+
+        /* 3-Step Setup Guide */
+
+        .setup-section {
+
+            padding: 80px 24px;
+
+            max-width: 1200px;
+
+            margin: 0 auto;
+
+            border-top: 1px solid var(--border-subtle);
+
+        }
+
+        .setup-grid {
+
+            display: grid;
+
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+
+            gap: 24px;
+
+        }
+
+        .setup-card {
+
+            background: var(--bg-panel);
+
+            border: 1px solid var(--border-subtle);
+
+            border-radius: 6px;
+
+            padding: 28px;
+
+        }
+
+        .setup-step {
+
+            font-family: var(--font-racing);
+
+            font-size: 12px;
+
+            font-weight: 800;
+
+            color: var(--volt);
+
+            letter-spacing: 1.5px;
+
+            margin-bottom: 12px;
+
+            text-transform: uppercase;
+
+        }
+
+        .setup-title {
+
+            font-family: var(--font-racing);
+
+            font-size: 17px;
+
+            font-weight: 800;
+
+            text-transform: uppercase;
+
+            margin-bottom: 10px;
+
+        }
+
+        .setup-desc {
+
+            font-size: 13.5px;
+
+            color: var(--text-dim);
+
+            line-height: 1.6;
+
+        }
+
+        /* Footer */
+
+        footer {
+
+            border-top: 1px solid var(--border-subtle);
+
+            padding: 40px 24px;
+
+            background: var(--bg-base);
+
+            font-size: 12px;
+
+            color: var(--text-muted);
+
+        }
+
+        .footer-content {
+
+            max-width: 1200px;
+
+            margin: 0 auto;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: space-between;
+
+            flex-wrap: wrap;
+
+            gap: 20px;
+
+        }
+
+        .footer-links {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 24px;
+
+        }
+
+        .footer-links a {
+
+            color: var(--text-muted);
+
+            text-decoration: none;
+
+            font-family: var(--font-racing);
+
+            font-weight: 700;
+
+            transition: color 0.15s ease;
+
+        }
+
+        .footer-links a:hover {
+
+            color: var(--volt);
+
+        }
+
+        /* Adaptive Layout for Tablet & Medium Screens */
+
+        @media (max-width: 900px) {
+
+            header {
+
+                padding: 14px 20px;
+
+            }
+
+            nav {
+
+                display: none;
+
+            }
+
+            .ambient-fixed-bg {
+
+                background-position: 46% 26%;
+
+            }
+
+            .showcase-card,
+
+            .showcase-card.reverse {
+
+                grid-template-columns: 1fr;
+
+            }
+
+            .showcase-card.reverse .showcase-visual {
+
+                order: 1;
+
+                border-left: none;
+
+                border-bottom: 1px solid var(--border-subtle);
+
+            }
+
+            .showcase-card.reverse .showcase-info {
+
+                order: 2;
+
+            }
+
+            .showcase-visual {
+
+                border-right: none;
+
+                border-bottom: 1px solid var(--border-subtle);
+
+            }
+
+            .showcase-info {
+
+                padding: 28px 24px;
+
+            }
+
+            .tech-grid {
+
+                grid-template-columns: 1fr;
+
+            }
+
+            .setup-grid {
+
+                grid-template-columns: 1fr;
+
+            }
+
+        }
+
+        /* Adaptive Layout for Mobile Devices */
+
+        @media (max-width: 640px) {
+
+            header {
+
+                padding: 12px 16px;
+
+            }
+
+            .brand-text {
+
+                font-size: 12px;
+
+            }
+
+            .btn-nav-repo {
+
+                padding: 7px 12px;
+
+                font-size: 10px;
+
+                letter-spacing: 0.5px;
+
+            }
+
+            .ambient-fixed-bg {
+
+                background-position: 48% 22%;
+
+                transform: scale(1.05);
+
+            }
+
+            .hero {
+
+                min-height: auto;
+
+                padding: 100px 16px 40px;
+
+            }
+
+            .hero-title {
+
+                font-size: clamp(26px, 7.5vw, 36px);
+
+                margin-bottom: 16px;
+
+            }
+
+            .hero-description {
+
+                font-size: 14px;
+
+                margin-bottom: 24px;
+
+            }
+
+            .hero-cta-group {
+
+                flex-direction: column;
+
+                width: 100%;
+
+                gap: 12px;
+
+                margin-bottom: 28px;
+
+            }
+
+            .btn-volt,
+
+            .btn-slate {
+
+                width: 100%;
+
+                justify-content: center;
+
+                box-sizing: border-box;
+
+                padding: 14px 18px;
+
+                font-size: 12px;
+
+            }
+
+            .hero-specs-strip {
+
+                gap: 12px;
+
+                display: flex;
+
+                flex-direction: column;
+
+                align-items: center;
+
+                text-align: center;
+
+            }
+
+            .showcase-section,
+
+            .tech-section,
+
+            .setup-section {
+
+                padding: 48px 16px;
+
+            }
+
+            .section-heading {
+
+                font-size: clamp(22px, 6vw, 28px);
+
+            }
+
+            .showcase-info {
+
+                padding: 22px 18px;
+
+            }
+
+            .showcase-bullets {
+
+                font-size: 13px;
+
+                gap: 8px;
+
+            }
+
+            .tech-card,
+
+            .setup-card {
+
+                padding: 22px 18px;
+
+            }
+
+            .footer-content {
+
+                flex-direction: column;
+
+                text-align: center;
+
+                gap: 16px;
+
+                font-size: 12px;
+
+            }
+
+            .footer-links {
+
+                justify-content: center;
+
+                flex-wrap: wrap;
+
+                gap: 16px;
+
+            }
+
         }
 
         /* Small Phones (iPhone SE, Galaxy A series, etc.) */
@@ -810,8 +1960,7 @@
 
         <nav>
 
-            <a href="#demo">Gameplay Video</a>
-
+            <a href="#gameplay-video">Field Test</a>
             <a href="#showcase">Mobile Features</a>
 
             <a href="#architecture">Architecture</a>
@@ -821,6 +1970,12 @@
         </nav>
 
         <div class="header-actions">
+            <a href="https://apps.microsoft.com/detail/9PKKK7NB747K?hl=en-us&gl=IN&ocid=pdpshare" target="_blank" rel="noopener noreferrer" class="btn-nav-repo btn-nav-store">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M0 3.449L9.75 2.1v9.451H0m10.949-9.602L24 0v11.4H10.949M0 12.6h9.75v9.451L0 20.699M10.949 12.6H24V24l-12.951-1.801" />
+                </svg>
+                <span>Microsoft Store</span>
+            </a>
 
             <a href="https://github.com/VarunKulkarni15/FH6-Mobile-Controller" target="_blank" class="btn-nav-repo">
 
@@ -866,74 +2021,84 @@
 
             </p>
 
-                                                                        <!-- Unified Matching Download Cards Stack (PC First, Then Android) -->
-            <div class="hero-download-stack">
-                <!-- 1. Windows PC Companion Card (Microsoft Store) -->
-                <div class="hero-card card-pc">
-                    <div class="hero-card-header">
-                        <div class="hero-card-label label-pc">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M0 3.449L9.75 2.1v9.451H0m10.949-9.602L24 0v11.4H10.949M0 12.6h9.75v9.451L0 20.699M10.949 12.6H24V24l-12.951-1.801" />
-                            </svg>
-                            <span>Windows PC Companion</span>
+                                    <!-- Dual-Platform Download Deck (Adaptive & Responsive) -->
+            <div class="hero-download-deck">
+                <!-- Left Platform: Android Mobile Client -->
+                <div class="download-platform-col">
+                    <div>
+                        <div class="deck-platform-header">
+                            <div class="deck-platform-label">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M17.523 15.3414c-.5511 0-.9993-.4486-.9993-.9997s.4482-.9993.9993-.9993c.551 0 .9993.4482.9993.9993.0001.5511-.4483.9997-.9993.9997m-11.046 0c-.5511 0-.9993-.4486-.9993-.9997s.4482-.9993.9993-.9993c.5511 0 .9993.4482.9993.9993 0 .5511-.4482.9997-.9993.9997m11.4045-6.02l1.9973-3.4592a.416.416 0 00-.1521-.5676.416.416 0 00-.5676.1521l-2.0223 3.503C15.5902 8.4101 13.8559 8.082 12 8.082s-3.5902.3282-5.1368.8677L4.8409 5.4467a.4161.4161 0 00-.5677-.1521.4157.4157 0 00-.1521.5676l1.9973 3.4592C2.6889 11.1867.3432 14.6589 0 18.761h24c-.3432-4.1021-2.6889-7.5743-6.1185-9.4396" />
+                                </svg>
+                                <span>Android Client</span>
+                            </div>
+                            <span class="deck-version-tag">v1.0.2 &bull; 7.37 MB</span>
                         </div>
-                        <span class="hero-card-tag">Microsoft Store &bull; Official</span>
+                        <h3 class="deck-card-title">HRZN Mobile Controller</h3>
+                        <p class="deck-card-desc">
+                            Direct Xbox 360 controller emulation. Modular steering wheel, 6-axis gyro motion tilt, progressive pedal triggers, customizable HUD cockpit &amp; 120Hz FastStream.
+                        </p>
+                        <div class="deck-trust-badge deck-report-trigger" onclick="openApkModal()" style="cursor: pointer;" title="Click to view VirusTotal scan report">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+                            <span>0/68 Clean &bull; VirusTotal Verified</span>
+                        </div>
                     </div>
-                    <h3 class="hero-card-title">HRZN PC Companion</h3>
-                    <p class="hero-card-desc">
-                        Official Microsoft Store release. Kernel ViGEmBus virtual controller bridge, zero cloud latency, local UDP auto-pairing, and 120Hz physics sync for PC.
-                    </p>
 
                     <div class="deck-actions-group">
-                        <a href="https://apps.microsoft.com/detail/9PKKK7NB747K?hl=en-us&gl=IN&ocid=pdpshare" target="_blank" rel="noopener" class="btn-volt">
+                        <button type="button" onclick="openApkModal()" class="btn-volt" style="border: none; cursor: pointer; width: 100%;">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M17.523 15.3414c-.5511 0-.9993-.4486-.9993-.9997s.4482-.9993.9993-.9993c.551 0 .9993.4482.9993.9993.0001.5511-.4483.9997-.9993.9997m-11.046 0c-.5511 0-.9993-.4486-.9993-.9997s.4482-.9993.9993-.9993c.5511 0 .9993.4482.9993.9993 0 .5511-.4482.9997-.9993.9997m11.4045-6.02l1.9973-3.4592a.416.416 0 00-.1521-.5676.416.416 0 00-.5676.1521l-2.0223 3.503C15.5902 8.4101 13.8559 8.082 12 8.082s-3.5902.3282-5.1368.8677L4.8409 5.4467a.4161.4161 0 00-.5677-.1521.4157.4157 0 00-.1521.5676l1.9973 3.4592C2.6889 11.1867.3432 14.6589 0 18.761h24c-.3432-4.1021-2.6889-7.5743-6.1185-9.4396" />
+                            </svg>
+                            <span>Download Android APK</span>
+                        </button>
+                        <div class="deck-trust-footer">
+                            <button type="button" onclick="openApkModal()" class="deck-report-trigger">
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+                                <span>Direct APK download &bull; 7.37 MB</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Straight Vertical Divider Line -->
+                <div class="hero-deck-divider"></div>
+
+                <!-- Right Platform: Windows PC Companion -->
+                <div class="download-platform-col">
+                    <div>
+                        <div class="deck-platform-header">
+                            <div class="deck-platform-label">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M0 3.449L9.75 2.1v9.451H0m10.949-9.602L24 0v11.4H10.949M0 12.6h9.75v9.451L0 20.699M10.949 12.6H24V24l-12.951-1.801" />
+                                </svg>
+                                <span>Windows Companion</span>
+                            </div>
+                            <span class="deck-version-tag" style="color: var(--volt); border-color: rgba(204, 255, 0, 0.35);">// LIVE ON STORE</span>
+                        </div>
+                        <h3 class="deck-card-title">HRZN PC Companion</h3>
+                        <p class="deck-card-desc">
+                            Direct ViGEmBus Xbox 360 virtual controller emulation. Zero cloud latency, local UDP broadcast auto-pairing, and 120Hz physics sync.
+                        </p>
+                        <div class="deck-trust-badge">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+                            <span>Microsoft Store Certified &bull; Safe &amp; Verified</span>
+                        </div>
+                    </div>
+
+                    <div class="deck-actions-group">
+                        <a href="https://apps.microsoft.com/detail/9PKKK7NB747K?hl=en-us&gl=IN&ocid=pdpshare" target="_blank" rel="noopener noreferrer" class="btn-volt">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
                                 <path d="M0 3.449L9.75 2.1v9.451H0m10.949-9.602L24 0v11.4H10.949M0 12.6h9.75v9.451L0 20.699M10.949 12.6H24V24l-12.951-1.801" />
                             </svg>
                             <span>Get from Microsoft Store</span>
                         </a>
-                        <div class="hero-card-subtext">
-                            Direct Store install &bull; Windows 10/11 &bull; Certified Safe
-                        </div>
-                    </div>
-                </div>
 
-                <!-- 2. Android Client Download Card (with VirusTotal Badge & Modal Trigger) -->
-                <div class="hero-card card-android">
-                    <div class="hero-card-header">
-                        <div class="hero-card-label label-android">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M17.523 15.3414c-.5511 0-.9993-.4486-.9993-.9997s.4482-.9993.9993-.9993c.551 0 .9993.4482.9993.9993.0001.5511-.4483.9997-.9993.9997m-11.046 0c-.5511 0-.9993-.4486-.9993-.9997s.4482-.9993.9993-.9993c.5511 0 .9993.4482.9993.9993 0 .5511-.4482.9997-.9993.9997m11.4045-6.02l1.9973-3.4592a.416.416 0 00-.1521-.5676.416.416 0 00-.5676.1521l-2.0223 3.503C15.5902 8.4101 13.8559 8.082 12 8.082s-3.5902.3282-5.1368.8677L4.8409 5.4467a.4161.4161 0 00-.5677-.1521.4157.4157 0 00-.1521.5676l1.9973 3.4592C2.6889 11.1867.3432 14.6589 0 18.761h24c-.3432-4.1021-2.6889-7.5743-6.1185-9.4396" />
-                            </svg>
-                            <span>Android Client</span>
-                        </div>
-                        <span class="hero-card-tag">v1.0.2 &bull; 7.37 MB</span>
-                    </div>
-                    <h3 class="hero-card-title">HRZN Mobile Controller</h3>
-                    <p class="hero-card-desc">
-                        Direct Xbox 360 controller emulation. Modular steering wheel, 6-axis gyro motion tilt, progressive pedal triggers, customizable HUD cockpit &amp; 120Hz UDP FastStream.
-                    </p>
-
-                    <!-- VirusTotal Trust Badge -->
-                    <div class="deck-trust-badge">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
-                        <span>0/68 Clean &bull; VirusTotal Verified</span>
-                    </div>
-
-                    <div class="deck-actions-group">
-                        <a href="javascript:void(0)" onclick="openApkModal()" class="btn-volt">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
-                            </svg>
-                            <span>Download Android APK</span>
-                        </a>
                         <div class="deck-trust-footer">
-                            <button type="button" onclick="openApkModal()" class="deck-report-trigger">
-                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
-                                <span>View VirusTotal Scan (0/68 Clean)</span>
-                            </button>
-                        </div>
-                        <div class="hero-card-subtext">
-                            Direct APK download &bull; 7.37 MB &bull; Android 8.0+
+                            <span style="font-size: 12px; color: var(--text-muted); display: inline-flex; align-items: center; gap: 6px;">
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+                                <span>Official Store install &bull; Windows 10/11</span>
+                            </span>
                         </div>
                     </div>
                 </div>
@@ -955,13 +2120,13 @@
 
         </section>
 
-                <!-- Gameplay Video (Minimalist Volt Lime Frame, No BG Card) -->
-        <section id="demo" class="video-pure-section">
-            <div class="video-pure-frame">
+        <!-- Pure Minimalist Gameplay Video (Volt Lime Stroke Only, Zero Background Card) -->
+        <section class="gameplay-video-section" id="gameplay-video">
+            <div class="gameplay-video-frame">
                 <iframe 
                     src="https://www.youtube-nocookie.com/embed/_ksd2J2BmBs?rel=0&modestbranding=1" 
-                    title="HRZN Mobile Controller Gameplay" 
-                    loading="lazy"
+                    title="HRZN Mobile Controller Gameplay &amp; Field Test" 
+                    frameborder="0" 
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
                     allowfullscreen>
                 </iframe>
@@ -1491,7 +2656,6 @@
     </script>
 
 
-    
     <!-- ANDROID APK VIRUSTOTAL VERIFICATION MODAL -->
     <div id="apk-modal-overlay" style="display: none; position: fixed; inset: 0; background: rgba(4, 7, 12, 0.88); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 10000; align-items: center; justify-content: center; padding: 16px; opacity: 0; transition: opacity 0.25s ease;" onclick="if(event.target===this) closeApkModal()">
         <div id="apk-modal-card" style="background: var(--bg-panel); border: 1px solid var(--border-active); box-shadow: 0 20px 60px rgba(0,0,0,0.85), 0 0 35px rgba(204,255,0,0.08); border-radius: 8px; width: 100%; max-width: 660px; overflow: hidden; transform: scale(0.95); transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1); position: relative;">
