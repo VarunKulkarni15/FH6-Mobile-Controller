@@ -11,7 +11,7 @@
 [![Security](https://img.shields.io/badge/VirusTotal-0%2F68%20Clean-brightgreen.svg?style=flat-square)](https://www.virustotal.com/gui/file/9c8484d12cc2db2975fa4892f9833d3b3614838a25137d3b95f5fae739701d4d)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](LICENSE)
 
-[**Live Web Portal**](https://hrzncontroller.varunkulkarni.dpdns.org/) &nbsp;&bull;&nbsp; [**Microsoft Store**](https://apps.microsoft.com/detail/9PKKK7NB747K) &nbsp;&bull;&nbsp; [**Windows (.exe)**](releases/HRZN-Controller.exe) &nbsp;&bull;&nbsp; [**•ndroid (.apk)**](HRZNController.apk)
+[**Live Web Portal**](https://hrzncontroller.varunkulkarni.dpdns.org/) &nbsp;&bull;&nbsp; [**Microsoft Store (Official PC Companion)**](https://apps.microsoft.com/detail/9PKKK7NB747K?hl=en-us&gl=IN&ocid=pdpshare) &nbsp;&bull;&nbsp; [**Android Client (.apk)**](HRZNController.apk)
 
 </div>
 
