@@ -709,96 +709,35 @@
             }
         }
 
-        /* FH6 Gameplay Video Showcase Card */
+                /* Minimalist Video Frame (Pure Volt Lime Border, Zero BG Card) */
 
-        .video-showcase-section {
-            padding: 20px 24px 60px;
-            max-width: 960px;
+        .video-pure-section {
+            padding: 10px 24px 60px;
+            max-width: 900px;
             margin: 0 auto;
             position: relative;
             z-index: 2;
         }
 
-        .video-curved-card {
-            background: radial-gradient(circle at top right, rgba(0, 229, 255, 0.06) 0%, rgba(14, 26, 27, 0.85) 60%);
-            border: 1px solid var(--border-active);
-            border-radius: 16px;
-            backdrop-filter: blur(18px);
-            -webkit-backdrop-filter: blur(18px);
-            box-shadow: 0 28px 70px rgba(0, 0, 0, 0.75), 0 0 35px rgba(204, 255, 0, 0.06);
-            padding: 24px 28px;
-            text-align: left;
-            position: relative;
-            overflow: hidden;
-            transition: border-color 0.25s ease, box-shadow 0.25s ease;
-        }
-
-        .video-curved-card:hover {
-            border-color: rgba(204, 255, 0, 0.45);
-            box-shadow: 0 32px 80px rgba(0, 0, 0, 0.85), 0 0 40px rgba(204, 255, 0, 0.1);
-        }
-
-        .video-card-topbar {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 12px;
-            margin-bottom: 16px;
-            flex-wrap: wrap;
-        }
-
-        .video-live-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            font-family: var(--font-racing);
-            font-size: 12px;
-            font-weight: 700;
-            color: var(--volt);
-            letter-spacing: 1.5px;
-            text-transform: uppercase;
-        }
-
-        .video-pulse-dot {
-            width: 8px;
-            height: 8px;
-            background: var(--volt);
-            border-radius: 50%;
-            display: inline-block;
-            box-shadow: 0 0 10px var(--volt);
-            animation: videoPulse 2s infinite;
-        }
-
-        @keyframes videoPulse {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.35; transform: scale(0.8); }
-        }
-
-        .video-spec-tag {
-            font-family: var(--font-racing);
-            font-size: 11px;
-            letter-spacing: 1px;
-            color: var(--cyan);
-            text-transform: uppercase;
-            background: rgba(0, 229, 255, 0.08);
-            border: 1px solid rgba(0, 229, 255, 0.25);
-            padding: 3px 10px;
-            border-radius: 4px;
-        }
-
-        .video-embed-container {
+        .video-pure-frame {
             position: relative;
             width: 100%;
-            padding-bottom: 56.25%; /* 16:9 ratio */
+            padding-bottom: 56.25%; /* 16:9 widescreen */
             height: 0;
-            border-radius: 10px;
+            border-radius: 12px;
+            border: 2px solid var(--volt);
+            box-shadow: 0 16px 50px rgba(0, 0, 0, 0.8), 0 0 25px rgba(204, 255, 0, 0.22);
             overflow: hidden;
-            border: 1px solid rgba(255, 255, 255, 0.08);
             background: #000000;
-            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.65);
+            transition: box-shadow 0.3s ease, transform 0.3s ease;
         }
 
-        .video-embed-container iframe {
+        .video-pure-frame:hover {
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.9), 0 0 35px rgba(204, 255, 0, 0.35);
+            transform: translateY(-2px);
+        }
+
+        .video-pure-frame iframe {
             position: absolute;
             top: 0;
             left: 0;
@@ -807,45 +746,13 @@
             border: 0;
         }
 
-        .video-card-footer {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 16px;
-            margin-top: 18px;
-            padding-top: 14px;
-            border-top: 1px solid rgba(255, 255, 255, 0.06);
-            flex-wrap: wrap;
-            font-size: 12px;
-            color: var(--text-dim);
-        }
-
-        .video-footer-item {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .video-footer-item strong {
-            font-family: var(--font-racing);
-            color: var(--white);
-            font-size: 11px;
-            letter-spacing: 0.5px;
-            text-transform: uppercase;
-        }
-
         @media (max-width: 640px) {
-            .video-showcase-section {
-                padding: 10px 16px 40px;
+            .video-pure-section {
+                padding: 6px 16px 40px;
             }
-            .video-curved-card {
-                padding: 16px 14px;
-                border-radius: 12px;
-            }
-            .video-card-footer {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 8px;
+            .video-pure-frame {
+                border-radius: 8px;
+                border-width: 1.5px;
             }
         }
 
@@ -1048,38 +955,16 @@
 
         </section>
 
-        <!-- 1.8. Gameplay Video Showcase Section (Curved Cockpit Card) -->
-        <section id="demo" class="video-showcase-section">
-            <div class="video-curved-card">
-                <div class="video-card-topbar">
-                    <div class="video-live-badge">
-                        <span class="video-pulse-dot"></span>
-                        <span>Gameplay Field Test &bull; In Action</span>
-                    </div>
-                    <span class="video-spec-tag">120Hz UDP &bull; Sub-8ms Telemetry</span>
-                </div>
-
-                <div class="video-embed-container">
-                    <iframe 
-                        src="https://www.youtube-nocookie.com/embed/_ksd2J2BmBs?rel=0&modestbranding=1" 
-                        title="HRZN Mobile Controller - Sim-Racing Gameplay Field Demo" 
-                        loading="lazy"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
-                        allowfullscreen>
-                    </iframe>
-                </div>
-
-                <div class="video-card-footer">
-                    <div class="video-footer-item">
-                        <strong>Controls:</strong> <span>6-Axis Gyro Steering + Volume Paddle Shifters</span>
-                    </div>
-                    <div class="video-footer-item">
-                        <strong>Target:</strong> <span>Hardware Xbox 360 Emulation via ViGEmBus</span>
-                    </div>
-                    <div class="video-footer-item">
-                        <strong>Link:</strong> <span style="color: var(--volt);">Direct LAN (Zero Cloud Latency)</span>
-                    </div>
-                </div>
+                <!-- Gameplay Video (Minimalist Volt Lime Frame, No BG Card) -->
+        <section id="demo" class="video-pure-section">
+            <div class="video-pure-frame">
+                <iframe 
+                    src="https://www.youtube-nocookie.com/embed/_ksd2J2BmBs?rel=0&modestbranding=1" 
+                    title="HRZN Mobile Controller Gameplay" 
+                    loading="lazy"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                    allowfullscreen>
+                </iframe>
             </div>
         </section>
 
